@@ -1,0 +1,443 @@
+<!doctype html>  
+<html lang="pt-BR">  
+<head>  
+<meta charset="utf-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">  
+<meta name="color-scheme" content="light dark">  
+<title>Interface com Blur</title>  
+<style>  
+:root{color-scheme:light dark}  
+*{box-sizing:border-box}  
+html,body{  
+  margin:0;  
+  padding:0;  
+  width:100%;  
+  height:100%;
+  overflow:hidden;
+  background:#ffffff;  
+  color:#111;  
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;  
+  -webkit-font-smoothing:antialiased;  
+  touch-action:manipulation;
+}  
+.feed{  
+  position:fixed;
+  top:var(--visual-viewport-offset-top, 0px);
+  left:0;
+  right:0;
+  height:var(--visual-viewport-height, 100dvh);
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  padding:calc(100px + env(safe-area-inset-top, 0px)) 18px calc(120px + env(safe-area-inset-bottom, 0px));  
+  display:flex;  
+  flex-direction:column;  
+  gap:16px;  
+  width:100%;
+  max-width:none;
+  margin:0;
+}  
+
+.card{  
+  background:#f6f6f8;  
+  border-radius:20px;  
+  padding:18px;  
+  border:1px solid rgba(0,0,0,0.05);  
+  display:flex;  
+  flex-direction:column;  
+  gap:10px;  
+  box-shadow:0 2px 8px rgba(0,0,0,0.02);  
+  width:100%;
+  max-width:564px;
+  margin-left:auto;
+  margin-right:auto;
+}  
+.card-header{  
+  display:flex;  
+  align-items:center;  
+  gap:12px;  
+}  
+.avatar{  
+  width:40px;  
+  height:40px;  
+  border-radius:50%;  
+  background:linear-gradient(135deg, #0a84ff, #5e5ce6);  
+  flex-shrink:0;  
+}  
+.avatar.alt{  
+  background:linear-gradient(135deg, #ff9f0a, #ff375f);  
+}  
+.avatar.alt2{  
+  background:linear-gradient(135deg, #30d158, #0a84ff);  
+}  
+.card-title{  
+  font-weight:600;  
+  font-size:16px;  
+  color:#1c1c1e;  
+  margin:0;  
+}  
+.card-subtitle{  
+  font-size:13px;  
+  color:#8e8e93;  
+  margin:0;  
+}  
+.card-body{  
+  font-size:15px;  
+  line-height:1.45;  
+  color:#3a3a3c;  
+  margin:0;  
+}  
+.card-image-placeholder{  
+  width:100%;  
+  height:140px;  
+  border-radius:12px;  
+  background:linear-gradient(135deg, #e5e5ea 0%, #d1d1d6 100%);  
+  object-fit:cover;
+  display:block;
+  margin-top:4px;  
+}  
+
+.blur-edge-top{  
+  position:fixed;  
+  top:var(--visual-viewport-offset-top, 0px);
+  left:0;  
+  right:0;  
+  height:130px;  
+  z-index:5;  
+  pointer-events:none;  
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+  -webkit-mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
+  mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
+  background:linear-gradient(to bottom,
+    rgba(255,255,255,.96) 0%,
+    rgba(255,255,255,.74) 48%,
+    rgba(255,255,255,0) 100%);  
+}  
+.blur-edge-bottom{  
+  position:fixed;  
+  bottom:0;  
+  left:0;  
+  right:0;  
+  height:130px;  
+  z-index:5;  
+  pointer-events:none;  
+  transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));  
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+  -webkit-mask-image:linear-gradient(to top, #000 0%, transparent 100%);
+  mask-image:linear-gradient(to top, #000 0%, transparent 100%);
+  background:linear-gradient(to top,
+    rgba(255,255,255,.96) 0%,
+    rgba(255,255,255,.74) 48%,
+    rgba(255,255,255,0) 100%);  
+}  
+
+.top{  
+  position:fixed;  
+  z-index:10;  
+  top:calc(16px + env(safe-area-inset-top, 0px) + var(--visual-viewport-offset-top, 0px));  
+  left:20px;  
+  right:20px;  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:center;  
+}  
+.round{  
+  position:relative;  
+  width:46px;  
+  height:46px;  
+  padding:0;  
+  border-radius:50%;  
+  display:grid;  
+  place-items:center;  
+  color:#111;  
+  border:.5px solid rgba(0,0,0,.12);  
+  background:  
+    linear-gradient(180deg,  
+      rgba(255,255,255,.75) 0%,  
+      rgba(240,240,245,.55) 100%);  
+  box-shadow:  
+    inset 0 .5px 0 rgba(255,255,255,.95),  
+    inset 0 -.5px 0 rgba(0,0,0,.05),  
+    0 3px 12px rgba(0,0,0,.08);  
+  -webkit-backdrop-filter:blur(20px);  
+  backdrop-filter:blur(20px);  
+  -webkit-tap-highlight-color:transparent;  
+  transform:translateZ(0);  
+}  
+.round::before{  
+  content:"";  
+  position:absolute;  
+  width:44px;  
+  height:44px;  
+  border-radius:50%;  
+  pointer-events:none;  
+  background:  
+    linear-gradient(180deg,  
+      rgba(255,255,255,.4) 0%,  
+      rgba(255,255,255,0) 50%,  
+      rgba(255,255,255,.2) 100%);  
+}  
+.round svg{  
+  position:relative;  
+  z-index:1;  
+  width:24px;  
+  height:24px;  
+}  
+.menu svg{width:26px;height:26px}  
+
+.bottom{  
+  position:fixed;  
+  z-index:10;  
+  left:12px;  
+  right:12px;  
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));  
+  transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));  
+  display:flex;  
+  align-items:center;  
+  gap:10px;  
+}  
+.search{  
+  height:48px;  
+  min-width:0;  
+  flex:1;  
+  border-radius:24px;  
+  display:flex;  
+  align-items:center;  
+  padding:0 14px;  
+  border:.5px solid rgba(0,0,0,.12);  
+  background:  
+    linear-gradient(180deg,  
+      rgba(255,255,255,.75) 0%,  
+      rgba(240,240,245,.55) 100%);  
+  box-shadow:  
+    inset 0 .5px 0 rgba(255,255,255,.95),  
+    inset 0 -.5px 0 rgba(0,0,0,.05),  
+    0 3px 12px rgba(0,0,0,.08);  
+  -webkit-backdrop-filter:blur(20px);  
+  backdrop-filter:blur(20px);  
+  transform:translateZ(0);  
+}  
+.search svg{  
+  width:22px;  
+  height:22px;  
+  flex:0 0 auto;  
+  color:rgba(60,60,67,.65);  
+}  
+.search input{  
+  flex:1;  
+  min-width:0;  
+  border:0;  
+  outline:0;  
+  background:transparent;  
+  padding:0 0 0 9px;  
+  color:#111;  
+  font:inherit;  
+  font-size:17px;  
+  letter-spacing:-.2px;  
+  caret-color:#0a84ff;  
+  -webkit-appearance:none;  
+  appearance:none;  
+}  
+.search input::placeholder{color:rgba(60,60,67,.55);opacity:1}  
+.search input::-webkit-search-cancel-button{display:none}  
+
+.add{  
+  position:relative;  
+  width:48px;  
+  height:48px;  
+  padding:0;  
+  flex:0 0 48px;  
+  border-radius:50%;  
+  display:grid;  
+  place-items:center;  
+  color:#111;  
+  border:.5px solid rgba(0,0,0,.12);  
+  background:  
+    linear-gradient(180deg,  
+      rgba(255,255,255,.75) 0%,  
+      rgba(240,240,245,.55) 100%);  
+  box-shadow:  
+    inset 0 .5px 0 rgba(255,255,255,.95),  
+    inset 0 -.5px 0 rgba(0,0,0,.05),  
+    0 3px 12px rgba(0,0,0,.08);  
+  -webkit-backdrop-filter:blur(20px);  
+  backdrop-filter:blur(20px);  
+  -webkit-tap-highlight-color:transparent;  
+  transform:translateZ(0);  
+}  
+.add svg{width:27px;height:27px}  
+button{font:inherit;cursor:pointer}  
+button:active{transform:scale(.975)}  
+button:focus-visible{  
+  outline:2px solid rgba(10,132,255,.18);  
+  outline-offset:2px;  
+}  
+
+@media (prefers-color-scheme:dark){
+  html,body{
+    background:#000000;
+    color:#f5f5f7;
+  }
+  .card{
+    background:#1c1c1e;
+    border-color:rgba(255,255,255,.08);
+    box-shadow:0 2px 8px rgba(0,0,0,.18);
+  }
+  .card-title{color:#f5f5f7}
+  .card-body{color:#d1d1d6}
+  .card-image-placeholder{
+    background:linear-gradient(135deg,#3a3a3c 0%,#2c2c2e 100%);
+  }
+  .blur-edge-top,.blur-edge-bottom{
+    background:linear-gradient(to bottom,rgba(0,0,0,.94) 0%,rgba(0,0,0,.72) 48%,rgba(0,0,0,0) 100%);
+  }
+  .blur-edge-bottom{
+    background:linear-gradient(to top,rgba(0,0,0,.94) 0%,rgba(0,0,0,.72) 48%,rgba(0,0,0,0) 100%);
+  }
+  .round,.search,.add{
+    color:#f5f5f7;
+    border-color:rgba(255,255,255,.14);
+    background:linear-gradient(180deg,rgba(58,58,60,.82) 0%,rgba(44,44,46,.72) 100%);
+    box-shadow:inset 0 .5px 0 rgba(255,255,255,.12),inset 0 -.5px 0 rgba(0,0,0,.28),0 3px 12px rgba(0,0,0,.18);
+  }
+  .round::before{
+    background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 50%,rgba(255,255,255,.05) 100%);
+  }
+  .search svg{color:rgba(235,235,245,.65)}
+  .search input{color:#f5f5f7}
+  .search input::placeholder{color:rgba(235,235,245,.55)}
+}
+</style>  
+</head>  
+<body>  
+  <div class="feed">  
+    <article class="card">  
+      <div class="card-header">  
+        <div class="avatar"></div>  
+        <div>  
+          <h3 class="card-title">Desenvolvimento UI</h3>  
+          <p class="card-subtitle">Há 10 minutos</p>  
+        </div>  
+      </div>  
+      <p class="card-body">Role para baixo: os cartões passam por baixo dos controles desfocados e das faixas de blur nas bordas.</p>  
+      <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-1/1200/700" alt="">  
+    </article>  
+
+    <article class="card">  
+      <div class="card-header">  
+        <div class="avatar alt"></div>  
+        <div>  
+          <h3 class="card-title">Design System iOS</h3>  
+          <p class="card-subtitle">Há 25 minutos</p>  
+        </div>  
+      </div>  
+      <p class="card-body">Os controles desfocam o conteúdo atrás deles; as faixas superior e inferior combinam blur com um gradiente progressivo.</p>  
+    </article>  
+
+    <article class="card">  
+      <div class="card-header">  
+        <div class="avatar alt2"></div>  
+        <div>  
+          <h3 class="card-title">Exploração de Transparência</h3>  
+          <p class="card-subtitle">Há 1 hora</p>  
+        </div>  
+      </div>  
+      <p class="card-body">Durante a rolagem, textos e formas que passam sob os controles e as faixas desfocadas ficam suavizados.</p>  
+      <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-2/1200/700" alt="">  
+    </article>  
+
+    <article class="card">  
+      <div class="card-header">  
+        <div class="avatar"></div>  
+        <div>  
+          <h3 class="card-title">Cartão de Teste 4</h3>  
+          <p class="card-subtitle">Há 2 horas</p>  
+        </div>  
+      </div>  
+      <p class="card-body">Role para avaliar o blur na busca e no botão da barra inferior.</p>  
+    </article>  
+
+    <article class="card">  
+      <div class="card-header">  
+        <div class="avatar alt"></div>  
+        <div>  
+          <h3 class="card-title">Cartão de Teste 5</h3>  
+          <p class="card-subtitle">Há 3 horas</p>  
+        </div>  
+      </div>  
+      <p class="card-body">Os controles permanecem fixos enquanto os cartões rolam; o feed usa a largura disponível e limita a coluna a 600px em telas maiores.</p>  
+      <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-3/1200/700" alt="">  
+    </article>  
+  </div>  
+
+  <div class="blur-edge-top"></div>  
+  <div class="blur-edge-bottom"></div>  
+
+  <div class="top">  
+    <button class="round" type="button">  
+      <svg viewBox="0 0 24 24">  
+        <path d="M15.4 4.8 8.2 12l7.2 7.2"  
+              fill="none" stroke="currentColor" stroke-width="2.35"  
+              stroke-linecap="round" stroke-linejoin="round"/>  
+      </svg>  
+    </button>  
+
+    <button class="round menu" type="button">  
+      <svg viewBox="0 0 24 24">  
+        <circle cx="6" cy="12" r="1.9" fill="currentColor"/>  
+        <circle cx="12" cy="12" r="1.9" fill="currentColor"/>  
+        <circle cx="18" cy="12" r="1.9" fill="currentColor"/>  
+      </svg>  
+    </button>  
+  </div>  
+
+  <form class="bottom" onsubmit="return false">  
+    <label class="search">  
+      <svg viewBox="0 0 24 24">  
+        <circle cx="10" cy="10" r="6" fill="none"  
+                stroke="currentColor" stroke-width="2"/>  
+        <path d="m14.5 14.5 5 5"  
+              fill="none" stroke="currentColor" stroke-width="2"  
+              stroke-linecap="round"/>  
+      </svg>  
+      <input type="search" placeholder="Search" autocomplete="off"  
+             enterkeyhint="search">  
+    </label>  
+
+    <button class="add" type="button">  
+      <svg viewBox="0 0 24 24">  
+        <path d="M12 5v14M5 12h14"  
+              fill="none" stroke="currentColor" stroke-width="2.15"  
+              stroke-linecap="round"/>  
+      </svg>  
+    </button>  
+  </form>  
+
+<script>  
+(() => {  
+  const root = document.documentElement;  
+  const viewport = window.visualViewport;  
+
+  if (!viewport) return;  
+
+  const update = () => {  
+    const offset = Math.max(  
+      0,  
+      window.innerHeight - viewport.height - viewport.offsetTop  
+    );  
+    root.style.setProperty('--keyboard-offset', `${offset}px`);  
+    root.style.setProperty('--visual-viewport-offset-top', `${viewport.offsetTop}px`);  
+    root.style.setProperty('--visual-viewport-height', `${viewport.height}px`);
+  };  
+
+  update();  
+  viewport.addEventListener('resize', update, {passive:true});  
+  viewport.addEventListener('scroll', update, {passive:true});  
+  window.addEventListener('resize', update, {passive:true});  
+})();  
+</script>  
+</body>  
+</html>
