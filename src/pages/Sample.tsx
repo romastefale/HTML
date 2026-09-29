@@ -1,15 +1,18 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
-import { GlassNav, type NavItem } from "../components/GlassNav";
+import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, GlassPill, asset, CREDITS_URL, HOME_URL } from "../components/Surfaces";
 import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
 import "./Sample.css";
 
+// Back to home, then every section of the page, in order.
 const NAV: NavItem[] = [
   { href: HOME_URL, label: "Início", back: true, ariaLabel: "Voltar ao início" },
+  { href: "#topo", label: "Lente" },
   { href: "#componentes", label: "Componentes" },
   { href: "#lugares", label: "Lugares" },
   { href: "#suporte", label: "Suporte" },
+  { href: "#creditos", label: "Créditos" },
 ];
 
 // ── Hero: an IN-PLACE lens (geometry + children), the fork's docs hero
@@ -327,7 +330,7 @@ export const Sample: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <GlassNav items={NAV} />
+      <SiteHeader items={NAV} />
       <main id="conteudo">
         <Hero />
 
@@ -420,7 +423,7 @@ export const Sample: React.FC = () => {
         </section>
       </main>
 
-      <footer className="site-footer">
+      <footer className="site-footer" id="creditos">
         <div className="wrap">
           <GlassPanel className="foot-glass">
             <div className="foot">
