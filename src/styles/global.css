@@ -1,0 +1,136 @@
+/* Shared look for both pages. Design rule: no hairlines. Edges come from the
+   glass itself (frost, tint, soft inner light) and a soft float shadow.
+
+   ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
+   • The page gradient STARTS and ENDS on --page-edge, and html + body
+     background-color are --page-edge too (also set inline in the HTML head, so
+     it holds before this file loads). Whether the browser shows live page
+     pixels behind its bars or its fallback tint from body/html
+     background-color, it's the same colour: the bars read as the page.
+   • No fixed/sticky element with background-color or backdrop-filter touches
+     a viewport edge (Safari 26 samples those into its bars): the fixed nav and
+     search wrappers are transparent and inset; the glass is on their children.
+   • theme-color (Android Chrome, older Safari) = --page-edge, per scheme. */
+:root{
+  color-scheme:light dark;
+  --page-edge:#8b82e6;
+  --page-bg:
+    radial-gradient(62% 26% at 10% 34%, rgba(255,158,205,.75) 0%, rgba(255,158,205,0) 100%),
+    radial-gradient(58% 26% at 92% 44%, rgba(120,205,255,.75) 0%, rgba(120,205,255,0) 100%),
+    radial-gradient(62% 26% at 22% 64%, rgba(255,210,150,.70) 0%, rgba(255,210,150,0) 100%),
+    radial-gradient(58% 24% at 84% 74%, rgba(140,240,210,.65) 0%, rgba(140,240,210,0) 100%),
+    linear-gradient(180deg, var(--page-edge) 0%, #c3b9f7 12%, #f1e7fb 30%, #eaf3ff 50%, #fbe9f1 70%, #c3b9f7 88%, var(--page-edge) 100%);
+  /* The cards band's own smooth multi-colour field (the cards refract a copy). */
+  --band-bg:
+    radial-gradient(70% 90% at 0% 0%, #ffb3d9 0%, rgba(255,179,217,0) 70%),
+    radial-gradient(70% 90% at 100% 0%, #9ecbff 0%, rgba(158,203,255,0) 70%),
+    radial-gradient(70% 90% at 100% 100%, #c9a4ff 0%, rgba(201,164,255,0) 70%),
+    radial-gradient(70% 90% at 0% 100%, #8ff0d0 0%, rgba(143,240,208,0) 70%),
+    radial-gradient(50% 60% at 50% 50%, #ffe1a8 0%, rgba(255,225,168,0) 75%),
+    linear-gradient(135deg, #fbe3f1 0%, #e4dcff 100%);
+  --band-edge:#eadcf6;
+  --text:#1c1c1e;
+  --text-dim:#3a3a3c;
+  --faint:#5d5b6e;
+  --link:#0a6cff;
+  --focus:#0a84ff;
+  --gutter-l:max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(20px, env(safe-area-inset-right, 0px));
+  --glass-light:inset 0 12px 20px -14px rgba(255,255,255,.72), inset 0 -10px 18px -14px rgba(255,255,255,.28);
+  --glass-float:0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08);
+  /* The library's own spring curve (glassEase in @samasante/liquid-glass). */
+  --glass-ease:cubic-bezier(.34,1.36,.42,1);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --page-edge:#1b1646;
+    --page-bg:
+      radial-gradient(62% 26% at 10% 34%, rgba(214,70,160,.45) 0%, rgba(214,70,160,0) 100%),
+      radial-gradient(58% 26% at 92% 44%, rgba(40,160,220,.42) 0%, rgba(40,160,220,0) 100%),
+      radial-gradient(62% 26% at 22% 64%, rgba(230,140,60,.30) 0%, rgba(230,140,60,0) 100%),
+      radial-gradient(58% 24% at 84% 74%, rgba(40,200,170,.32) 0%, rgba(40,200,170,0) 100%),
+      linear-gradient(180deg, var(--page-edge) 0%, #2a2170 12%, #1d2b63 30%, #16324f 50%, #2c1f5a 70%, #2a2170 88%, var(--page-edge) 100%);
+    --text:#f5f5f7;
+    --text-dim:#d1d1d6;
+    --faint:#b3b0c8;
+    --link:#64d2ff;
+  }
+}
+*{box-sizing:border-box}
+html{
+  background-color:var(--page-edge);
+  scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
+  scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px));
+}
+body{
+  margin:0;
+  min-height:100vh;
+  min-height:100dvh;
+  color:var(--text);
+  background-color:var(--page-edge);
+  background-image:var(--page-bg);
+  background-attachment:fixed; /* iOS ignores it (scrolls); the edges still match */
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  touch-action:manipulation; /* pan + pinch-zoom stay allowed */
+}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:10px}
+code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:.9em}
+.skip{
+  position:absolute;left:12px;top:-60px;z-index:100;
+  padding:10px 14px;border-radius:12px;background:#111;color:#fff;text-decoration:none;
+}
+.skip:focus{top:calc(12px + env(safe-area-inset-top, 0px))}
+.noscript{
+  max-width:560px;margin:calc(40px + env(safe-area-inset-top, 0px)) auto;padding:22px 24px;border-radius:22px;
+  background:rgba(255,255,255,.55);box-shadow:var(--glass-light),var(--glass-float);color:#1c1c1e;
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+
+/* ── Glass materials (<Glass> from @samasante/liquid-glass) ────────────────
+   <Glass> frosts + tints the box and adds its own edge layer. Our optics set
+   specular: 0 (src/lib/optics.ts), which turns that edge layer's 1px rim off;
+   this soft inner light + float shadow replace it (the library keeps its edge
+   on a separate layer precisely so a className box-shadow doesn't fight it). */
+.glass{box-shadow:var(--glass-light),var(--glass-float)}
+
+/* Tints: always TRANSLUCENT (the library rule: the background is the tint). */
+.tint-ink{background:rgba(24,20,56,.46);color:#fff}
+.tint-blue{background:rgba(10,132,255,.52);color:#fff}
+.tint-red{background:rgba(248,113,113,.40);color:#1c1c1e}
+.tint-green{background:rgba(48,209,88,.36);color:#1c1c1e}
+.tint-white{background:rgba(255,255,255,.34);color:#1c1c1e}
+.tint-soft{background:rgba(255,255,255,.42);color:#1c1c1e}
+.tint-frost{background:rgba(255,255,255,.52);color:#1c1c1e}
+.tint-control{background:rgba(255,255,255,.5);color:#111}
+@media (prefers-color-scheme:dark){
+  .tint-soft{background:rgba(255,255,255,.12);color:#f5f5f7}
+  .tint-frost{background:rgba(28,24,60,.5);color:#f5f5f7}
+  .tint-control{background:rgba(44,40,80,.55);color:#f5f5f7}
+}
+@media (prefers-reduced-transparency:reduce){
+  .tint-ink{background:rgba(24,20,56,.94)}
+  .tint-blue{background:rgba(10,110,230,.96)}
+  .tint-red,.tint-green,.tint-white,.tint-soft,.tint-frost,.tint-control{background:rgba(255,255,255,.95);color:#1c1c1e}
+}
+@media (prefers-reduced-transparency:reduce) and (prefers-color-scheme:dark){
+  .tint-soft,.tint-frost,.tint-control{background:rgba(28,24,60,.96);color:#f5f5f7}
+}
+
+/* Pills (buttons/links inside a material <Glass>). */
+.pill{border-radius:999px}
+.pill .btn{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 22px;min-height:44px;
+  font:inherit;font-size:15.5px;font-weight:600;letter-spacing:-.1px;
+  color:inherit;text-decoration:none;border-radius:inherit;background:none;border:0;cursor:pointer;
+}
+.pill .btn:active{transform:scale(.975)}
+
+/* Glass caption pill over a photo. */
+.cap-pill{border-radius:16px;max-width:100%}
+.cap-pill a{color:inherit;text-underline-offset:2px}

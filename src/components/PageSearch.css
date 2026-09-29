@@ -1,0 +1,42 @@
+/* In-page search bar (bottom). The fixed wrapper is transparent and sits 18px
+   above the bottom safe area, so Safari 26 never samples it into its bar. */
+.page-search{
+  position:fixed;z-index:25;
+  left:max(12px, env(safe-area-inset-left, 0px));
+  right:max(12px, env(safe-area-inset-right, 0px));
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+  transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));
+  display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto;
+}
+.page-search .search-glass{flex:1;min-width:0;border-radius:24px}
+.page-search .step-glass{border-radius:24px}
+.page-search .search{height:48px;min-width:0;display:flex;align-items:center;gap:6px;padding:0 6px 0 14px;color:inherit}
+.page-search .search > svg{width:21px;height:21px;flex:0 0 auto;opacity:.65}
+.page-search input{
+  flex:1;min-width:0;border:0;outline:0;background:transparent;padding:0 0 0 4px;
+  color:inherit;font:inherit;font-size:17px; /* ≥16px: no iOS focus zoom */
+  letter-spacing:-.2px;caret-color:#0a84ff;-webkit-appearance:none;appearance:none;
+}
+.page-search input::placeholder{color:currentColor;opacity:.55}
+.page-search input::-webkit-search-cancel-button{display:none}
+.page-search output{flex:0 0 auto;font-size:13.5px;font-weight:600;opacity:.72;white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-search output:empty{display:none}
+.page-search .search:focus-within{box-shadow:0 0 0 3px rgba(10,132,255,.4);border-radius:24px}
+.ps-btn{
+  width:38px;height:38px;flex:0 0 auto;padding:0;border:0;border-radius:19px;
+  display:grid;place-items:center;background:none;color:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.ps-btn svg{width:20px;height:20px}
+.ps-btn:hover{background:rgba(127,127,160,.16)}
+.ps-btn:disabled{opacity:.35;cursor:default;background:none}
+.page-search .step{display:flex;align-items:center;height:48px;padding:0 5px;gap:2px}
+
+/* Matches: CSS Custom Highlight API (no DOM changes, safe inside React). */
+::highlight(page-search){background-color:rgba(255,204,0,.5);color:inherit}
+::highlight(page-search-current){background-color:#ff9f0a;color:#1c1c1e}
+/* Fallback for engines without it: translucent boxes drawn over the matches
+   (React owns the text nodes, so we never split them with <mark>). */
+.ps-overlay{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:5}
+.ps-overlay span{position:absolute;border-radius:3px;background:rgba(255,204,0,.45);mix-blend-mode:multiply}
+.ps-overlay span.is-current{background:rgba(255,159,10,.75)}
