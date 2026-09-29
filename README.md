@@ -1,9 +1,25 @@
 # HTML
 
-Baseline HTML.
+Site: https://romastefale.github.io/HTML/ · Amostra: https://romastefale.github.io/HTML/liquid-glass-sample.html
 
-Site: https://romastefale.github.io/HTML/
+App React (Vite + TypeScript) com a mesma arquitetura do site de demonstração da biblioteca
+[liquid-glass](https://github.com/romastefale/liquid-glass) (`site/`): cada superfície de vidro é um
+componente React que usa o `<Glass>` do pacote `@samasante/liquid-glass` (versão 0.1.1, idêntica ao fork no
+commit `4e7b769`).
 
-Amostra Liquid Glass: https://romastefale.github.io/HTML/liquid-glass-sample.html
+- `index.html` e `liquid-glass-sample.html`: entradas do Vite (mesmas URLs de antes).
+- `src/components/GlassNav.tsx`: menu de vidro compartilhado (recolhe em “…” ao rolar, abre como popover).
+- `src/components/PageSearch.tsx`: pesquisa na página (CSS Custom Highlight API, com fallback).
+- `src/pages/Home.tsx`, `src/pages/Sample.tsx`: as duas páginas.
+- `src/styles/global.css`: fundo em gradiente suave, cores das barras do navegador, tintas do vidro.
+- `public/img/`: fotos e `CREDITS.md`.
 
-As duas páginas usam o mesmo menu de vidro (`assets/glass-nav.js`): inteiro no topo, recolhido num botão redondo “…” ao rolar. A página inicial tem pesquisa na página (`assets/page-search.js`). O fundo é um gradiente suave em `assets/glass.css`, com as bordas na mesma cor que as barras do navegador.
+```bash
+pnpm install
+pnpm dev        # http://127.0.0.1:4178/HTML/
+pnpm build      # typecheck + build → dist/
+pnpm preview    # http://127.0.0.1:4179/HTML/
+```
+
+Deploy: `.github/workflows/pages.yml` faz o build e publica `dist/` com `actions/deploy-pages`
+(requer Settings → Pages → Source: “GitHub Actions”).

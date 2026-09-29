@@ -2,7 +2,7 @@
 
 Todas as fotos vêm do [Wikimedia Commons](https://commons.wikimedia.org/) e têm licença livre.
 Elas foram redimensionadas para no máximo 1600 px de largura e recomprimidas em JPEG; não houve outra alteração.
-Os fundos das páginas são gradientes CSS (`assets/glass.css`), sem imagens.
+Os fundos das páginas são gradientes CSS (`src/styles/global.css`), sem imagens.
 
 | Arquivo | Onde aparece | Lugar | Autor | Licença | Fonte |
 |---|---|---|---|---|---|
