@@ -16,6 +16,12 @@ html{scroll-behavior:smooth}
   left:max(var(--gutter-l), calc((100% - 1100px) / 2));
   right:max(var(--gutter-r), calc((100% - 1100px) / 2));
 }
+/* The lens hairline: the lens runs specular: 0 (no directional sheen or glow at
+   its top), and this ring, moved with the lens, draws the same uniform rim. */
+.hero-ring{
+  position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform;
+  box-shadow:inset 0 0 0 var(--rim-w) var(--rim);
+}
 .hero-scene{
   position:absolute;inset:0;
   display:grid;place-items:center;align-content:center;gap:14px;
@@ -42,14 +48,15 @@ html{scroll-behavior:smooth}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px, 2vw, 22px);align-items:stretch}
 @media (max-width:860px){.cards{grid-template-columns:1fr}}
 .gcard{position:relative;border-radius:22px;color:#1c1c1e}
-/* Crisp layer ON TOP of the lens, exactly the fork's examples/GlassNotification.tsx:
-   a top-lit white gradient + its "edge stack: a bright top sheen, a 1px white
-   inner highlight, a soft inner glow blooming in from the rim, the dark hairline,
-   + float shadow" ("the crisp panel edge is a CSS double-border on the card"). */
+/* Crisp layer ON TOP of the lens (examples/GlassNotification.tsx): a top-lit
+   white gradient + the float shadow of its edge stack. Of that stack's lines
+   (top sheen, white inner highlight, inner glow, dark hairline) only ONE stays:
+   the same uniform hairline as every other glass (--rim-w / --rim). The lens
+   itself runs specular: 0, so no sheen pools at the top either. */
 .gcard-body{
   position:relative;z-index:1;height:100%;border-radius:inherit;padding:22px 22px 24px;display:flex;flex-direction:column;gap:8px;
   background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.16) 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5),inset 0 0 24px rgba(255,255,255,.55),0 0 0 .5px rgba(0,0,0,.18),0 14px 36px rgba(0,0,0,.22),0 2px 5px rgba(0,0,0,.14);
+  box-shadow:0 0 0 var(--rim-w) var(--rim),0 14px 36px rgba(0,0,0,.22),0 2px 5px rgba(0,0,0,.14);
 }
 @media (prefers-reduced-transparency:reduce){.gcard-body{background:rgba(255,255,255,.94)}}
 .gcard .icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;color:#fff;box-shadow:inset 0 6px 10px -6px rgba(255,255,255,.6),0 4px 10px rgba(10,60,160,.18);background:linear-gradient(160deg,#2e9bff 0%,#0a6cff 100%)}

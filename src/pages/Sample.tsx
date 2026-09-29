@@ -19,7 +19,9 @@ const HERO_LENS: Partial<GlassOptics> = {
   mapSize: 512, clipToShape: true, softEdge: true,
   strength: 0.06, depth: 0.7, curvature: 0.62, dispersion: 1,
   bend: 0, bendWidth: 0.16, splay: 0, frost: 0.5, brightness: 0.06,
-  specular: 1.3, sheenAngle: 35, sheenDark: false, sheen: 1, sheenWidth: 4,
+  // specular 0 (docs: 1.3): no sheen/glow pooling at the top; the uniform
+  // hairline is the .hero-ring overlay instead.
+  specular: 0, sheenAngle: 35, sheenDark: false, sheen: 1, sheenWidth: 4,
   sheenFalloff: 1.6, glow: 0.22, glowSpread: 1, glowFalloff: 0.6,
 };
 const REST = { x: 0.3, y: 0.42 };
@@ -59,6 +61,22 @@ const Hero: React.FC = () => {
   }, []);
 
   const size = box.w ? Math.round(Math.max(130, Math.min(200, box.w * 0.42))) : 200;
+
+  // Keep the hairline ring on the lens: same centre fraction × stage box.
+  const ringRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const place = () => {
+      const el = ringRef.current;
+      if (el) el.style.transform = `translate(${x.get() * box.w - size / 2}px, ${y.get() * box.h - size / 2}px)`;
+    };
+    place();
+    const offX = x.on("change", place);
+    const offY = y.on("change", place);
+    return () => {
+      offX();
+      offY();
+    };
+  }, [x, y, box, size]);
 
   // De-oval the objectBoundingBox bend on a non-square box (same as the docs hero).
   const optics = useMemo(() => {
@@ -194,6 +212,7 @@ const Hero: React.FC = () => {
             </div>
           </div>
         </Glass>
+        {box.w > 0 && <div ref={ringRef} className="hero-ring" aria-hidden="true" style={{ width: size, height: size }} />}
       </div>
       <div className="hero-actions">
         <GlassPill tint="tint-blue">
@@ -221,7 +240,7 @@ const Hero: React.FC = () => {
 const PANEL_LENS: Partial<GlassOptics> = {
   mapSize: 256, clipToShape: true, softEdge: true,
   depth: 1, curvature: 0.5, dispersion: 0.6, strength: 0.17,
-  bend: 0.7, bendWidth: 0.12, frost: 3, brightness: 0.22, specular: 1.3,
+  bend: 0.7, bendWidth: 0.12, frost: 3, brightness: 0.22, specular: 0, // example: 1.3; uniform CSS hairline instead
   sheenAngle: 50, glow: 0.32, glowSpread: 1, glowFalloff: 1, sheen: 1.3, sheenWidth: 3,
 };
 const BAND_BG = "var(--band-bg)";
