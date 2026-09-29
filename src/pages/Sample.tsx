@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { GlassNav, type NavItem } from "../components/GlassNav";
 import { GlassCaption, GlassPanel, GlassPill, asset, CREDITS_URL, HOME_URL } from "../components/Surfaces";
-import { useReducedMotion } from "../lib/useMedia";
+import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
 import "./Sample.css";
 
 const NAV: NavItem[] = [
@@ -12,7 +12,7 @@ const NAV: NavItem[] = [
   { href: "#suporte", label: "Suporte" },
 ];
 
-// ── Hero: an IN-PLACE lens (geometry + children), exactly the fork's docs hero
+// ── Hero: an IN-PLACE lens (geometry + children), the fork's docs hero
 //    (site/src/views/Docs.tsx › LiveHero): it bends its own children in every
 //    browser. Optics = HERO_LENS from that file.
 const HERO_LENS: Partial<GlassOptics> = {
@@ -22,17 +22,31 @@ const HERO_LENS: Partial<GlassOptics> = {
   specular: 1.3, sheenAngle: 35, sheenDark: false, sheen: 1, sheenWidth: 4,
   sheenFalloff: 1.6, glow: 0.22, glowSpread: 1, glowFalloff: 0.6,
 };
+const REST = { x: 0.3, y: 0.42 };
+const ORBIT = { cx: 0.5, cy: 0.5, rx: 0.26, ry: 0.14, speed: 0.5 };
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 const Hero: React.FC = () => {
-  const boxRef = useRef<HTMLElement>(null);
-  const x = useMemo(() => glassValue(0.3), []);
-  const y = useMemo(() => glassValue(0.42), []);
+  const heroRef = useRef<HTMLElement>(null);
+  // The lens STAGE: a content-sized box (the headline block), not the whole
+  // full-viewport hero. BROWSERS.md › Known limitations: "keep lenses
+  // content-sized"; the docs hero is a bounded box too. It also keeps the lens
+  // off the nav, the status bar / safe area and the hero buttons.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const x = useMemo(() => glassValue(REST.x), []);
+  const y = useMemo(() => glassValue(REST.y), []);
   const target = useRef<{ x: number; y: number } | null>(null);
+  const pointer = useRef<{ cx: number; cy: number } | null>(null);
+  const release = useRef(0);
   const reduceMotion = useReducedMotion();
+  // BROWSERS.md: Chromium "opt into filterResolution={2} for crisper edges"
+  // (the library forces 1 in WebKit). Only on 1x screens, where the stair-steps
+  // show; on 2x/3x screens the filter already rasterizes at device pixels.
+  const lowDpi = useMediaQuery("(max-resolution: 1.5dppx)");
   const [box, setBox] = useState({ w: 0, h: 0 });
 
   useLayoutEffect(() => {
-    const el = boxRef.current;
+    const el = stageRef.current;
     if (!el) return;
     const measure = () => {
       const r = el.getBoundingClientRect();
@@ -44,6 +58,8 @@ const Hero: React.FC = () => {
     return () => ro.disconnect();
   }, []);
 
+  const size = box.w ? Math.round(Math.max(130, Math.min(200, box.w * 0.42))) : 200;
+
   // De-oval the objectBoundingBox bend on a non-square box (same as the docs hero).
   const optics = useMemo(() => {
     const { w, h } = box;
@@ -53,29 +69,44 @@ const Hero: React.FC = () => {
     return { ...HERO_LENS, scaleX: (s * m) / w, scaleY: (s * m) / h };
   }, [box]);
 
+  // Keep the whole disc inside the stage (site/src/components/GlassDemo.tsx ›
+  // clampBox): an in-place lens is clipped at its element's edge, so a lens that
+  // runs past it shows a cut, flat edge.
+  const bounds = useRef({ xlo: 0.5, xhi: 0.5, ylo: 0.5, yhi: 0.5 });
+  bounds.current = useMemo(() => {
+    const { w, h } = box;
+    if (!(w > 0 && h > 0)) return { xlo: 0.5, xhi: 0.5, ylo: 0.5, yhi: 0.5 };
+    const px = Math.min(0.5, (size / 2 + 2) / w);
+    const py = Math.min(0.5, (size / 2 + 2) / h);
+    return { xlo: px, xhi: 1 - px, ylo: py, yhi: 1 - py };
+  }, [box, size]);
+
   // Pointer drives the lens; otherwise a slow orbit (still if reduced motion).
   // Paused off-screen / in a hidden tab.
   useEffect(() => {
-    const el = boxRef.current;
+    const el = heroRef.current;
     if (!el) return;
     let raf = 0;
     let visible = true;
     const start = performance.now();
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      let tx = 0.3;
-      let ty = 0.42;
+      const c = bounds.current;
+      let tx = REST.x;
+      let ty = REST.y;
       if (target.current) ({ x: tx, y: ty } = target.current);
       else if (!reduceMotion) {
-        const a = ((now - start) / 1000) * 0.5;
-        tx = 0.5 + 0.26 * Math.cos(a);
-        ty = 0.45 + 0.14 * Math.sin(a);
+        const a = ((now - start) / 1000) * ORBIT.speed;
+        tx = ORBIT.cx + ORBIT.rx * Math.cos(a);
+        ty = ORBIT.cy + ORBIT.ry * Math.sin(a);
       }
+      tx = clamp(tx, c.xlo, c.xhi);
+      ty = clamp(ty, c.ylo, c.yhi);
       const e = target.current ? 0.28 : 0.12;
       const dx = tx - x.get();
       const dy = ty - y.get();
-      if (Math.abs(dx) > 1e-4) x.set(x.get() + dx * e);
-      if (Math.abs(dy) > 1e-4) y.set(y.get() + dy * e);
+      if (Math.abs(dx) > 3e-4) x.set(x.get() + dx * e);
+      if (Math.abs(dy) > 3e-4) y.set(y.get() + dy * e);
     };
     const run = () => {
       if (!raf && visible && !document.hidden) raf = requestAnimationFrame(tick);
@@ -92,46 +123,78 @@ const Hero: React.FC = () => {
     io.observe(el);
     const onVis = () => (document.hidden ? stop() : run());
     document.addEventListener("visibilitychange", onVis);
+    // The page scrolls under a still mouse: re-aim at the cursor, or the lens
+    // rides away with the content and drifts off the pointer.
+    const onScroll = () => {
+      const p = pointer.current;
+      const r = stageRef.current?.getBoundingClientRect();
+      if (p && r && target.current) target.current = { x: (p.cx - r.left) / r.width, y: (p.cy - r.top) / r.height };
+    };
+    addEventListener("scroll", onScroll, { passive: true });
     run();
     return () => {
       stop();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
+      removeEventListener("scroll", onScroll);
+      clearTimeout(release.current);
     };
   }, [x, y, reduceMotion]);
 
-  const onMove = (e: React.PointerEvent) => {
-    const r = boxRef.current?.getBoundingClientRect();
-    if (r) target.current = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  const aim = (e: React.PointerEvent) => {
+    clearTimeout(release.current);
+    const r = stageRef.current?.getBoundingClientRect();
+    if (!r) return;
+    pointer.current = { cx: e.clientX, cy: e.clientY };
+    target.current = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
   };
-  const size = box.w ? Math.round(Math.max(130, Math.min(200, box.w * 0.42))) : 200;
+  const drop = (e: React.PointerEvent, now = false) => {
+    clearTimeout(release.current);
+    const clear = () => {
+      target.current = null;
+      pointer.current = null;
+    };
+    // A tap on touch places the lens and holds it a moment before the orbit resumes.
+    if (e.pointerType === "mouse" || now) clear();
+    else release.current = window.setTimeout(clear, 1600);
+  };
 
   return (
     <section
-      ref={boxRef}
+      ref={heroRef}
       className="hero"
       id="topo"
       aria-labelledby="hero-title"
-      onPointerMove={onMove}
-      onPointerLeave={() => (target.current = null)}
-      onPointerCancel={() => (target.current = null)}
+      onPointerDown={aim}
+      onPointerMove={aim}
+      onPointerLeave={(e) => drop(e)}
+      onPointerCancel={(e) => drop(e, true)}
     >
-      <Glass optics={optics} center={{ x, y }} size={size} radius={size / 2} style={{ position: "absolute", inset: 0 }}>
-        {/* Sized inner box: gives the absolute scene a flow height. */}
-        <div style={{ position: "relative", width: "100%", height: "var(--hero-h)" }}>
-          <div className="hero-scene">
-            <p className="eyebrow">Amostra · liquid-glass</p>
-            <h1 id="hero-title">
-              Vidro líquido,
-              <br />
-              de verdade.
-            </h1>
-            <p className="lead">
-              Uma lente que refrata o DOM ao vivo: o texto continua selecionável e os links continuam clicáveis.
-            </p>
+      <div ref={stageRef} className="hero-stage">
+        <Glass
+          optics={optics}
+          center={{ x, y }}
+          size={size}
+          radius={size / 2}
+          filterResolution={lowDpi ? 2 : 1}
+          style={{ position: "absolute", inset: 0 }}
+        >
+          {/* Sized inner box: gives the absolute scene a flow height. */}
+          <div style={{ position: "relative", width: "100%", height: box.h || "100%" }}>
+            <div className="hero-scene">
+              <p className="eyebrow">Amostra · liquid-glass</p>
+              <h1 id="hero-title">
+                Vidro líquido,
+                <br />
+                de verdade.
+              </h1>
+              <p className="lead">
+                Uma lente que refrata o DOM ao vivo: o texto continua selecionável e os links continuam clicáveis.
+              </p>
+            </div>
           </div>
-        </div>
-      </Glass>
+        </Glass>
+      </div>
       <div className="hero-actions">
         <GlassPill tint="tint-blue">
           <a className="btn" href="#componentes">
@@ -146,7 +209,7 @@ const Hero: React.FC = () => {
       </div>
       <p className="hero-hint">
         {typeof window !== "undefined" && window.matchMedia("(hover: none)").matches
-          ? "Toque e arraste sobre o título para guiar a lente."
+          ? "Toque no título para guiar a lente."
           : "Mova o cursor sobre o título para guiar a lente."}
       </p>
     </section>
