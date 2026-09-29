@@ -1,19 +1,20 @@
 import type { GlassOptics } from "@samasante/liquid-glass";
 
 // Looks for the material <Glass> (a bare wrap that frosts + tints the page
-// behind it). `specular: 0` switches off the library's edge layer (a 1px
-// white rim + 1px top line, both scaled by `specular`): the no-hairline rule.
-// The soft light comes from the `.glass` class instead (src/styles/global.css).
-const NO_RIM: Partial<GlassOptics> = { specular: 0 };
+// behind it). No `specular` override: the library's default (1, MATERIAL_OPTICS
+// in src/GlassMaterial.tsx of the fork) draws its own edge layer, "a soft
+// bright top highlight + a faint all-round hairline. No dark line anywhere":
+//   inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px rgba(255,255,255,.12)
+// That layer is the hairline; nothing in our CSS replaces or doubles it.
 
-/** Content-sized controls (buttons, caption pills): the library's default
- *  material look (bends the live page in Chrome/Edge), minus the rim. */
-export const CONTROL: Partial<GlassOptics> = { ...NO_RIM };
+/** Content-sized controls (buttons, the search step pill): the library's
+ *  default material look (bends the live page in Chrome/Edge) with its rim. */
+export const CONTROL: Partial<GlassOptics> = {};
 
-/** Wide bars (nav pill, search bar): frost only. BROWSERS.md: "Very wide panels
- *  shouldn't use a single stretched displacement lens … use a frost-only
- *  treatment". */
-export const FROST: Partial<GlassOptics> = { ...NO_RIM, strength: 0, dispersion: 0 };
+/** Wide bars (nav pill, search bar) + caption pills: frost only. BROWSERS.md:
+ *  "Very wide panels shouldn't use a single stretched displacement lens … use a
+ *  frost-only treatment". The rim stays at the default. */
+export const FROST: Partial<GlassOptics> = { strength: 0, dispersion: 0 };
 
-/** Reading panels (cards, notes, footer, menu): frost only, heavier blur. */
-export const PANEL: Partial<GlassOptics> = { ...NO_RIM, strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };
+/** Reading panels (notes, footer, menu): frost only, heavier blur, default rim. */
+export const PANEL: Partial<GlassOptics> = { strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };

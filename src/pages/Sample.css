@@ -6,16 +6,28 @@ html{scroll-behavior:smooth}
 /* Hero: headline over the page gradient, wrapped by an IN-PLACE <Glass> lens
    that bends it (transparent, so the gradient runs unbroken from the bar down). */
 .hero{position:relative;height:var(--hero-h);overflow:hidden;touch-action:pan-y pinch-zoom}
+/* The lens stage: the headline block only, between the nav (top) and the hero
+   buttons (bottom), inside the safe area. The <Glass> fills it; the lens never
+   leaves it (BROWSERS.md: keep lenses content-sized). */
+.hero-stage{
+  position:absolute;
+  top:calc(76px + env(safe-area-inset-top,0px));
+  bottom:calc(132px + env(safe-area-inset-bottom,0px));
+  left:max(var(--gutter-l), calc((100% - 1100px) / 2));
+  right:max(var(--gutter-r), calc((100% - 1100px) / 2));
+}
 .hero-scene{
   position:absolute;inset:0;
   display:grid;place-items:center;align-content:center;gap:14px;
-  padding:calc(110px + env(safe-area-inset-top,0px)) var(--gutter-r) calc(180px + env(safe-area-inset-bottom,0px)) var(--gutter-l);
+  padding:12px 0;
   text-align:center;
 }
 .eyebrow{margin:0;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.hero h1{margin:0;font-weight:700;letter-spacing:-.04em;line-height:1.02;font-size:clamp(44px, 8.4vw, 108px);text-shadow:0 2px 36px rgba(255,255,255,.55)}
+/* No text-shadow on the refracted headline: a semi-transparent halo over the
+   see-through stage turns into a grey haze once the lens splits it into R/G/B
+   (dispersion). The docs hero's glyph shadow sits over an OPAQUE wallpaper. */
+.hero h1{margin:0;font-weight:700;letter-spacing:-.04em;line-height:1.02;font-size:clamp(44px, 8.4vw, 108px)}
 .hero .lead{margin:0;max-width:40ch;font-size:clamp(16px, 2.1vw, 19px);color:var(--text-dim)}
-@media (prefers-color-scheme:dark){.hero h1{text-shadow:0 2px 36px rgba(0,0,0,.35)}}
 .hero-actions{position:absolute;z-index:2;left:0;right:0;bottom:calc(68px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:0 16px}
 .hero-hint{position:absolute;z-index:2;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));margin:0;padding:0 var(--gutter-r) 0 var(--gutter-l);text-align:center;font-size:12.5px;color:var(--faint)}
 
@@ -29,12 +41,15 @@ html{scroll-behavior:smooth}
 .band{position:relative;border-radius:28px;overflow:hidden;padding:clamp(18px, 4vw, 44px);background:var(--band-bg);box-shadow:0 18px 44px rgba(40,20,110,.16),0 3px 8px rgba(40,20,110,.08)}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px, 2vw, 22px);align-items:stretch}
 @media (max-width:860px){.cards{grid-template-columns:1fr}}
-.gcard{position:relative;border-radius:22px;color:#1c1c1e;box-shadow:0 14px 36px rgba(40,10,90,.18),0 2px 6px rgba(40,10,90,.08)}
-/* Crisp layer ON TOP of the lens: a top-lit white gradient + soft inner light. */
+.gcard{position:relative;border-radius:22px;color:#1c1c1e}
+/* Crisp layer ON TOP of the lens, exactly the fork's examples/GlassNotification.tsx:
+   a top-lit white gradient + its "edge stack: a bright top sheen, a 1px white
+   inner highlight, a soft inner glow blooming in from the rim, the dark hairline,
+   + float shadow" ("the crisp panel edge is a CSS double-border on the card"). */
 .gcard-body{
   position:relative;z-index:1;height:100%;border-radius:inherit;padding:22px 22px 24px;display:flex;flex-direction:column;gap:8px;
   background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.16) 100%);
-  box-shadow:inset 0 14px 22px -16px rgba(255,255,255,.95),inset 0 -12px 20px -16px rgba(255,255,255,.5),inset 0 0 24px rgba(255,255,255,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5),inset 0 0 24px rgba(255,255,255,.55),0 0 0 .5px rgba(0,0,0,.18),0 14px 36px rgba(0,0,0,.22),0 2px 5px rgba(0,0,0,.14);
 }
 @media (prefers-reduced-transparency:reduce){.gcard-body{background:rgba(255,255,255,.94)}}
 .gcard .icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;color:#fff;box-shadow:inset 0 6px 10px -6px rgba(255,255,255,.6),0 4px 10px rgba(10,60,160,.18);background:linear-gradient(160deg,#2e9bff 0%,#0a6cff 100%)}
