@@ -61,6 +61,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
 }) => {
   const { theme, toggle } = useTheme();
   const headerRef = useRef<HTMLElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
@@ -167,8 +168,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
     if (refocus) searchBtn.current?.focus({ preventScroll: true });
   }, []);
 
-  // While open: Esc anywhere, or a tap/click outside the panel and its button,
-  // closes it (a scroll gesture isn't a click, so reading the results is fine).
+  // While open: Esc anywhere, or a tap/click outside the pill, closes it (a
+  // scroll gesture isn't a click, so reading the results is fine).
   useEffect(() => {
     if (!searchOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -176,7 +177,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
     };
     const onClick = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (document.getElementById(searchId)?.contains(t) || searchBtn.current?.contains(t)) return;
+      if (barRef.current?.contains(t)) return;
       closeSearch(false);
     };
     document.addEventListener("keydown", onKey);
@@ -185,7 +186,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("click", onClick);
     };
-  }, [searchOpen, searchId, closeSearch]);
+  }, [searchOpen, closeSearch]);
 
   // With the on-screen keyboard up, iOS can pan the visual viewport inside the
   // layout one; keep the menu (and the open field) pinned to what's visible.
@@ -207,9 +208,16 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
   const dark = theme === "dark";
   return (
     <header ref={headerRef} className="site-header">
-      <div className="sh-anchor">
-        <Glass className="glass sh-bar tint-bar" optics={FROST} style={{ display: "flex" }}>
-          <a className="sh-brand" href={HOME_URL}>
+      <div ref={barRef} className="sh-anchor">
+        <Glass
+          className="glass sh-bar tint-bar"
+          optics={FROST}
+          style={{ display: "flex" }}
+          data-mode={searchOpen ? "search" : "menu"}
+        >
+          {/* Menu mode. In search mode these stay in the layout (hidden, inert)
+              so the pill keeps exactly its size and place. */}
+          <a className="sh-brand" href={HOME_URL} inert={searchOpen}>
             <span className="sh-brand-ns">romastefale/</span>vidro
           </a>
           <nav
@@ -219,6 +227,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
             data-fade-start={fade.start || undefined}
             data-fade-end={fade.end || undefined}
             onScroll={syncFade}
+            inert={searchOpen}
           >
             {items.map((it, i) => (
               <a
@@ -241,37 +250,41 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
               </a>
             ))}
           </nav>
+          {/* Search mode: the field takes the pill, up to the magnifier. */}
+          <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
           <div className="sh-actions">
-            <button
-              ref={searchBtn}
-              type="button"
-              className="sh-pill"
-              onClick={() => (searchOpen ? closeSearch() : openSearch())}
-              aria-label="Pesquisar na página"
-              aria-expanded={searchOpen}
-              aria-controls={searchOpen ? searchId : undefined}
-              title="Pesquisar na página"
-              onPointerDown={pressDown}
-              onPointerUp={pressUp}
-              onPointerLeave={pressUp}
-            >
-              <Magnifier />
-            </button>
+            {/* Hidden during search (the field needs the room at 393px). */}
             <button
               type="button"
-              className="sh-pill"
+              className="sh-pill sh-theme"
               onClick={toggle}
               aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
               title="Alternar modo claro / escuro"
+              inert={searchOpen}
               onPointerDown={pressDown}
               onPointerUp={pressUp}
               onPointerLeave={pressUp}
             >
               {dark ? <Sun /> : <Moon />}
             </button>
+            {/* The toggle: opens the search in the pill, closes it again. */}
+            <button
+              ref={searchBtn}
+              type="button"
+              className="sh-pill sh-search-btn"
+              onClick={() => (searchOpen ? closeSearch() : openSearch())}
+              aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+              aria-expanded={searchOpen}
+              aria-controls={searchId}
+              title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+              onPointerDown={pressDown}
+              onPointerUp={pressUp}
+              onPointerLeave={pressUp}
+            >
+              <Magnifier />
+            </button>
           </div>
         </Glass>
-        {searchOpen && <PageSearch id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />}
       </div>
     </header>
   );

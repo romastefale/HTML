@@ -1,39 +1,39 @@
-/* In-page search: a glass panel that drops from the magnifier button in the
-   top menu (SiteHeader), anchored under the floating pill. Only mounted while
-   open, so nothing is left rendered (or sampled by Safari) when it's closed. */
+/* In-page search, INSIDE the floating menu pill (SiteHeader.css): in search
+   mode the pill itself is the search bar. The form covers the pill from its
+   left edge up to the magnifier (which stays put and closes it again); the
+   brand, links and theme button fade out underneath, still in the layout, so
+   the pill keeps exactly its size and place. */
 .page-search{
-  position:absolute;top:calc(100% + 8px);right:0;
-  width:min(440px, 100%);
-  animation:ps-drop .42s var(--glass-ease);
+  position:absolute;z-index:1;top:0;bottom:0;left:0;right:var(--ps-right, 49px);
+  display:flex;align-items:center;gap:2px;padding:0 0 0 16px;min-width:0;
+  color:inherit;
+  opacity:0;visibility:hidden;transform:translateX(14px);
+  transition:opacity .18s ease, transform .34s var(--glass-ease), visibility 0s linear .18s;
 }
-@keyframes ps-drop{
-  from{opacity:0;transform:translateY(-10px)}
-  to{opacity:1;transform:none}
+.page-search[data-open]{
+  opacity:1;visibility:visible;transform:none;
+  transition:opacity .22s ease .06s, transform .42s var(--glass-ease) .02s, visibility 0s;
 }
-@media (max-width:760px){.page-search{left:0;width:auto}}
-.page-search .ps-glass{border-radius:24px}
-.page-search .search{height:48px;min-width:0;display:flex;align-items:center;gap:4px;padding:0 5px 0 14px;color:inherit}
-.page-search .search > svg{flex:0 0 auto;opacity:.65}
 .page-search input{
-  flex:1;min-width:0;border:0;outline:0;background:transparent;padding:0 0 0 6px;
+  flex:1;min-width:0;height:40px;border:0;outline:0;background:transparent;padding:0;
   color:inherit;font:inherit;font-size:17px; /* ≥16px: no iOS focus zoom */
-  letter-spacing:-.2px;caret-color:#0a84ff;-webkit-appearance:none;appearance:none;
+  letter-spacing:-.2px;caret-color:#4c9aff;-webkit-appearance:none;appearance:none;
 }
-.page-search input::placeholder{color:currentColor;opacity:.55}
+.page-search input::placeholder{color:var(--bar-sub);opacity:1}
 .page-search input::-webkit-search-cancel-button{display:none}
-.page-search output{flex:0 0 auto;padding:0 4px;font-size:13.5px;font-weight:600;opacity:.72;white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-search output{flex:0 0 auto;padding:0 4px;font-size:13.5px;font-weight:600;color:var(--bar-sub);white-space:nowrap;font-variant-numeric:tabular-nums}
 .page-search output:empty{display:none}
-.page-search .ps-glass:focus-within{box-shadow:var(--glass-float),0 0 0 3px rgba(10,132,255,.4)}
-.ps-sep{flex:0 0 auto;width:1px;height:22px;margin:0 2px;background:currentColor;opacity:.16}
+.ps-sep{flex:0 0 auto;width:1px;height:20px;margin:0 3px;background:currentColor;opacity:.16}
 .ps-btn{
-  width:38px;height:38px;flex:0 0 auto;padding:0;border:0;border-radius:19px;
+  width:34px;height:34px;flex:0 0 auto;padding:0;border:0;border-radius:17px;
   display:grid;place-items:center;background:none;color:inherit;
   -webkit-tap-highlight-color:transparent;
 }
-.ps-btn svg{width:20px;height:20px}
+.ps-btn svg{width:19px;height:19px}
 .ps-btn:hover{background:rgba(127,127,160,.16)}
 .ps-btn:disabled{opacity:.35;cursor:default;background:none}
-@media (prefers-reduced-motion:reduce){.page-search{animation:none}}
+.ps-btn:focus-visible{outline:2px solid #4c9aff;outline-offset:1px;border-radius:17px}
+@media (max-width:760px){.page-search{padding-left:14px;--ps-right:48px}}
 
 /* Matches: CSS Custom Highlight API (no DOM changes, safe inside React). */
 ::highlight(page-search){background-color:rgba(255,204,0,.5);color:inherit}
@@ -43,3 +43,4 @@
 .ps-overlay{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:5}
 .ps-overlay span{position:absolute;border-radius:3px;background:rgba(255,204,0,.45);mix-blend-mode:multiply}
 .ps-overlay span.is-current{background:rgba(255,159,10,.75)}
+@media (prefers-reduced-motion:reduce){.page-search,.page-search[data-open]{transition:none;transform:none}}

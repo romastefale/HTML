@@ -67,7 +67,7 @@ export const Home: React.FC = () => {
             <h1 id="home-title">Interface de vidro</h1>
             <p>
               O menu de vidro flutuante no topo reúne todas as seções desta página: deslize-o para o lado para ver o
-              resto. A lupa abre a pesquisa na página e o botão ao lado troca o modo claro e escuro.
+              resto. A lupa transforma o menu na pesquisa da página e o botão ao lado troca o modo claro e escuro.
             </p>
           </section>
         </GlassPanel>
@@ -101,10 +101,10 @@ export const Home: React.FC = () => {
 
         <Card id="busca" avatar="alt" title="Pesquisar na página" subtitle="Busca">
           <p className="card-body">
-            Toque na lupa do menu e digite uma palavra, como “vidro” ou “foto”: cada ocorrência fica destacada e o
-            contador mostra “1 de N”. <kbd>Enter</kbd> ou as setas vão para a próxima, <kbd>Shift</kbd>+<kbd>Enter</kbd>{" "}
-            volta e <kbd>Esc</kbd> (ou tocar fora) fecha a pesquisa e apaga os destaques. Acentos e maiúsculas não
-            importam.
+            Toque na lupa do menu: o próprio menu vira a barra de pesquisa. Digite uma palavra, como “vidro” ou
+            “foto”: cada ocorrência fica destacada e o contador mostra “1 de N”. <kbd>Enter</kbd> ou as setas vão para
+            a próxima e <kbd>Shift</kbd>+<kbd>Enter</kbd> volta. Toque na lupa de novo (ou use <kbd>Esc</kbd>) para
+            fechar: os destaques somem e o menu volta. Acentos e maiúsculas não importam.
           </p>
         </Card>
 

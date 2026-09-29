@@ -3,7 +3,8 @@
    the same while the page scrolls. Inside it, the fork demo-site header's
    parts and values (site/src/components/SiteHeader.tsx + the palette in
    site/src/theme.ts): the wordmark, text links (current one bolder) and round
-   34px buttons (search, light/dark). Frost only (BROWSERS.md: wide bars), one
+   34px buttons (light/dark, search). The magnifier turns the pill itself
+   into the search bar and back (see "Search mode" below). Frost only (BROWSERS.md: wide bars), one
    uniform hairline from .glass::after (PR #6).
    The fixed wrapper is transparent (the glass is on its child), so Safari 26
    has nothing solid at the edge to sample: its bar shows the page colour. */
@@ -77,11 +78,26 @@
 /* The site's keyboard focus ring (site/index.html), drawn so the nav's clip keeps it. */
 .site-header a:focus-visible,.sh-pill:focus-visible{outline:2px solid #4c9aff;outline-offset:2px;border-radius:6px}
 .sh-pill:focus-visible{border-radius:999px}
+/* Search mode: the pill becomes the search bar (PageSearch.css). The brand,
+   links and theme button fade out but keep their room, so nothing moves or
+   resizes; the magnifier stays in place, shown active, and closes it. */
+.sh-brand,.sh-nav,.sh-theme{transition:opacity .2s ease, transform .34s var(--glass-ease), visibility 0s}
+.sh-bar[data-mode="search"] :is(.sh-brand,.sh-nav,.sh-theme){
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .16s ease, transform .3s var(--glass-ease), visibility 0s linear .16s;
+}
+.sh-bar[data-mode="search"] :is(.sh-brand,.sh-nav){transform:translateX(-12px)}
+.sh-bar[data-mode="search"] .sh-theme{transform:scale(.7)}
+.sh-search-btn{transition:transform .12s ease, background-color .2s ease, color .2s ease}
 .sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
+.sh-bar[data-mode="search"]:has(input:focus){box-shadow:var(--glass-float),0 0 0 2px rgba(76,154,255,.55)}
 @media (max-width:760px){
   .sh-anchor{flex:1 1 auto}
   .sh-bar{width:100%;gap:10px;padding:0 8px 0 16px}
   .sh-brand-ns{display:none}
   .sh-nav{margin-left:0;gap:14px}
 }
-@media (prefers-reduced-motion:reduce){.sh-pill{transition:none}}
+@media (prefers-reduced-motion:reduce){
+  .sh-pill,.sh-brand,.sh-nav,.sh-theme,.sh-bar[data-mode="search"] :is(.sh-brand,.sh-nav,.sh-theme){transition:none}
+  .sh-bar[data-mode="search"] :is(.sh-brand,.sh-nav,.sh-theme){transform:none}
+}

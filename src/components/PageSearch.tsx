@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Glass } from "@samasante/liquid-glass";
-import { FROST } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import "./PageSearch.css";
 
@@ -74,18 +72,20 @@ export const Magnifier: React.FC<{ size?: number }> = ({ size = 15 }) => (
 );
 
 /**
- * In-page word search, opened from the magnifier button in the top menu
- * (SiteHeader): a glass panel under the menu with the field, "2 de 5" and
- * ▲▼. Highlights every match inside #`scopeId`; Enter / Shift+Enter / ▲▼
- * jump and scroll. Case- and accent-insensitive. Closing it (Esc, the button,
- * a tap outside) unmounts it, which clears every highlight.
+ * In-page word search that lives INSIDE the floating menu pill (SiteHeader):
+ * when `open`, the pill turns into the search bar — the field, "2 de 5", the
+ * clear button and ▲▼ — in the same place and at the same size. Highlights
+ * every match inside #`scopeId`; Enter / Shift+Enter / ▲▼ jump and scroll.
+ * Case- and accent-insensitive. Closing clears the query and every highlight.
+ * Always mounted (so it can fade in and out); `inert` while closed.
  */
 export const PageSearch: React.FC<{
+  open: boolean;
   scopeId: string;
   id: string;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onClose: () => void;
-}> = ({ scopeId, id, inputRef, onClose }) => {
+}> = ({ open, scopeId, id, inputRef, onClose }) => {
   const [query, setQuery] = useState("");
   const [count, setCount] = useState(0);
   const [current, setCurrent] = useState(-1);
@@ -147,11 +147,26 @@ export const PageSearch: React.FC<{
     [scopeId, go],
   );
 
-  // Search as you type (debounced).
+  const reset = useCallback(() => {
+    setQuery("");
+    searched.current = "";
+    ranges.current = [];
+    setCount(0);
+    setCurrent(-1);
+    paint(-1);
+  }, [paint]);
+
+  // Search as you type (debounced), only while open.
   useEffect(() => {
+    if (!open) return;
     const t = setTimeout(() => run(query), 160);
     return () => clearTimeout(t);
-  }, [query, run]);
+  }, [open, query, run]);
+
+  // Closing clears the query and the highlights.
+  useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
 
   // Fallback boxes follow layout changes.
   useLayoutEffect(() => {
@@ -161,7 +176,7 @@ export const PageSearch: React.FC<{
     return () => window.removeEventListener("resize", onResize);
   }, [useHL, paint, current]);
 
-  // Closing (unmount) clears the highlights.
+  // Clean up highlights on unmount.
   useEffect(
     () => () => {
       if (hasHighlightApi()) {
@@ -175,15 +190,6 @@ export const PageSearch: React.FC<{
   const step = (d: number) => {
     if (query !== searched.current) run(query);
     else go(current + d);
-  };
-  const clear = () => {
-    setQuery("");
-    searched.current = "";
-    ranges.current = [];
-    setCount(0);
-    setCurrent(-1);
-    paint(-1);
-    inputRef.current?.focus();
   };
 
   const q = query.trim();
@@ -207,60 +213,65 @@ export const PageSearch: React.FC<{
         className="page-search"
         role="search"
         aria-label="Pesquisar na página"
+        data-open={open || undefined}
+        inert={!open}
         onSubmit={(e) => {
           e.preventDefault();
           step(1);
         }}
       >
-        <Glass className="glass ps-glass tint-bar" optics={FROST} style={{ display: "block" }}>
-          <div className="search">
-            <Magnifier size={19} />
-            <input
-              ref={inputRef}
-              id={inputId}
-              type="search"
-              placeholder="Pesquisar na página"
-              aria-label="Pesquisar na página"
-              autoComplete="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              enterKeyHint="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  step(e.shiftKey ? -1 : 1);
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClose();
-                }
-              }}
-            />
-            <output htmlFor={inputId} aria-live="polite">
-              {status}
-            </output>
-            {q.length > 0 && (
-              <button className="ps-btn" type="button" aria-label="Limpar pesquisa" onClick={clear}>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-                </svg>
-              </button>
-            )}
-            <span className="ps-sep" aria-hidden="true" />
-            <button className="ps-btn" type="button" aria-label="Resultado anterior" disabled={count < 2} onClick={() => step(-1)}>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m6 14.5 6-6 6 6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <button className="ps-btn" type="button" aria-label="Próximo resultado" disabled={count < 2} onClick={() => step(1)}>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m6 9.5 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </Glass>
+        <input
+          ref={inputRef}
+          id={inputId}
+          type="search"
+          placeholder="Pesquisar na página"
+          aria-label="Pesquisar na página"
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          enterKeyHint="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              step(e.shiftKey ? -1 : 1);
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }
+          }}
+        />
+        <output htmlFor={inputId} aria-live="polite">
+          {status}
+        </output>
+        {q.length > 0 && (
+          <button
+            className="ps-btn"
+            type="button"
+            aria-label="Limpar pesquisa"
+            onClick={() => {
+              reset();
+              inputRef.current?.focus();
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
+        <span className="ps-sep" aria-hidden="true" />
+        <button className="ps-btn" type="button" aria-label="Resultado anterior" disabled={count < 2} onClick={() => step(-1)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 14.5 6-6 6 6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <button className="ps-btn" type="button" aria-label="Próximo resultado" disabled={count < 2} onClick={() => step(1)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9.5 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </form>
     </>
   );
