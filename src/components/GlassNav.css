@@ -54,3 +54,7 @@
   .gnav.is-ready .gnav-pill,.gnav-links,.gnav-more{transition-duration:.01s!important}
   .gnav-menu.is-open,.gnav-menu.is-closing{animation-duration:.01s!important}
 }
+
+/* The pill clips its overflow and the popover grows through a clip-path, so
+   their hairline (global.css › .glass::after) sits just inside instead. */
+.gnav-pill::after,.gnav-menu-glass::after{box-shadow:inset 0 0 0 var(--rim-w) var(--rim)}

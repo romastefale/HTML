@@ -1,6 +1,6 @@
-/* Shared look for both pages. Edges come from the glass itself: the library's
-   own specular rim (the hairline, default `specular`), frost, tint, and a soft
-   float shadow. No hand-made CSS borders on material glass.
+/* Shared look for both pages. Edges come from the glass itself (frost, tint),
+   one uniform, very thin, mostly transparent hairline (--rim-w / --rim, drawn
+   by .glass::after) and a soft float shadow.
 
    ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
    • The page gradient STARTS and ENDS on --page-edge, and html + body
@@ -38,6 +38,11 @@
   --gutter-l:max(20px, env(safe-area-inset-left, 0px));
   --gutter-r:max(20px, env(safe-area-inset-right, 0px));
   --glass-float:0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08);
+  /* The one hairline on every glass edge: a single uniform colour all round
+     (no brighter top), very thin, mostly transparent. 0.5px on 2x+ screens
+     (= one device pixel), 1px on 1x. */
+  --rim-w:1px;
+  --rim:rgba(255,255,255,.18);
   /* The library's own spring curve (glassEase in @samasante/liquid-glass). */
   --glass-ease:cubic-bezier(.34,1.36,.42,1);
 }
@@ -54,6 +59,7 @@
     --text-dim:#d1d1d6;
     --faint:#b3b0c8;
     --link:#64d2ff;
+    --rim:rgba(255,255,255,.14);
   }
 }
 *{box-sizing:border-box}
@@ -92,13 +98,25 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
   font:16px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
 }
 
+@media (min-resolution:2dppx){:root{--rim-w:.5px}}
+
 /* ── Glass materials (<Glass> from @samasante/liquid-glass) ────────────────
-   <Glass> frosts + tints the box and draws its own edge layer: the hairline
-   (a 1px top highlight + a faint 1px all-round white rim, scaled by `specular`,
-   default 1; the fork's src/GlassMaterial.tsx). It sits on its own layer "so it
-   never fights a box-shadow the user set", so the class only adds the float
-   shadow (the "outer drop shadow" of the same Apple look). */
+   The library's edge layer is `specular`-driven and always pairs a brighter
+   1px top highlight with the all-round rim (src/GlassMaterial.tsx: .55·g on
+   top, .12·g all round), and `specular` is its only knob. So our optics set
+   specular: 0 (src/lib/optics.ts) and the hairline is drawn here, uniform, on
+   its OWN layer (::after, above the content, below nothing), the same way the
+   library keeps its edge "as its own inset layer so it never fights a
+   box-shadow": the float shadow stays on the element's box-shadow. A box that
+   clips its overflow (the nav pill) keeps the same line on the inside. */
 .glass{box-shadow:var(--glass-float)}
+.glass::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  /* Just OUTSIDE the edge (spread follows the radius): there it reads against
+     the page in both schemes; inside, a white line vanishes on the light,
+     white-frosted fills. */
+  box-shadow:0 0 0 var(--rim-w) var(--rim);
+}
 
 /* Tints: always TRANSLUCENT (the library rule: the background is the tint). */
 .tint-ink{background:rgba(24,20,56,.46);color:#fff}
