@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#130f33">
+<!-- Android Chrome paints its top bar solid in this colour; it equals the top
+     edge of the page gradient (--page-edge) so the bar reads as the page.
+     Safari 26 ignores theme-color (it tints from the page itself). -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#8b82e6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1646">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,446 +18,275 @@
 <link rel="modulepreload" href="assets/glass-ui.js">
 <link rel="stylesheet" href="assets/glass.css">
 <style>
-/* Same liquid-glass language as liquid-glass-sample.html: a gradient
-   backdrop edge to edge, frosted glass cards, glass controls, no hairlines. */
+/* Same liquid-glass language as liquid-glass-sample.html: one smooth gradient
+   edge to edge (assets/glass.css), glass nav, glass cards, glass search. */
 :root{
   color-scheme:light dark;
-  /* --edge + the --mesh-* gradients come from assets/glass.css */
-  --inset-t:env(safe-area-inset-top, 0px);
-  --inset-b:env(safe-area-inset-bottom, 0px);
-  --inset-l:env(safe-area-inset-left, 0px);
-  --inset-r:env(safe-area-inset-right, 0px);
   --title:#1c1c1e;
-  --subtitle:#6e6e73;
+  --subtitle:#5d5b6e;
   --body:#3a3a3c;
 }
 *{box-sizing:border-box}
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:var(--edge);
-  color:#111;
+html{scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
+body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
 }
-
-/* Gradient backdrop, edge to edge (behind the status bar and the home
-   indicator). background-image only, so Safari 26 samples body for its bars. */
-.backdrop{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background-image:var(--mesh-dark);
-}
-
-.feed{
-  position:fixed;
-  z-index:1;
-  top:var(--visual-viewport-offset-top, 0px);
-  left:0;
-  right:0;
-  height:var(--visual-viewport-height, 100dvh);
-  overflow-y:auto;
-  overscroll-behavior-y:contain;
-  -webkit-overflow-scrolling:touch;
-  touch-action:pan-y pinch-zoom;
-  padding:calc(100px + var(--inset-t)) max(18px, var(--inset-r)) calc(120px + var(--inset-b)) max(18px, var(--inset-l));
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  width:100%;
-  max-width:none;
-  margin:0;
-}
-
-/* Cards: frosted glass panels (frost-only material; they are wide panels). */
-.card-slot{
-  width:100%;
-  max-width:564px;
-  margin-left:auto;
-  margin-right:auto;
-}
-.card-glass{border-radius:22px}
-.card{
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.card-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:linear-gradient(135deg, #0a84ff, #5e5ce6);
-  box-shadow:inset 0 6px 10px -6px rgba(255,255,255,.6),0 4px 10px rgba(10,60,160,.18);
-  flex-shrink:0;
-}
-.avatar.alt{
-  background:linear-gradient(135deg, #ff9f0a, #ff375f);
-}
-.avatar.alt2{
-  background:linear-gradient(135deg, #30d158, #0a84ff);
-}
-.card-title{
-  font-weight:600;
-  font-size:16px;
-  color:var(--title);
-  margin:0;
-}
-.card-subtitle{
-  font-size:13px;
-  color:var(--subtitle);
-  margin:0;
-}
-.card-body{
-  font-size:15px;
-  line-height:1.45;
-  color:var(--body);
-  margin:0;
-}
-.card-link{
-  color:#0a6cff;
-  font-weight:600;
-  text-decoration:none;
-}
-.card-figure{margin:4px 0 0;display:flex;flex-direction:column;gap:6px}
-.card-credit{font-size:11.5px;color:var(--subtitle)}
-.card-credit a{color:inherit}
-.card-image-placeholder{
-  width:100%;
-  height:160px;
-  border-radius:14px;
-  background:linear-gradient(135deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.2) 100%);
-  object-fit:cover;
-  display:block;
-  margin-top:4px;
-}
-
-/* Progressive blur bands at both edges; they extend under the status bar and
-   the home indicator so the controls + clock stay legible over the photo. */
-.blur-edge-top,.blur-edge-bottom{
-  position:fixed;
-  left:0;
-  right:0;
-  z-index:5;
-  pointer-events:none;
-  -webkit-backdrop-filter:blur(14px);
-  backdrop-filter:blur(14px);
-}
-.blur-edge-top{
-  top:var(--visual-viewport-offset-top, 0px);
-  height:calc(120px + var(--inset-t));
-  -webkit-mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
-  mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
-  background-image:linear-gradient(to bottom, rgba(19,15,51,.78) 0%, rgba(19,15,51,.42) 48%, rgba(19,15,51,0) 100%);
-}
-.blur-edge-bottom{
-  bottom:0;
-  height:calc(130px + var(--inset-b));
-  transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));
-  -webkit-mask-image:linear-gradient(to top, #000 0%, transparent 100%);
-  mask-image:linear-gradient(to top, #000 0%, transparent 100%);
-  background-image:linear-gradient(to top, rgba(19,15,51,.78) 0%, rgba(19,15,51,.42) 48%, rgba(19,15,51,0) 100%);
-}
-
-/* Glass controls (content-sized material lenses). */
-.top{
-  position:fixed;
-  z-index:10;
-  top:calc(16px + var(--inset-t) + var(--visual-viewport-offset-top, 0px));
-  left:max(20px, var(--inset-l));
-  right:max(20px, var(--inset-r));
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.round-glass{border-radius:23px}
-.add-glass{border-radius:24px}
-.search-glass{border-radius:24px}
-.round,.add{
-  width:46px;
-  height:46px;
-  padding:0;
-  border:0;
-  border-radius:inherit;
-  display:grid;
-  place-items:center;
-  color:inherit;
-  background:none;
-  -webkit-tap-highlight-color:transparent;
-}
-.add{width:48px;height:48px}
-.round svg{
-  width:24px;
-  height:24px;
-}
-.menu svg{width:26px;height:26px}
-
-.bottom{
-  position:fixed;
-  z-index:10;
-  left:max(12px, var(--inset-l));
-  right:max(12px, var(--inset-r));
-  bottom:calc(18px + var(--inset-b));
-  transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));
-  display:flex;
-  align-items:center;
-  gap:10px;
-  max-width:640px;
-  margin:0 auto;
-}
-.search-slot{flex:1;min-width:0}
-.add-slot{flex:0 0 48px}
-.search{
-  height:48px;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  color:inherit;
-}
-.search svg{
-  width:22px;
-  height:22px;
-  flex:0 0 auto;
-  opacity:.65;
-}
-.search input{
-  flex:1;
-  min-width:0;
-  border:0;
-  outline:0;
-  background:transparent;
-  padding:0 0 0 9px;
-  color:inherit;
-  font:inherit;
-  font-size:17px; /* ≥16px: no iOS focus zoom, and pinch-zoom stays allowed */
-  letter-spacing:-.2px;
-  caret-color:#0a84ff;
-  -webkit-appearance:none;
-  appearance:none;
-}
-.search input::placeholder{color:currentColor;opacity:.55}
-.search input::-webkit-search-cancel-button{display:none}
-.add svg{width:27px;height:27px}
+a{color:inherit}
 button{font:inherit;cursor:pointer}
 button:active{transform:scale(.975)}
-:focus-visible{
-  outline:2px solid #0a84ff;
-  outline-offset:3px;
-  border-radius:10px;
+:focus-visible{outline:2px solid #0a84ff;outline-offset:3px;border-radius:10px}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;border-radius:12px;background:#111;color:#fff;text-decoration:none}
+.skip:focus{top:calc(12px + env(safe-area-inset-top, 0px))}
+
+/* Normal document scroll: the page (and its gradient) runs under the browser
+   bars; nothing fixed with a background touches the viewport edges. */
+.feed{
+  padding:calc(84px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(104px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  display:flex;flex-direction:column;gap:16px;
 }
-.search:focus-within{box-shadow:0 0 0 3px rgba(10,132,255,.45);border-radius:24px}
+.card-slot{width:100%;max-width:564px;margin-left:auto;margin-right:auto}
+.card-glass{border-radius:22px}
+.intro{padding:22px 20px 20px;display:flex;flex-direction:column;gap:6px}
+.intro h1{margin:0;font-size:clamp(28px, 7vw, 36px);letter-spacing:-.03em;line-height:1.08;color:var(--title)}
+.intro p{margin:0;font-size:15.5px;line-height:1.45;color:var(--body)}
+.card{padding:18px;display:flex;flex-direction:column;gap:10px}
+.card-header{display:flex;align-items:center;gap:12px}
+.avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg, #0a84ff, #5e5ce6);
+  box-shadow:inset 0 6px 10px -6px rgba(255,255,255,.6),0 4px 10px rgba(10,60,160,.18);
+}
+.avatar.alt{background:linear-gradient(135deg, #ff9f0a, #ff375f)}
+.avatar.alt2{background:linear-gradient(135deg, #30d158, #0a84ff)}
+.card-title{font-weight:600;font-size:16px;color:var(--title);margin:0}
+.card-subtitle{font-size:13px;color:var(--subtitle);margin:0}
+.card-body{font-size:15px;line-height:1.45;color:var(--body);margin:0}
+.card-link{color:#0a6cff;font-weight:600;text-decoration:none}
+kbd{font:600 .85em ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 6px;border-radius:6px;background:rgba(127,127,160,.16)}
+
+/* Photo with a glass credit pill floating over it (no separate caption line). */
+.photo{position:relative;margin:4px 0 0;border-radius:16px;overflow:hidden}
+.photo img{width:100%;height:180px;object-fit:cover;display:block}
+.photo figcaption{position:absolute;left:8px;right:8px;bottom:8px;display:flex}
+.cap-pill{border-radius:14px;max-width:100%}
+.cap-pill .cap{display:block;padding:6px 11px 7px;font-size:11.5px;line-height:1.35}
+.cap-pill a{color:inherit;text-underline-offset:2px}
+
+/* The nav's "Pesquisar" link only makes sense once the search bar exists. */
+html:not(.has-page-search) a[href="#page-search-input"]{display:none}
+.foot{padding:16px 18px;font-size:13.5px;line-height:1.45;color:var(--subtitle)}
+.foot a{color:var(--title);font-weight:600}
 
 @media (prefers-color-scheme:dark){
-  :root{--title:#f5f5f7;--subtitle:#98989d;--body:#d1d1d6}
+  :root{--title:#f5f5f7;--subtitle:#b3b0c8;--body:#d1d1d6}
   .card-link{color:#64d2ff}
-  .card-image-placeholder{
-    background:linear-gradient(135deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.04) 100%);
-  }
 }
 </style>
 </head>
 <body>
-  <div class="backdrop" aria-hidden="true"></div>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
-  <main class="feed">
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar alt2"></div>
-            <div>
-              <h3 class="card-title">Amostra Liquid Glass</h3>
-              <p class="card-subtitle">Nova página</p>
-            </div>
-          </div>
-          <p class="card-body">Vidro líquido que refrata o conteúdo ao vivo, com fallback em blur. <a class="card-link" href="liquid-glass-sample.html">Abrir a amostra →</a></p>
-        </article>
-      </div>
-    </div>
-
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar"></div>
-            <div>
-              <h3 class="card-title">Desenvolvimento UI</h3>
-              <p class="card-subtitle">Há 10 minutos</p>
-            </div>
-          </div>
-          <p class="card-body">Role para baixo: os cartões passam por baixo dos controles desfocados e das faixas de blur nas bordas.</p>
-          <figure class="card-figure">
-            <img class="card-image-placeholder" src="assets/img/hong-kong-victoria-harbour.jpg" alt="Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer" width="1600" height="1063" decoding="async">
-            <figcaption class="card-credit">Porto de Victoria, Hong Kong · Foto: <a href="https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg">Wilfredor</a>, CC0</figcaption>
-          </figure>
-        </article>
-      </div>
-    </div>
-
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar alt"></div>
-            <div>
-              <h3 class="card-title">Design System iOS</h3>
-              <p class="card-subtitle">Há 25 minutos</p>
-            </div>
-          </div>
-          <p class="card-body">Os controles desfocam o conteúdo atrás deles; as faixas superior e inferior combinam blur com um gradiente progressivo.</p>
-        </article>
-      </div>
-    </div>
-
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar alt2"></div>
-            <div>
-              <h3 class="card-title">Exploração de Transparência</h3>
-              <p class="card-subtitle">Há 1 hora</p>
-            </div>
-          </div>
-          <p class="card-body">Durante a rolagem, textos e formas que passam sob os controles e as faixas desfocadas ficam suavizados.</p>
-          <figure class="card-figure">
-            <img class="card-image-placeholder" src="assets/img/rio-pao-de-acucar.jpg" alt="Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul" width="1600" height="990" loading="lazy" decoding="async">
-            <figcaption class="card-credit">Pão de Açúcar, Rio de Janeiro · Foto: <a href="https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg">Wilfredor</a>, CC0</figcaption>
-          </figure>
-        </article>
-      </div>
-    </div>
-
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar"></div>
-            <div>
-              <h3 class="card-title">Cartão de Teste 4</h3>
-              <p class="card-subtitle">Há 2 horas</p>
-            </div>
-          </div>
-          <p class="card-body">Role para avaliar o blur na busca e no botão da barra inferior.</p>
-        </article>
-      </div>
-    </div>
-
-    <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
-      <div class="glass card-glass tint-frost">
-        <article class="card">
-          <div class="card-header">
-            <div class="avatar alt"></div>
-            <div>
-              <h3 class="card-title">Cartão de Teste 5</h3>
-              <p class="card-subtitle">Há 3 horas</p>
-            </div>
-          </div>
-          <p class="card-body">Os controles permanecem fixos enquanto os cartões rolam; o feed usa a largura disponível e limita a coluna a 600px em telas maiores.</p>
-          <figure class="card-figure">
-            <img class="card-image-placeholder" src="assets/img/aurora-boreal-alasca.jpg" alt="Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca" width="1600" height="1043" loading="lazy" decoding="async">
-            <figcaption class="card-credit">Aurora boreal, Alasca · Foto: <a href="https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg">Senior Airman Joshua Strang (USAF)</a>, domínio público</figcaption>
-          </figure>
-        </article>
-      </div>
-    </div>
-  </main>
-
-  <div class="blur-edge-top" aria-hidden="true"></div>
-  <div class="blur-edge-bottom" aria-hidden="true"></div>
-
-  <div class="top">
-    <div class="lg-slot" data-lg="material">
-      <div class="glass round-glass tint-control">
-        <button class="round" type="button" aria-label="Voltar">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15.4 4.8 8.2 12l7.2 7.2"
-                  fill="none" stroke="currentColor" stroke-width="2.35"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="lg-slot" data-lg="material">
-      <div class="glass round-glass tint-control">
-        <button class="round menu" type="button" aria-label="Mais opções">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="6" cy="12" r="1.9" fill="currentColor"/>
-            <circle cx="12" cy="12" r="1.9" fill="currentColor"/>
-            <circle cx="18" cy="12" r="1.9" fill="currentColor"/>
-          </svg>
+<!-- Shared glass nav (same component on liquid-glass-sample.html; behaviour in
+     assets/glass-nav.js). Without JS it stays a full pill. -->
+<header class="gnav" data-gnav>
+  <div class="gnav-anchor">
+    <div class="lg-slot" data-lg="material" data-lg-optics="frost">
+      <div class="glass gnav-pill tint-ink">
+        <nav class="gnav-links" aria-label="Principal">
+          <a href="#topo" aria-current="page">Início</a>
+          <a href="liquid-glass-sample.html">Amostra</a>
+          <a href="#page-search-input">Pesquisar</a>
+        </nav>
+        <button class="gnav-more" type="button" aria-label="Abrir menu">
+          <svg class="i-dots" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="18" cy="12" r="1.9" fill="currentColor"/></svg>
+          <svg class="i-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </button>
       </div>
     </div>
   </div>
+</header>
 
-  <form class="bottom" role="search" onsubmit="return false">
-    <!-- Wide bar → frost-only material, per BROWSERS.md. -->
-    <div class="lg-slot search-slot" data-lg="material" data-lg-optics="frost" data-lg-block>
-      <div class="glass search-glass tint-control">
-        <label class="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="10" cy="10" r="6" fill="none"
-                    stroke="currentColor" stroke-width="2"/>
-            <path d="m14.5 14.5 5 5"
-                  fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round"/>
-          </svg>
-          <input type="search" placeholder="Search" aria-label="Buscar" autocomplete="off"
-                 enterkeyhint="search">
-        </label>
-      </div>
+<main class="feed" id="conteudo">
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <section class="intro" id="topo" aria-labelledby="home-title">
+        <h1 id="home-title">Interface de vidro</h1>
+        <p>Role a página: o menu no topo se recolhe num botão redondo de vidro, e a barra de pesquisa lá embaixo encontra qualquer palavra nesta página.</p>
+      </section>
     </div>
+  </div>
 
-    <div class="lg-slot add-slot" data-lg="material">
-      <div class="glass add-glass tint-control">
-        <button class="add" type="button" aria-label="Adicionar">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 5v14M5 12h14"
-                  fill="none" stroke="currentColor" stroke-width="2.15"
-                  stroke-linecap="round"/>
-          </svg>
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar alt2"></div>
+          <div>
+            <h2 class="card-title">Amostra Liquid Glass</h2>
+            <p class="card-subtitle">Nova página</p>
+          </div>
+        </div>
+        <p class="card-body">Vidro líquido que refrata o conteúdo ao vivo, com fallback em blur. <a class="card-link" href="liquid-glass-sample.html">Abrir a amostra →</a></p>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar"></div>
+          <div>
+            <h2 class="card-title">Menu que se recolhe</h2>
+            <p class="card-subtitle">Navegação</p>
+          </div>
+        </div>
+        <p class="card-body">No topo da página o menu aparece inteiro. Ao rolar, a pílula de vidro se transforma num botão redondo com três pontos, e o conteúdo ganha destaque. Toque nos três pontos para abrir o menu de novo.</p>
+        <figure class="photo">
+          <img src="assets/img/hong-kong-victoria-harbour.jpg" alt="Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer" width="1600" height="1063" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material" data-lg-optics="frost">
+              <div class="glass cap-pill tint-ink"><span class="cap">Porto de Victoria, Hong Kong · Foto: <a href="https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg">Wilfredor</a>, CC0</span></div>
+            </div>
+          </figcaption>
+        </figure>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar alt"></div>
+          <div>
+            <h2 class="card-title">Pesquisar na página</h2>
+            <p class="card-subtitle">Busca</p>
+          </div>
+        </div>
+        <p class="card-body">Digite uma palavra na barra de vidro lá embaixo, como “vidro” ou “foto”: cada ocorrência fica destacada e o contador mostra “1 de N”. <kbd>Enter</kbd> vai para a próxima, <kbd>Shift</kbd>+<kbd>Enter</kbd> volta e <kbd>Esc</kbd> limpa. Acentos e maiúsculas não importam.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar alt2"></div>
+          <div>
+            <h2 class="card-title">Fundo em gradiente suave</h2>
+            <p class="card-subtitle">Transparência</p>
+          </div>
+        </div>
+        <p class="card-body">O fundo é um único gradiente translúcido, sem formas. Ele começa e termina na mesma cor, que também é a cor usada pelo navegador atrás das barras, então o topo da tela parece continuar a página.</p>
+        <figure class="photo">
+          <img src="assets/img/rio-pao-de-acucar.jpg" alt="Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul" width="1600" height="990" loading="lazy" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material" data-lg-optics="frost">
+              <div class="glass cap-pill tint-ink"><span class="cap">Pão de Açúcar, Rio de Janeiro · Foto: <a href="https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg">Wilfredor</a>, CC0</span></div>
+            </div>
+          </figcaption>
+        </figure>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar"></div>
+          <div>
+            <h2 class="card-title">Cartões de vidro</h2>
+            <p class="card-subtitle">Material</p>
+          </div>
+        </div>
+        <p class="card-body">Cada cartão é vidro fosco sobre o gradiente, com luz suave nas bordas em vez de linhas finas. Sem JavaScript, os mesmos cartões usam um blur em CSS.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <article class="card">
+        <div class="card-header">
+          <div class="avatar alt"></div>
+          <div>
+            <h2 class="card-title">Céu noturno</h2>
+            <p class="card-subtitle">Foto</p>
+          </div>
+        </div>
+        <p class="card-body">A coluna usa a largura disponível e se limita a 564px em telas maiores; os controles de vidro ficam por cima enquanto a página rola.</p>
+        <figure class="photo">
+          <img src="assets/img/aurora-boreal-alasca.jpg" alt="Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca" width="1600" height="1043" loading="lazy" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material" data-lg-optics="frost">
+              <div class="glass cap-pill tint-ink"><span class="cap">Aurora boreal, Alasca · Foto: <a href="https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg">Senior Airman Joshua Strang (USAF)</a>, domínio público</span></div>
+            </div>
+          </figcaption>
+        </figure>
+      </article>
+    </div>
+  </div>
+
+  <div class="lg-slot card-slot" data-lg="material" data-lg-optics="panel" data-lg-block>
+    <div class="glass card-glass tint-frost">
+      <footer class="foot">Fotos do Wikimedia Commons; créditos e licenças em <a href="assets/img/CREDITS.md">CREDITS.md</a>. Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT).</footer>
+    </div>
+  </div>
+</main>
+
+<!-- In-page search. Hidden until assets/page-search.js runs (no dead control
+     without JS). -->
+<form class="page-search" role="search" aria-label="Pesquisar na página" data-page-search hidden>
+  <!-- Wide bar → frost-only material, per BROWSERS.md. -->
+  <div class="lg-slot search-slot" data-lg="material" data-lg-optics="frost" data-lg-block>
+    <div class="glass search-glass tint-control">
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="m14.5 14.5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="page-search-input" type="search" placeholder="Pesquisar na página" aria-label="Pesquisar na página" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+        <output for="page-search-input" aria-live="polite"></output>
+        <button class="ps-btn ps-clear" type="button" data-search-clear aria-label="Limpar pesquisa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </button>
       </div>
     </div>
-  </form>
+  </div>
+  <div class="lg-slot" data-lg="material">
+    <div class="glass step-glass tint-control">
+      <div class="step">
+        <button class="ps-btn" type="button" data-search-prev aria-label="Resultado anterior">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14.5 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ps-btn" type="button" data-search-next aria-label="Próximo resultado">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9.5 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
 
 <script>
+// Keep the bottom search bar above the on-screen keyboard.
 (() => {
   const root = document.documentElement;
   const viewport = window.visualViewport;
-
   if (!viewport) return;
-
   const update = () => {
-    const offset = Math.max(
-      0,
-      window.innerHeight - viewport.height - viewport.offsetTop
-    );
+    const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
     root.style.setProperty('--keyboard-offset', `${offset}px`);
-    root.style.setProperty('--visual-viewport-offset-top', `${viewport.offsetTop}px`);
-    root.style.setProperty('--visual-viewport-height', `${viewport.height}px`);
   };
-
   update();
   viewport.addEventListener('resize', update, {passive:true});
   viewport.addEventListener('scroll', update, {passive:true});
   window.addEventListener('resize', update, {passive:true});
 })();
 </script>
+<script src="assets/glass-nav.js" defer></script>
+<script src="assets/page-search.js" defer></script>
 <script type="module">
 // Upgrade the glass slots with the vendored liquid-glass build. Without JS the
 // same markup keeps the CSS blur fallback from assets/glass.css.
