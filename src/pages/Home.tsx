@@ -1,20 +1,28 @@
 import React, { useRef } from "react";
-import { GlassNav, type NavItem } from "../components/GlassNav";
+import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { PageSearch, SEARCH_INPUT_ID } from "../components/PageSearch";
 import { GlassCaption, GlassPanel, asset, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
 import "./Home.css";
 
+// Every section of the page, in order (plus the sample page and the search).
 const NAV: NavItem[] = [
-  { href: "#topo", label: "Início", current: true },
+  { href: "#topo", label: "Início" },
   { href: SAMPLE_URL, label: "Amostra" },
+  { href: "#menu", label: "Menu" },
   {
     href: `#${SEARCH_INPUT_ID}`,
     label: "Pesquisar",
+    spy: false,
     onSelect: (e) => {
       e.preventDefault();
       document.getElementById(SEARCH_INPUT_ID)?.focus();
     },
   },
+  { href: "#busca", label: "Busca" },
+  { href: "#gradiente", label: "Gradiente" },
+  { href: "#cartoes", label: "Cartões" },
+  { href: "#ceu", label: "Céu noturno" },
+  { href: "#creditos", label: "Créditos" },
 ];
 
 const Photo: React.FC<{ src: string; alt: string; w: number; h: number; lazy?: boolean; children: React.ReactNode }> = ({
@@ -35,14 +43,15 @@ const Photo: React.FC<{ src: string; alt: string; w: number; h: number; lazy?: b
   </figure>
 );
 
-const Card: React.FC<{ avatar?: string; title: string; subtitle: string; children: React.ReactNode }> = ({
+const Card: React.FC<{ id?: string; avatar?: string; title: string; subtitle: string; children: React.ReactNode }> = ({
+  id,
   avatar = "",
   title,
   subtitle,
   children,
 }) => (
   <GlassPanel className="card-glass">
-    <article className="card">
+    <article className="card" id={id}>
       <div className="card-header">
         <div className={`avatar ${avatar}`} />
         <div>
@@ -62,14 +71,14 @@ export const Home: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <GlassNav items={NAV} />
+      <SiteHeader items={NAV} />
       <main ref={main} className="feed" id="conteudo">
         <GlassPanel className="card-glass">
           <section className="intro" id="topo" aria-labelledby="home-title">
             <h1 id="home-title">Interface de vidro</h1>
             <p>
-              Role a página: o menu no topo se recolhe num botão redondo de vidro, e a barra de pesquisa lá embaixo
-              encontra qualquer palavra nesta página.
+              A barra no topo reúne todas as seções desta página: deslize-a para o lado para ver o resto. O botão
+              redondo troca o modo claro e escuro, e a barra de pesquisa lá embaixo encontra qualquer palavra.
             </p>
           </section>
         </GlassPanel>
@@ -83,10 +92,12 @@ export const Home: React.FC = () => {
           </p>
         </Card>
 
-        <Card title="Menu que se recolhe" subtitle="Navegação">
+        <Card id="menu" title="Menu com rolagem lateral" subtitle="Navegação">
           <p className="card-body">
-            No topo da página o menu aparece inteiro. Ao rolar, a pílula de vidro se transforma num botão redondo com
-            três pontos, e o conteúdo ganha destaque. Toque nos três pontos para abrir o menu de novo.
+            O menu é uma barra fosca de largura total, igual do início ao fim da página, como a do site da biblioteca
+            liquid-glass. Quando as seções não cabem, deslize a barra para o lado (no computador, use o trackpad ou{" "}
+            <kbd>Shift</kbd> + roda do mouse). A seção que você está lendo fica em negrito e sempre visível na barra. O
+            botão com a lua ou o sol troca o modo claro e escuro, e a escolha fica salva.
           </p>
           <Photo
             src="img/hong-kong-victoria-harbour.jpg"
@@ -99,7 +110,7 @@ export const Home: React.FC = () => {
           </Photo>
         </Card>
 
-        <Card avatar="alt" title="Pesquisar na página" subtitle="Busca">
+        <Card id="busca" avatar="alt" title="Pesquisar na página" subtitle="Busca">
           <p className="card-body">
             Digite uma palavra na barra de vidro lá embaixo, como “vidro” ou “foto”: cada ocorrência fica destacada e o
             contador mostra “1 de N”. <kbd>Enter</kbd> vai para a próxima, <kbd>Shift</kbd>+<kbd>Enter</kbd> volta e{" "}
@@ -107,7 +118,7 @@ export const Home: React.FC = () => {
           </p>
         </Card>
 
-        <Card avatar="alt2" title="Fundo em gradiente suave" subtitle="Transparência">
+        <Card id="gradiente" avatar="alt2" title="Fundo em gradiente suave" subtitle="Transparência">
           <p className="card-body">
             O fundo é um único gradiente translúcido, sem formas. Ele começa e termina na mesma cor, que também é a cor
             usada pelo navegador atrás das barras, então o topo da tela parece continuar a página.
@@ -124,14 +135,14 @@ export const Home: React.FC = () => {
           </Photo>
         </Card>
 
-        <Card title="Cartões de vidro" subtitle="Componentes React">
+        <Card id="cartoes" title="Cartões de vidro" subtitle="Componentes React">
           <p className="card-body">
             Cada cartão é um componente React que usa o <code>&lt;Glass&gt;</code> da biblioteca liquid-glass: vidro
-            fosco sobre o gradiente, com luz suave nas bordas em vez de linhas finas.
+            fosco sobre o gradiente, com uma linha fina, uniforme e bem transparente na borda.
           </p>
         </Card>
 
-        <Card avatar="alt" title="Céu noturno" subtitle="Foto">
+        <Card id="ceu" avatar="alt" title="Céu noturno" subtitle="Foto">
           <p className="card-body">
             A coluna usa a largura disponível e se limita a 564px em telas maiores; os controles de vidro ficam por cima
             enquanto a página rola.
@@ -152,7 +163,7 @@ export const Home: React.FC = () => {
         </Card>
 
         <GlassPanel className="card-glass">
-          <footer className="foot">
+          <footer className="foot" id="creditos">
             Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Efeito:{" "}
             <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), via o pacote{" "}
             <code>@samasante/liquid-glass</code>.
