@@ -1,10 +1,12 @@
-/* The shared top bar, built like the fork's demo-site header
-   (site/src/components/SiteHeader.tsx + the palette in site/src/theme.ts):
-   full width, a translucent fill + backdrop blur(16px) (frost only, the
-   BROWSERS.md treatment for wide bars), one faint bottom edge, the wordmark,
-   text links (current one bolder) and round 34px pills on the right.
-   Fixed (the site's is sticky) so the full-screen hero runs under it; it
-   reaches up under the status bar (safe area) so the browser bar blends in. */
+/* The shared top menu: a FLOATING glass pill (as before PR #7), inset from
+   the edges and 12px under the safe area, never touching the top edge, and
+   the same while the page scrolls. Inside it, the fork demo-site header's
+   parts and values (site/src/components/SiteHeader.tsx + the palette in
+   site/src/theme.ts): the wordmark, text links (current one bolder) and round
+   34px buttons (search, light/dark). Frost only (BROWSERS.md: wide bars), one
+   uniform hairline from .glass::after (PR #6).
+   The fixed wrapper is transparent (the glass is on its child), so Safari 26
+   has nothing solid at the edge to sample: its bar shows the page colour. */
 :root{
   --bar-bg:rgba(238,240,245,.72);
   --bar-text:#0a0b0d;
@@ -12,6 +14,7 @@
   --bar-edge:rgba(0,0,0,.1);
   --chip-bg:rgba(255,255,255,.66);
   --chip-border:rgba(0,0,0,.12);
+  --bar-bg-solid:#eef0f5;
 }
 :root[data-theme="dark"]{
   --bar-bg:rgba(6,6,7,.72);
@@ -20,26 +23,30 @@
   --bar-edge:rgba(255,255,255,.1);
   --chip-bg:rgba(255,255,255,.05);
   --chip-border:rgba(255,255,255,.14);
+  --bar-bg-solid:#060607;
 }
 .site-header{
-  position:fixed;z-index:70;top:0;left:0;right:0;
-  display:flex;align-items:center;gap:18px;
-  padding:calc(14px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px)) 14px max(22px, env(safe-area-inset-left, 0px));
-  background:var(--bar-bg);
-  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-  /* The one hairline: PR #6's width (1px, 0.5px on 2x+), the site's colour. */
-  border-bottom:var(--rim-w) solid var(--bar-edge);
+  position:fixed;z-index:70;left:0;right:0;
+  top:calc(12px + env(safe-area-inset-top, 0px));
+  transform:translateY(var(--vv-top, 0px));
+  display:flex;justify-content:center;pointer-events:none;
+  padding:0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
   font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
-  color:var(--bar-text);
 }
+.sh-anchor{position:relative;min-width:0;max-width:min(100%, 1040px);pointer-events:auto}
+.sh-bar{
+  align-items:center;gap:14px;min-width:0;max-width:100%;height:52px;
+  padding:0 9px 0 20px;border-radius:26px;
+}
+.tint-bar{background:var(--bar-bg);color:var(--bar-text)}
 @media (prefers-reduced-transparency:reduce){
-  .site-header{background:#eef0f5}
-  :root[data-theme="dark"] .site-header{background:#060607}
+  .tint-bar{background:#eef0f5}
+  :root[data-theme="dark"] .tint-bar{background:#060607}
 }
 .sh-brand{flex:0 0 auto;font-weight:600;font-size:15.5px;letter-spacing:-.3px;color:var(--bar-text);text-decoration:none;white-space:nowrap}
 .sh-brand-ns{color:var(--bar-sub)}
 .sh-nav{
-  flex:0 1 auto;min-width:0;margin-left:14px;
+  flex:0 1 auto;min-width:0;margin-left:4px;
   display:flex;align-items:center;gap:20px;padding:2px 4px;
   overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
   scrollbar-width:none;-webkit-overflow-scrolling:touch;
@@ -55,9 +62,11 @@
   color:var(--bar-sub);text-decoration:none;font-size:13.5px;font-weight:500;white-space:nowrap;
   -webkit-tap-highlight-color:transparent;
 }
+.sh-label{display:inline-grid}
+.sh-label::after{content:attr(data-text);font-weight:600;height:0;overflow:hidden;visibility:hidden;pointer-events:none;user-select:none}
 .sh-nav a:hover{color:var(--bar-text)}
 .sh-nav a[aria-current]{color:var(--bar-text);font-weight:600}
-.sh-spacer{flex:1 1 0;min-width:0}
+.sh-actions{flex:0 0 auto;display:flex;align-items:center;gap:6px;margin-left:auto}
 .sh-pill{
   flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;border-radius:999px;box-sizing:border-box;
@@ -68,9 +77,11 @@
 /* The site's keyboard focus ring (site/index.html), drawn so the nav's clip keeps it. */
 .site-header a:focus-visible,.sh-pill:focus-visible{outline:2px solid #4c9aff;outline-offset:2px;border-radius:6px}
 .sh-pill:focus-visible{border-radius:999px}
+.sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
 @media (max-width:760px){
-  .site-header{gap:10px;padding:calc(12px + env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) 12px max(14px, env(safe-area-inset-left, 0px))}
+  .sh-anchor{flex:1 1 auto}
+  .sh-bar{width:100%;gap:10px;padding:0 8px 0 16px}
   .sh-brand-ns{display:none}
-  .sh-nav{margin-left:4px;gap:14px}
+  .sh-nav{margin-left:0;gap:14px}
 }
 @media (prefers-reduced-motion:reduce){.sh-pill{transition:none}}

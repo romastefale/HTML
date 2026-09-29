@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Glass } from "@samasante/liquid-glass";
-import { CONTROL, FROST } from "../lib/optics";
+import { FROST } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import "./PageSearch.css";
 
-export const SEARCH_INPUT_ID = "page-search-input";
 const MIN = 2;
 const HL_ALL = "page-search";
 const HL_CURRENT = "page-search-current";
@@ -64,19 +64,28 @@ const findRanges = (scope: HTMLElement, query: string) => {
 
 type Box = { x: number; y: number; w: number; h: number; current: boolean };
 
-const SearchIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
-    <path d="m14.5 14.5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+/** Magnifier, drawn like the fork site's header icons (24-unit box, 2px
+ *  round stroke; site/src/components/SiteHeader.tsx › SunIcon). */
+export const Magnifier: React.FC<{ size?: number }> = ({ size = 15 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.6-3.6" />
   </svg>
 );
 
 /**
- * In-page word search in a bottom glass bar: highlights every match inside
- * `scope`, shows "2 de 5", Enter / Shift+Enter / ▲▼ jump and scroll, Esc
- * clears. Case- and accent-insensitive.
+ * In-page word search, opened from the magnifier button in the top menu
+ * (SiteHeader): a glass panel under the menu with the field, "2 de 5" and
+ * ▲▼. Highlights every match inside #`scopeId`; Enter / Shift+Enter / ▲▼
+ * jump and scroll. Case- and accent-insensitive. Closing it (Esc, the button,
+ * a tap outside) unmounts it, which clears every highlight.
  */
-export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }> = ({ scope }) => {
+export const PageSearch: React.FC<{
+  scopeId: string;
+  id: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  onClose: () => void;
+}> = ({ scopeId, id, inputRef, onClose }) => {
   const [query, setQuery] = useState("");
   const [count, setCount] = useState(0);
   const [current, setCurrent] = useState(-1);
@@ -85,22 +94,6 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
   const searched = useRef("");
   const reduceMotion = useReducedMotion();
   const useHL = useRef(hasHighlightApi()).current;
-
-  // Keep the fixed bar above the on-screen keyboard.
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const root = document.documentElement;
-    const update = () =>
-      root.style.setProperty("--keyboard-offset", `${Math.max(0, window.innerHeight - vv.height - vv.offsetTop)}px`);
-    update();
-    vv.addEventListener("resize", update, { passive: true });
-    vv.addEventListener("scroll", update, { passive: true });
-    return () => {
-      vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
-    };
-  }, []);
 
   const paint = useCallback(
     (idx: number) => {
@@ -146,17 +139,18 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
   const run = useCallback(
     (q: string) => {
       searched.current = q;
-      ranges.current = scope.current ? findRanges(scope.current, q) : [];
+      const scope = document.getElementById(scopeId);
+      ranges.current = scope ? findRanges(scope, q) : [];
       setCount(ranges.current.length);
       go(0);
     },
-    [scope, go],
+    [scopeId, go],
   );
 
   // Search as you type (debounced).
   useEffect(() => {
-    const id = setTimeout(() => run(query), 160);
-    return () => clearTimeout(id);
+    const t = setTimeout(() => run(query), 160);
+    return () => clearTimeout(t);
   }, [query, run]);
 
   // Fallback boxes follow layout changes.
@@ -167,7 +161,7 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
     return () => window.removeEventListener("resize", onResize);
   }, [useHL, paint, current]);
 
-  // Clean up highlights on unmount.
+  // Closing (unmount) clears the highlights.
   useEffect(
     () => () => {
       if (hasHighlightApi()) {
@@ -182,28 +176,34 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
     if (query !== searched.current) run(query);
     else go(current + d);
   };
-  const reset = () => {
+  const clear = () => {
     setQuery("");
     searched.current = "";
     ranges.current = [];
     setCount(0);
     setCurrent(-1);
     paint(-1);
+    inputRef.current?.focus();
   };
 
   const q = query.trim();
   const status = q.length < MIN ? "" : count ? `${current + 1} de ${count}` : "Nenhum resultado";
+  const inputId = `${id}-input`;
 
   return (
     <>
-      {!useHL && boxes.length > 0 && (
-        <div className="ps-overlay" aria-hidden="true">
-          {boxes.map((b, i) => (
-            <span key={i} className={b.current ? "is-current" : undefined} style={{ left: b.x - 1, top: b.y, width: b.w + 2, height: b.h }} />
-          ))}
-        </div>
-      )}
+      {!useHL &&
+        boxes.length > 0 &&
+        createPortal(
+          <div className="ps-overlay" aria-hidden="true">
+            {boxes.map((b, i) => (
+              <span key={i} className={b.current ? "is-current" : undefined} style={{ left: b.x - 1, top: b.y, width: b.w + 2, height: b.h }} />
+            ))}
+          </div>,
+          document.body,
+        )}
       <form
+        id={id}
         className="page-search"
         role="search"
         aria-label="Pesquisar na página"
@@ -212,11 +212,12 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
           step(1);
         }}
       >
-        <Glass className="glass search-glass tint-control" optics={FROST} style={{ display: "block" }}>
+        <Glass className="glass ps-glass tint-bar" optics={FROST} style={{ display: "block" }}>
           <div className="search">
-            <SearchIcon />
+            <Magnifier size={19} />
             <input
-              id={SEARCH_INPUT_ID}
+              ref={inputRef}
+              id={inputId}
               type="search"
               placeholder="Pesquisar na página"
               aria-label="Pesquisar na página"
@@ -232,32 +233,22 @@ export const PageSearch: React.FC<{ scope: React.RefObject<HTMLElement | null> }
                   step(e.shiftKey ? -1 : 1);
                 } else if (e.key === "Escape") {
                   e.preventDefault();
-                  reset();
+                  e.stopPropagation();
+                  onClose();
                 }
               }}
             />
-            <output htmlFor={SEARCH_INPUT_ID} aria-live="polite">
+            <output htmlFor={inputId} aria-live="polite">
               {status}
             </output>
             {q.length > 0 && (
-              <button
-                className="ps-btn"
-                type="button"
-                aria-label="Limpar pesquisa"
-                onClick={() => {
-                  reset();
-                  document.getElementById(SEARCH_INPUT_ID)?.focus();
-                }}
-              >
+              <button className="ps-btn" type="button" aria-label="Limpar pesquisa" onClick={clear}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7 7l10 10M17 7 7 17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </button>
             )}
-          </div>
-        </Glass>
-        <Glass className="glass step-glass tint-control" optics={CONTROL}>
-          <div className="step">
+            <span className="ps-sep" aria-hidden="true" />
             <button className="ps-btn" type="button" aria-label="Resultado anterior" disabled={count < 2} onClick={() => step(-1)}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m6 14.5 6-6 6 6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />

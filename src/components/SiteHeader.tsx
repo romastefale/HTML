@@ -1,6 +1,10 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { Glass } from "@samasante/liquid-glass";
+import { FROST } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
+import { Magnifier, PageSearch } from "./PageSearch";
 import { HOME_URL } from "./Surfaces";
 import "./SiteHeader.css";
 
@@ -11,7 +15,7 @@ export interface NavItem {
   back?: boolean;
   ariaLabel?: string;
   /** Section items ("#id") follow the scroll (aria-current="location");
-   *  set false for an item that isn't a section (e.g. "Pesquisar"). */
+   *  set false for an item that isn't a section. */
   spy?: boolean;
   onSelect?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
@@ -41,15 +45,26 @@ const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).sty
 const EDGE = 12; // px kept clear around an item scrolled into view
 
 /**
- * The shared top bar (home + sample), built like the fork's demo-site header
- * (site/src/components/SiteHeader.tsx): a full-width frosted bar with the
- * wordmark on the left, text links (current one bolder) and a round theme
- * toggle on the right. One bar, the same from the first paint to the end of
- * the page; when the links don't fit they scroll sideways (swipe, trackpad,
- * Shift + wheel), the scrollbar hidden and a soft fade on the side with more.
+ * The shared top menu (home + sample), the same at the top of the page and all
+ * the way down: a floating glass pill inset under the safe area, holding the
+ * fork demo-site header's parts (site/src/components/SiteHeader.tsx): the
+ * wordmark, text links (current one bolder), and round 34px buttons for the
+ * page search (magnifier) and the light/dark mode. When the links don't fit
+ * they scroll sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden
+ * and a soft fade on the side with more. The magnifier opens the search panel
+ * under the pill; Esc, the button again or a tap outside closes it.
  */
-export const SiteHeader: React.FC<{ items: NavItem[]; label?: string }> = ({ items, label = "Principal" }) => {
+export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScope?: string }> = ({
+  items,
+  label = "Principal",
+  searchScope = "conteudo",
+}) => {
   const { theme, toggle } = useTheme();
+  const headerRef = useRef<HTMLElement>(null);
+  const searchBtn = useRef<HTMLButtonElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const searchId = `busca-${useId().replace(/:/g, "")}`;
+  const [searchOpen, setSearchOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(-1);
@@ -112,7 +127,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string }> = ({ ite
     let raf = 0;
     const compute = () => {
       raf = 0;
-      const line = (navRef.current?.closest("header")?.getBoundingClientRect().bottom ?? 0) + 32;
+      const line = (navRef.current?.getBoundingClientRect().bottom ?? 0) + 32;
       const atEnd = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
       let idx = -1;
       targets.forEach((el, i) => {
@@ -141,50 +156,123 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string }> = ({ ite
     first.current = false;
   }, [active, reveal]);
 
+  // Open synchronously inside the tap (flushSync) so focus() still counts as
+  // user-initiated and iOS brings the keyboard up.
+  const openSearch = () => {
+    flushSync(() => setSearchOpen(true));
+    searchInput.current?.focus({ preventScroll: true });
+  };
+  const closeSearch = useCallback((refocus = true) => {
+    setSearchOpen(false);
+    if (refocus) searchBtn.current?.focus({ preventScroll: true });
+  }, []);
+
+  // While open: Esc anywhere, or a tap/click outside the panel and its button,
+  // closes it (a scroll gesture isn't a click, so reading the results is fine).
+  useEffect(() => {
+    if (!searchOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeSearch();
+    };
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (document.getElementById(searchId)?.contains(t) || searchBtn.current?.contains(t)) return;
+      closeSearch(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onClick);
+    };
+  }, [searchOpen, searchId, closeSearch]);
+
+  // With the on-screen keyboard up, iOS can pan the visual viewport inside the
+  // layout one; keep the menu (and the open field) pinned to what's visible.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const el = headerRef.current;
+    if (!vv || !el || !searchOpen) return;
+    const update = () => el.style.setProperty("--vv-top", `${Math.max(0, vv.offsetTop)}px`);
+    update();
+    vv.addEventListener("resize", update, { passive: true });
+    vv.addEventListener("scroll", update, { passive: true });
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      el.style.removeProperty("--vv-top");
+    };
+  }, [searchOpen]);
+
   const dark = theme === "dark";
   return (
-    <header className="site-header">
-      <a className="sh-brand" href={HOME_URL}>
-        <span className="sh-brand-ns">romastefale/</span>vidro
-      </a>
-      <nav
-        ref={navRef}
-        className="sh-nav"
-        aria-label={label}
-        data-fade-start={fade.start || undefined}
-        data-fade-end={fade.end || undefined}
-        onScroll={syncFade}
-      >
-        {items.map((it, i) => (
-          <a
-            key={it.href + it.label}
-            ref={(el) => {
-              linkRefs.current[i] = el;
-            }}
-            href={it.href}
-            aria-label={it.ariaLabel}
-            aria-current={i === active ? "location" : undefined}
-            onFocus={() => reveal(i, true)}
-            onClick={(e) => it.onSelect?.(e)}
-          >
-            {it.back && <Chevron />}
-            {it.label}
+    <header ref={headerRef} className="site-header">
+      <div className="sh-anchor">
+        <Glass className="glass sh-bar tint-bar" optics={FROST} style={{ display: "flex" }}>
+          <a className="sh-brand" href={HOME_URL}>
+            <span className="sh-brand-ns">romastefale/</span>vidro
           </a>
-        ))}
-      </nav>
-      <div className="sh-spacer" />
-      <button
-        type="button"
-        className="sh-pill"
-        onClick={toggle}
-        aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-        title="Alternar modo claro / escuro"
-        onPointerDown={pressDown}
-        onPointerUp={pressUp}
-        onPointerLeave={pressUp}
-      >
-        {dark ? <Sun /> : <Moon />}
-      </button>
+          <nav
+            ref={navRef}
+            className="sh-nav"
+            aria-label={label}
+            data-fade-start={fade.start || undefined}
+            data-fade-end={fade.end || undefined}
+            onScroll={syncFade}
+          >
+            {items.map((it, i) => (
+              <a
+                key={it.href + it.label}
+                ref={(el) => {
+                  linkRefs.current[i] = el;
+                }}
+                href={it.href}
+                aria-label={it.ariaLabel}
+                aria-current={i === active ? "location" : undefined}
+                onFocus={() => reveal(i, false)}
+                onClick={(e) => it.onSelect?.(e)}
+              >
+                {it.back && <Chevron />}
+                {/* data-text reserves the bold width: the pill never changes size
+                    when the current link changes. */}
+                <span className="sh-label" data-text={it.label}>
+                  {it.label}
+                </span>
+              </a>
+            ))}
+          </nav>
+          <div className="sh-actions">
+            <button
+              ref={searchBtn}
+              type="button"
+              className="sh-pill"
+              onClick={() => (searchOpen ? closeSearch() : openSearch())}
+              aria-label="Pesquisar na página"
+              aria-expanded={searchOpen}
+              aria-controls={searchOpen ? searchId : undefined}
+              title="Pesquisar na página"
+              onPointerDown={pressDown}
+              onPointerUp={pressUp}
+              onPointerLeave={pressUp}
+            >
+              <Magnifier />
+            </button>
+            <button
+              type="button"
+              className="sh-pill"
+              onClick={toggle}
+              aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
+              title="Alternar modo claro / escuro"
+              onPointerDown={pressDown}
+              onPointerUp={pressUp}
+              onPointerLeave={pressUp}
+            >
+              {dark ? <Sun /> : <Moon />}
+            </button>
+          </div>
+        </Glass>
+        {searchOpen && <PageSearch id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />}
+      </div>
     </header>
   );
 };

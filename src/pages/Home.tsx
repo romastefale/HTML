@@ -1,23 +1,13 @@
-import React, { useRef } from "react";
+import React from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { PageSearch, SEARCH_INPUT_ID } from "../components/PageSearch";
 import { GlassCaption, GlassPanel, asset, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
 import "./Home.css";
 
-// Every section of the page, in order (plus the sample page and the search).
+// Every section of the page, in order (plus the sample page).
 const NAV: NavItem[] = [
   { href: "#topo", label: "Início" },
   { href: SAMPLE_URL, label: "Amostra" },
   { href: "#menu", label: "Menu" },
-  {
-    href: `#${SEARCH_INPUT_ID}`,
-    label: "Pesquisar",
-    spy: false,
-    onSelect: (e) => {
-      e.preventDefault();
-      document.getElementById(SEARCH_INPUT_ID)?.focus();
-    },
-  },
   { href: "#busca", label: "Busca" },
   { href: "#gradiente", label: "Gradiente" },
   { href: "#cartoes", label: "Cartões" },
@@ -65,20 +55,19 @@ const Card: React.FC<{ id?: string; avatar?: string; title: string; subtitle: st
 );
 
 export const Home: React.FC = () => {
-  const main = useRef<HTMLElement>(null);
   return (
     <>
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
       <SiteHeader items={NAV} />
-      <main ref={main} className="feed" id="conteudo">
+      <main className="feed" id="conteudo">
         <GlassPanel className="card-glass">
           <section className="intro" id="topo" aria-labelledby="home-title">
             <h1 id="home-title">Interface de vidro</h1>
             <p>
-              A barra no topo reúne todas as seções desta página: deslize-a para o lado para ver o resto. O botão
-              redondo troca o modo claro e escuro, e a barra de pesquisa lá embaixo encontra qualquer palavra.
+              O menu de vidro flutuante no topo reúne todas as seções desta página: deslize-o para o lado para ver o
+              resto. A lupa abre a pesquisa na página e o botão ao lado troca o modo claro e escuro.
             </p>
           </section>
         </GlassPanel>
@@ -94,10 +83,10 @@ export const Home: React.FC = () => {
 
         <Card id="menu" title="Menu com rolagem lateral" subtitle="Navegação">
           <p className="card-body">
-            O menu é uma barra fosca de largura total, igual do início ao fim da página, como a do site da biblioteca
-            liquid-glass. Quando as seções não cabem, deslize a barra para o lado (no computador, use o trackpad ou{" "}
-            <kbd>Shift</kbd> + roda do mouse). A seção que você está lendo fica em negrito e sempre visível na barra. O
-            botão com a lua ou o sol troca o modo claro e escuro, e a escolha fica salva.
+            O menu é uma pílula de vidro que flutua no topo, igual do início ao fim da página e em todas as páginas.
+            Quando as seções não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
+            do mouse). A seção que você está lendo fica em negrito e sempre visível no menu. O botão com a lua ou o sol
+            troca o modo claro e escuro, e a escolha fica salva.
           </p>
           <Photo
             src="img/hong-kong-victoria-harbour.jpg"
@@ -112,9 +101,10 @@ export const Home: React.FC = () => {
 
         <Card id="busca" avatar="alt" title="Pesquisar na página" subtitle="Busca">
           <p className="card-body">
-            Digite uma palavra na barra de vidro lá embaixo, como “vidro” ou “foto”: cada ocorrência fica destacada e o
-            contador mostra “1 de N”. <kbd>Enter</kbd> vai para a próxima, <kbd>Shift</kbd>+<kbd>Enter</kbd> volta e{" "}
-            <kbd>Esc</kbd> limpa. Acentos e maiúsculas não importam.
+            Toque na lupa do menu e digite uma palavra, como “vidro” ou “foto”: cada ocorrência fica destacada e o
+            contador mostra “1 de N”. <kbd>Enter</kbd> ou as setas vão para a próxima, <kbd>Shift</kbd>+<kbd>Enter</kbd>{" "}
+            volta e <kbd>Esc</kbd> (ou tocar fora) fecha a pesquisa e apaga os destaques. Acentos e maiúsculas não
+            importam.
           </p>
         </Card>
 
@@ -170,7 +160,6 @@ export const Home: React.FC = () => {
           </footer>
         </GlassPanel>
       </main>
-      <PageSearch scope={main} />
     </>
   );
 };

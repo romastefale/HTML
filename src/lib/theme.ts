@@ -10,10 +10,11 @@ import { useCallback, useEffect, useState } from "react";
 export type ThemeName = "light" | "dark";
 export const THEME_KEY = "lg-theme";
 
-/** Browser-bar colour per mode: the header's translucent fill over the page's
- *  top edge (--bar-bg over --page-edge), so Android's solid bar matches it.
+/** Browser-bar colour per mode = the page's top/bottom edge (--page-edge in
+ *  src/styles/global.css), also html/body background-color: the menu floats,
+ *  nothing solid touches the edge, so the browser bars read as the page.
  *  Keep in sync with the inline <head> script in index.html / liquid-glass-sample.html. */
-export const BAR_COLOR: Record<ThemeName, string> = { light: "#d2d1f1", dark: "#0c0a19" };
+export const PAGE_EDGE: Record<ThemeName, string> = { light: "#8b82e6", dark: "#1b1646" };
 
 const stored = (): ThemeName | null => {
   try {
@@ -29,7 +30,7 @@ export const applyTheme = (t: ThemeName) => {
   const d = document.documentElement;
   d.dataset.theme = t;
   d.style.colorScheme = t;
-  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", BAR_COLOR[t]));
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", PAGE_EDGE[t]));
 };
 
 export const useTheme = () => {
