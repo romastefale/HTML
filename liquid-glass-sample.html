@@ -4,28 +4,41 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#130f33">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Liquid Glass">
 <meta name="description" content="Amostra estática do liquid-glass: uma lente de vidro líquido que refrata o DOM ao vivo, com fallback em blur.">
 <title>Amostra Liquid Glass</title>
 <link rel="modulepreload" href="assets/liquid-glass/liquid-glass.bundle.js">
+<link rel="modulepreload" href="assets/glass-ui.js">
+<link rel="stylesheet" href="assets/glass.css">
 <style>
 /* ── Base: same system stack + smoothing as index.html ──────────────────── */
 :root{
   color-scheme:light dark;
-  --hero-h:clamp(540px, 88svh, 780px);
+  --hero-h:max(560px, 100vh);
+  /* --edge + the --mesh-* gradients come from assets/glass.css */
+  --gutter-l:max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(20px, env(safe-area-inset-right, 0px));
   --text:#1c1c1e;
   --text-dim:#3a3a3c;
   --faint:#6e6e73;
   --page:#f5f5f7;
   --surface:#ffffff;
-  --line:rgba(0,0,0,.08);
+  --soft-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06);
   --focus:#0a84ff;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:90px}
+@supports (height:100svh){:root{--hero-h:max(560px, 100svh)}}
+html{scroll-behavior:smooth;scroll-padding-top:calc(90px + env(safe-area-inset-top, 0px))}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-html,body{margin:0;padding:0}
+/* html + body share the edge colour so the safe areas and overscroll never
+   show a mismatched bar; the content sections paint the page colour. */
+html,body{margin:0;padding:0;background:var(--edge)}
 body{
-  background:var(--page);
+  min-height:100vh;min-height:100dvh;
   color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
@@ -37,29 +50,15 @@ a{color:inherit}
   position:absolute;left:12px;top:-60px;z-index:100;
   padding:10px 14px;border-radius:12px;background:#111;color:#fff;text-decoration:none;
 }
-.skip:focus{top:12px}
+.skip:focus{top:calc(12px + env(safe-area-inset-top, 0px))}
 .visually-hidden{
   position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;
   overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
 }
 
-/* ── Glass "pills" (nav + buttons) ─────────────────────────────────────────
-   Enhanced: the pill becomes a <Glass> material (the library sets its own
-   backdrop-filter + edge layer and adds [data-liquid-glass]). Fallback (no JS /
-   module failed): the same box gets a plain CSS frost, like index.html. The
-   background is always TRANSLUCENT: it is the glass tint (library rule). */
+/* ── Glass pills (nav + buttons). Fallback frost, soft edges and tints live in
+   assets/glass.css; here only the shape. ─────────────────────────────────── */
 .pill{border-radius:999px}
-.pill:not([data-liquid-glass]){
-  -webkit-backdrop-filter:blur(18px) saturate(1.3);
-  backdrop-filter:blur(18px) saturate(1.3);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.14);
-}
-.tint-ink{background:rgba(18,22,32,.42);color:#fff}
-.tint-blue{background:rgba(10,132,255,.46);color:#fff}
-.tint-clear{background:rgba(255,255,255,.16);color:#fff}
-.tint-red{background:rgba(248,113,113,.40);color:#1c1c1e}
-.tint-green{background:rgba(48,209,88,.36);color:#1c1c1e}
-.tint-white{background:rgba(255,255,255,.34);color:#1c1c1e}
 .pill .btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:12px 22px;min-height:44px;
@@ -75,7 +74,8 @@ a{color:inherit}
 .site-nav{
   position:fixed;z-index:20;left:0;right:0;
   top:calc(14px + env(safe-area-inset-top,0px));
-  display:flex;justify-content:center;pointer-events:none;padding:0 12px;
+  display:flex;justify-content:center;pointer-events:none;
+  padding:0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
 }
 .site-nav .lg-slot{pointer-events:auto;max-width:100%}
 .nav-pill nav{display:flex;align-items:center;gap:2px;padding:5px}
@@ -89,14 +89,14 @@ a{color:inherit}
 @media (max-width:400px){.nav-pill a{padding:0 10px;font-size:14px}}
 
 /* ── Hero: the photo + headline are wrapped by an IN-PLACE <Glass> lens ───── */
-.hero{position:relative;height:var(--hero-h);overflow:hidden;background:#0b1a2e;color:#fff}
+.hero{position:relative;height:var(--hero-h);overflow:hidden;background:var(--edge);color:#fff}
 .hero-stage{position:absolute;inset:0}
 .hero-scene{
   position:absolute;inset:0;
   display:grid;place-items:center;align-content:center;gap:14px;
-  padding:calc(110px + env(safe-area-inset-top,0px)) 22px 170px;
+  padding:calc(110px + env(safe-area-inset-top,0px)) var(--gutter-r) calc(180px + env(safe-area-inset-bottom,0px)) var(--gutter-l);
   text-align:center;
-  background:url(assets/img/wallpaper-blue.jpg) center/cover no-repeat,#0b1a2e;
+  background:var(--mesh-dark);
 }
 .eyebrow{
   margin:0;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -113,39 +113,40 @@ a{color:inherit}
 }
 .hero-actions{
   position:absolute;z-index:2;left:0;right:0;
-  bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  bottom:calc(68px + env(safe-area-inset-bottom,0px));
   display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:0 16px;
 }
 .hero-hint{
-  position:absolute;z-index:2;left:0;right:0;bottom:22px;margin:0;
+  position:absolute;z-index:2;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));margin:0;padding:0 var(--gutter-r) 0 var(--gutter-l);
   text-align:center;font-size:12.5px;color:rgba(255,255,255,.72);
 }
 .hero-hint .touch{display:none}
 @media (hover:none){.hero-hint .mouse{display:none}.hero-hint .touch{display:inline}}
 
 /* ── Content sections ─────────────────────────────────────────────────────── */
-.wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 20px}
-.section{padding:clamp(56px, 8vw, 96px) 0}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 var(--gutter-r) 0 var(--gutter-l)}
+.section{padding:clamp(56px, 8vw, 96px) 0;background:var(--page)}
 .section h2{margin:0 0 8px;font-size:clamp(28px, 4vw, 40px);letter-spacing:-.03em;line-height:1.1}
 .section .sub{margin:0 0 28px;max-width:62ch;color:var(--faint);font-size:17px}
 code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:.9em}
 
-/* Photo band the glass cards float over (they refract a copy of it). */
+/* Gradient band the glass cards float over (they refract a copy of it). */
 .band{
   position:relative;border-radius:28px;overflow:hidden;
   padding:clamp(18px, 4vw, 44px);
-  background:url(assets/img/wallpaper-purple.jpg) center/cover no-repeat,#c4b0f7;
+  background:var(--mesh-light);
 }
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px, 2vw, 22px);align-items:stretch}
 @media (max-width:860px){.cards{grid-template-columns:1fr}}
 
 .gcard{
   position:relative;border-radius:22px;color:#1c1c1e;
-  box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 14px 36px rgba(40,10,90,.22),0 2px 5px rgba(0,0,0,.12);
+  box-shadow:0 14px 36px rgba(40,10,90,.22),0 2px 6px rgba(40,10,90,.10);
 }
 /* Fallback frost (no JS): a plain translucent card. */
 .gcard:not(.lg-on){
   background:rgba(255,255,255,.38);
+  box-shadow:inset 0 14px 22px -16px rgba(255,255,255,.95),inset 0 0 24px rgba(255,255,255,.4),0 14px 36px rgba(40,10,90,.22);
   -webkit-backdrop-filter:blur(18px) saturate(1.3);
   backdrop-filter:blur(18px) saturate(1.3);
 }
@@ -158,11 +159,11 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 }
 .gcard.lg-on .gcard-body{
   background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.16) 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5),inset 0 0 24px rgba(255,255,255,.5);
+  box-shadow:inset 0 14px 22px -16px rgba(255,255,255,.95),inset 0 -12px 20px -16px rgba(255,255,255,.5),inset 0 0 24px rgba(255,255,255,.45);
 }
 .gcard .icon{
   width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
-  color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.4);
+  color:#fff;box-shadow:inset 0 6px 10px -6px rgba(255,255,255,.6),0 4px 10px rgba(10,60,160,.18);
   background:linear-gradient(160deg,#2e9bff 0%,#0a6cff 100%);
 }
 .gcard .icon.alt{background:linear-gradient(135deg,#ff9f0a,#ff375f)}
@@ -174,28 +175,38 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 
 .band-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:clamp(18px, 3vw, 28px)}
 
+/* Places gallery: photos with a glass caption floating over each one. */
+.places{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px, 2vw, 22px)}
+@media (max-width:860px){.places{grid-template-columns:1fr}}
+.place{
+  position:relative;margin:0;border-radius:26px;overflow:hidden;aspect-ratio:4/5;
+  background:var(--mesh-dark);box-shadow:0 18px 40px rgba(20,10,60,.22),0 3px 8px rgba(20,10,60,.10);
+}
+@media (max-width:860px){.place{aspect-ratio:4/3}}
+.place img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.place figcaption{position:absolute;left:12px;right:12px;bottom:12px;display:flex}
+.cap-pill{border-radius:18px;max-width:100%}
+.cap-pill .cap{display:flex;flex-direction:column;gap:1px;padding:10px 16px 11px}
+.cap-pill strong{font-size:15.5px;letter-spacing:-.1px}
+.cap-pill small{font-size:12px;opacity:.86}
+.cap-pill a{color:inherit;text-underline-offset:2px}
+
 /* Browser-support notes: plain (non-glass) cards, like index.html's feed. */
 .notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 @media (max-width:760px){.notes{grid-template-columns:1fr}}
-.note{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px 22px}
+.note{background:var(--surface);border-radius:20px;padding:20px 22px;box-shadow:var(--soft-shadow)}
 .note h3{margin:0 0 6px;font-size:16.5px}
 .note p,.note li{margin:0;font-size:15px;color:var(--text-dim)}
 .note ul{margin:0;padding-left:18px;display:grid;gap:4px}
 
-.site-footer{border-top:1px solid var(--line);padding:28px 0 calc(40px + env(safe-area-inset-bottom,0px));color:var(--faint);font-size:14px}
+.site-footer{background:var(--edge);padding:32px 0 calc(40px + env(safe-area-inset-bottom,0px));color:rgba(255,255,255,.66);font-size:14px}
 .site-footer .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:center}
-.site-footer a{color:var(--text);font-weight:600}
+.site-footer a{color:#fff;font-weight:600}
 
 @media (prefers-color-scheme:dark){
-  :root{--text:#f5f5f7;--text-dim:#d1d1d6;--faint:#98989d;--page:#000;--surface:#1c1c1e;--line:rgba(255,255,255,.1)}
+  :root{--text:#f5f5f7;--text-dim:#d1d1d6;--faint:#98989d;--page:#000;--surface:#1c1c1e;--soft-shadow:0 8px 24px rgba(0,0,0,.4)}
 }
-/* Users who ask for less transparency get a near-solid tint. */
-@media (prefers-reduced-transparency:reduce){
-  .tint-ink{background:rgba(18,22,32,.9)}
-  .tint-blue{background:rgba(10,110,230,.95)}
-  .tint-clear{background:rgba(40,50,70,.9)}
-  .tint-red,.tint-green,.tint-white,.gcard:not(.lg-on){background:rgba(255,255,255,.92)}
-}
+@media (prefers-reduced-transparency:reduce){.gcard:not(.lg-on){background:rgba(255,255,255,.92)}}
 </style>
 </head>
 <body>
@@ -204,14 +215,14 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 <header class="site-nav">
   <!-- Wide-ish bar → frost-only material (data-lg-optics="frost"), per BROWSERS.md. -->
   <div class="lg-slot" data-lg="material" data-lg-optics="frost">
-    <div class="pill nav-pill tint-ink">
+    <div class="glass pill nav-pill tint-ink">
       <nav aria-label="Principal">
         <a href="index.html">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 4.8 8.2 12l7.2 7.2" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Início
         </a>
-        <a href="#topo">Vidro</a>
         <a href="#componentes">Componentes</a>
+        <a href="#lugares">Lugares</a>
         <a href="#suporte">Suporte</a>
       </nav>
     </div>
@@ -232,10 +243,10 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 
     <div class="hero-actions">
       <div class="lg-slot" data-lg="material">
-        <div class="pill tint-blue"><a class="btn" href="#componentes">Ver componentes</a></div>
+        <div class="glass pill tint-blue"><a class="btn" href="#componentes">Ver componentes</a></div>
       </div>
       <div class="lg-slot" data-lg="material">
-        <div class="pill tint-clear"><a class="btn" href="index.html">Voltar ao início</a></div>
+        <div class="glass pill tint-clear"><a class="btn" href="index.html">Voltar ao início</a></div>
       </div>
     </div>
     <p class="hero-hint"><span class="mouse">Mova o cursor sobre a imagem para guiar a lente.</span><span class="touch">Toque e arraste na imagem para guiar a lente.</span></p>
@@ -243,8 +254,8 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 
   <section class="section" id="componentes" aria-labelledby="comp-title">
     <div class="wrap">
-      <h2 id="comp-title">Cartões sobre uma foto</h2>
-      <p class="sub">Cada cartão é um <code>&lt;Glass refract&gt;</code>: ele refrata uma cópia alinhada do papel de parede, e o conteúdo fica nítido por cima. Os botões abaixo são o modo material.</p>
+      <h2 id="comp-title">Cartões sobre um gradiente</h2>
+      <p class="sub">Cada cartão é um <code>&lt;Glass refract&gt;</code>: ele refrata uma cópia alinhada do gradiente de fundo, e o conteúdo fica nítido por cima. Os botões abaixo são o modo material.</p>
 
       <div class="band" id="band">
         <div class="cards">
@@ -276,15 +287,48 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 
         <div class="band-actions">
           <div class="lg-slot" data-lg="material">
-            <div class="pill tint-red"><button class="btn" type="button">Salvar</button></div>
+            <div class="glass pill tint-red"><button class="btn" type="button">Salvar</button></div>
           </div>
           <div class="lg-slot" data-lg="material">
-            <div class="pill tint-green"><button class="btn" type="button">Compartilhar</button></div>
+            <div class="glass pill tint-green"><button class="btn" type="button">Compartilhar</button></div>
           </div>
           <div class="lg-slot" data-lg="material">
-            <div class="pill tint-white"><button class="btn" type="button">Cancelar</button></div>
+            <div class="glass pill tint-white"><button class="btn" type="button">Cancelar</button></div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="lugares" aria-labelledby="lug-title" style="padding-top:0">
+    <div class="wrap">
+      <h2 id="lug-title">Vidro sobre fotos</h2>
+      <p class="sub">Legendas de vidro no modo material sobre fotos de lugares famosos. No Chrome e no Edge a foto se curva atrás da legenda; no Safari e no Firefox ela fica fosca.</p>
+      <div class="places">
+        <figure class="place">
+          <img src="assets/img/santorini-oia.jpg" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" width="1600" height="1067" loading="lazy" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material">
+              <div class="glass cap-pill tint-ink"><span class="cap"><strong>Oia, Santorini</strong><small>Foto: <a href="https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg">Giles Laurent</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></small></span></div>
+            </div>
+          </figcaption>
+        </figure>
+        <figure class="place">
+          <img src="assets/img/cataratas-do-iguacu.jpg" alt="Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde" width="1600" height="1200" loading="lazy" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material">
+              <div class="glass cap-pill tint-ink"><span class="cap"><strong>Cataratas do Iguaçu</strong><small>Foto: <a href="https://commons.wikimedia.org/wiki/File:Iguazu_Falls_with_Rainbow.JPG">Tabetabe</a>, domínio público</small></span></div>
+            </div>
+          </figcaption>
+        </figure>
+        <figure class="place">
+          <img src="assets/img/lencois-maranhenses.jpg" alt="Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul" width="1600" height="1200" loading="lazy" decoding="async">
+          <figcaption>
+            <div class="lg-slot" data-lg="material">
+              <div class="glass cap-pill tint-ink"><span class="cap"><strong>Lençóis Maranhenses</strong><small>Foto: <a href="https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg">Gerda Arendt</a>, CC0</small></span></div>
+            </div>
+          </figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -321,50 +365,18 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 <footer class="site-footer">
   <div class="wrap">
     <a href="index.html">← Voltar para a página inicial</a>
-    <span>Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), incluído em <code>assets/liquid-glass/</code>.</span>
+    <span>Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), incluído em <code>assets/liquid-glass/</code>. Fotos: Wikimedia Commons, créditos e licenças em <a href="assets/img/CREDITS.md">CREDITS.md</a>.</span>
   </div>
 </footer>
 
 <script type="module">
-import {
-  React,
-  createRoot,
-  flushSync,
-  Glass,
-  glassValue,
-} from "./assets/liquid-glass/liquid-glass.bundle.js";
+import { React, createRoot, flushSync, Glass, glassValue } from "./assets/liquid-glass/liquid-glass.bundle.js";
+import { h, Adopt, SOFT_SHEEN, enhanceMaterials, markReady } from "./assets/glass-ui.js";
 
-const h = React.createElement;
 const { useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
-// Move existing static nodes into a React-owned box (so the HTML stays the
-// single source of content, and the no-JS fallback is the same markup).
-function Adopt({ nodes }) {
-  const ref = useRef(null);
-  useLayoutEffect(() => {
-    ref.current.append(...nodes);
-  }, []);
-  return h("div", { ref, style: { display: "contents" } });
-}
-
-// ── 1. Material pills (nav + buttons) ──────────────────────────────────────
-// A bare wrap with a translucent tint = glass material. The nav pill is wide,
-// so it gets a frost-only treatment (no displacement), per BROWSERS.md.
-const FROST_ONLY = { strength: 0, dispersion: 0 };
-
-function enhanceMaterials() {
-  for (const slot of document.querySelectorAll('[data-lg="material"]')) {
-    const pill = slot.firstElementChild;
-    if (!pill) continue;
-    const nodes = [...pill.childNodes];
-    const optics = slot.dataset.lgOptics === "frost" ? FROST_ONLY : undefined;
-    const root = createRoot(slot);
-    flushSync(() =>
-      root.render(h(Glass, { className: pill.className, optics }, h(Adopt, { nodes }))),
-    );
-  }
-}
+// ── 1. Material pills (nav + buttons): shared enhancer, assets/glass-ui.js ──
 
 // ── 2. Hero: in-place lens (bends its own children in every browser) ───────
 // Optics = the library's own landing-page hero look.
@@ -374,6 +386,7 @@ const HERO_OPTICS = {
   bend: 0, bendWidth: 0.16, splay: 0, frost: 0.5, brightness: 0.06,
   specular: 1.3, sheenAngle: 35, sheenDark: false, sheen: 1, sheenWidth: 4,
   sheenFalloff: 1.6, glow: 0.22, glowSpread: 1, glowFalloff: 0.6,
+  ...SOFT_SHEEN, // wider, softer rim light instead of a thin bright line
 };
 
 function HeroLens({ stage, area, nodes }) {
@@ -468,9 +481,11 @@ const PANEL_OPTICS = {
   depth: 1, curvature: 0.5, dispersion: 0.6, strength: 0.17,
   bend: 0.7, bendWidth: 0.12, frost: 3, brightness: 0.22, specular: 1.3,
   sheenAngle: 50, glow: 0.32, glowSpread: 1, glowFalloff: 1, sheen: 1.3, sheenWidth: 3,
+  ...SOFT_SHEEN,
 };
-const BAND_BG = "url(assets/img/wallpaper-purple.jpg) center / cover no-repeat";
-const BAND_EDGE = "#c4b0f7"; // hand-picked `behind` for a photo backdrop
+// The copy paints the SAME gradient as .band, at the band's size, so it lines up.
+const BAND_BG = "var(--mesh-light)";
+const BAND_EDGE = getComputedStyle(document.documentElement).getPropertyValue("--mesh-light-edge").trim() || "#e2c6f2";
 
 function CardLens({ card, band }) {
   const [g, setG] = useState(null);
@@ -523,7 +538,7 @@ function enhanceCards() {
 for (const step of [enhanceMaterials, enhanceHero, enhanceCards]) {
   try { step(); } catch (err) { console.error("[liquid-glass sample]", err); }
 }
-document.documentElement.classList.add("lg-ready");
+markReady();
 </script>
 </body>
 </html>
