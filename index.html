@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#0b1a2e">
+<meta name="theme-color" content="#130f33">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,11 +14,11 @@
 <link rel="modulepreload" href="assets/glass-ui.js">
 <link rel="stylesheet" href="assets/glass.css">
 <style>
-/* Same liquid-glass language as liquid-glass-sample.html: a photographic
+/* Same liquid-glass language as liquid-glass-sample.html: a gradient
    backdrop edge to edge, frosted glass cards, glass controls, no hairlines. */
 :root{
   color-scheme:light dark;
-  --edge:#0b1a2e; /* safe areas, overscroll + Safari 26 bar tint (body bg) */
+  /* --edge + the --mesh-* gradients come from assets/glass.css */
   --inset-t:env(safe-area-inset-top, 0px);
   --inset-b:env(safe-area-inset-bottom, 0px);
   --inset-l:env(safe-area-inset-left, 0px);
@@ -41,16 +41,14 @@ html,body{
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
 }
 
-/* Photographic backdrop, edge to edge (behind the status bar and the home
+/* Gradient backdrop, edge to edge (behind the status bar and the home
    indicator). background-image only, so Safari 26 samples body for its bars. */
 .backdrop{
   position:fixed;
   inset:0;
   z-index:0;
   pointer-events:none;
-  background-image:url(assets/img/wallpaper-blue.jpg);
-  background-size:cover;
-  background-position:center;
+  background-image:var(--mesh-dark);
 }
 
 .feed{
@@ -128,9 +126,12 @@ html,body{
   font-weight:600;
   text-decoration:none;
 }
+.card-figure{margin:4px 0 0;display:flex;flex-direction:column;gap:6px}
+.card-credit{font-size:11.5px;color:var(--subtitle)}
+.card-credit a{color:inherit}
 .card-image-placeholder{
   width:100%;
-  height:140px;
+  height:160px;
   border-radius:14px;
   background:linear-gradient(135deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.2) 100%);
   object-fit:cover;
@@ -154,7 +155,7 @@ html,body{
   height:calc(120px + var(--inset-t));
   -webkit-mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
   mask-image:linear-gradient(to bottom, #000 0%, transparent 100%);
-  background-image:linear-gradient(to bottom, rgba(11,26,46,.78) 0%, rgba(11,26,46,.42) 48%, rgba(11,26,46,0) 100%);
+  background-image:linear-gradient(to bottom, rgba(19,15,51,.78) 0%, rgba(19,15,51,.42) 48%, rgba(19,15,51,0) 100%);
 }
 .blur-edge-bottom{
   bottom:0;
@@ -162,7 +163,7 @@ html,body{
   transform:translateY(calc(-1 * var(--keyboard-offset, 0px)));
   -webkit-mask-image:linear-gradient(to top, #000 0%, transparent 100%);
   mask-image:linear-gradient(to top, #000 0%, transparent 100%);
-  background-image:linear-gradient(to top, rgba(11,26,46,.78) 0%, rgba(11,26,46,.42) 48%, rgba(11,26,46,0) 100%);
+  background-image:linear-gradient(to top, rgba(19,15,51,.78) 0%, rgba(19,15,51,.42) 48%, rgba(19,15,51,0) 100%);
 }
 
 /* Glass controls (content-sized material lenses). */
@@ -293,7 +294,10 @@ button:active{transform:scale(.975)}
             </div>
           </div>
           <p class="card-body">Role para baixo: os cartões passam por baixo dos controles desfocados e das faixas de blur nas bordas.</p>
-          <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-1/1200/700" alt="">
+          <figure class="card-figure">
+            <img class="card-image-placeholder" src="assets/img/hong-kong-victoria-harbour.jpg" alt="Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer" width="1600" height="1063" decoding="async">
+            <figcaption class="card-credit">Porto de Victoria, Hong Kong · Foto: <a href="https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg">Wilfredor</a>, CC0</figcaption>
+          </figure>
         </article>
       </div>
     </div>
@@ -324,7 +328,10 @@ button:active{transform:scale(.975)}
             </div>
           </div>
           <p class="card-body">Durante a rolagem, textos e formas que passam sob os controles e as faixas desfocadas ficam suavizados.</p>
-          <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-2/1200/700" alt="">
+          <figure class="card-figure">
+            <img class="card-image-placeholder" src="assets/img/rio-pao-de-acucar.jpg" alt="Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul" width="1600" height="990" loading="lazy" decoding="async">
+            <figcaption class="card-credit">Pão de Açúcar, Rio de Janeiro · Foto: <a href="https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg">Wilfredor</a>, CC0</figcaption>
+          </figure>
         </article>
       </div>
     </div>
@@ -355,7 +362,10 @@ button:active{transform:scale(.975)}
             </div>
           </div>
           <p class="card-body">Os controles permanecem fixos enquanto os cartões rolam; o feed usa a largura disponível e limita a coluna a 600px em telas maiores.</p>
-          <img class="card-image-placeholder" src="https://picsum.photos/seed/interface-ui-3/1200/700" alt="">
+          <figure class="card-figure">
+            <img class="card-image-placeholder" src="assets/img/aurora-boreal-alasca.jpg" alt="Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca" width="1600" height="1043" loading="lazy" decoding="async">
+            <figcaption class="card-credit">Aurora boreal, Alasca · Foto: <a href="https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg">Senior Airman Joshua Strang (USAF)</a>, domínio público</figcaption>
+          </figure>
         </article>
       </div>
     </div>
