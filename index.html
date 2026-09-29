@@ -88,6 +88,16 @@ html,body{
   color:#3a3a3c;  
   margin:0;  
 }  
+.card-link{
+  color:#0a84ff;
+  font-weight:600;
+  text-decoration:none;
+}
+.card-link:focus-visible{
+  outline:2px solid rgba(10,132,255,.5);
+  outline-offset:2px;
+  border-radius:4px;
+}
 .card-image-placeholder{  
   width:100%;  
   height:140px;  
@@ -314,6 +324,17 @@ button:focus-visible{
 </head>  
 <body>  
   <div class="feed">  
+    <article class="card">
+      <div class="card-header">
+        <div class="avatar alt2"></div>
+        <div>
+          <h3 class="card-title">Amostra Liquid Glass</h3>
+          <p class="card-subtitle">Nova página</p>
+        </div>
+      </div>
+      <p class="card-body">Vidro líquido que refrata o conteúdo ao vivo, com fallback em blur. <a class="card-link" href="liquid-glass-sample.html">Abrir a amostra →</a></p>
+    </article>
+
     <article class="card">  
       <div class="card-header">  
         <div class="avatar"></div>  
