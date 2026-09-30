@@ -159,7 +159,7 @@ html{scroll-behavior:smooth;scroll-padding-bottom:calc(96px + env(safe-area-inse
   border-radius:26px;text-decoration:none;color:var(--bar-sub);font-size:11px;font-weight:600;-webkit-tap-highlight-color:transparent}
 .tabbar a svg{width:24px;height:24px}
 .tabbar a[aria-current]{color:var(--link)}
-.tabbar a:focus-visible{outline:2px solid #4c9aff;outline-offset:-2px}
+.tabbar a:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
 /* P6 stand-ins (same size as the switch 74×28 and the slider row 22) until the lenses mount. */
 .cc-standin{display:inline-block;flex:none;width:74px;height:28px;padding:0;border:0;border-radius:14px;background:var(--cc-track,#d9d4e8);position:relative}
 .cc-standin::after{content:"";position:absolute;top:3px;left:3px;width:44px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}

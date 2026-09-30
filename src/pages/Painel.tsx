@@ -5,7 +5,7 @@ import { Frost } from "../components/Frost";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL } from "../components/Surfaces";
 import { GlassSwitch } from "../components/examples/GlassSwitch";
 import { GlassSlider } from "../components/examples/GlassSlider";
-import { FROST } from "../lib/optics";
+import { FROST, NO_SHINE } from "../lib/optics";
 import { pageNav } from "../lib/pages";
 import { useThemeName } from "../lib/theme";
 import { useReducedMotion } from "../lib/useMedia";
@@ -84,7 +84,7 @@ const SEG_LENS: Partial<GlassOptics> = {
   // (~3 px of displacement on a 32 px lens) magnifies the label without folding it.
   strength: 0.022, depth: 0.5, curvature: 0.55, dispersion: 0.35,
   bend: 0.15, bendWidth: 0.12, splay: 0, frost: 0, brightness: 0.05,
-  specular: 0, glow: 0.2, glowSpread: 1, glowFalloff: 0.8, // uniform hairline = .seg-ring
+  ...NO_SHINE, // uniform hairline = .seg-ring
 };
 /** The segmented row's scene, inside the lens once it has mounted (P6). */
 const SegLens: React.FC<{
@@ -192,10 +192,9 @@ const WIDGET_LENS: Partial<GlassOptics> = {
   mapSize: 256, clipToShape: true, softEdge: true,
   depth: 1, curvature: 0.5, dispersion: 0.6, strength: 0.17,
   bend: 0.7, bendWidth: 0.12, frost: 4, brightness: 0.2,
-  specular: 0, // examples/GlassNotification.tsx: 1.3; the uniform CSS hairline instead
-  sheenAngle: 50, glow: 0.32, glowSpread: 1, glowFalloff: 1, sheen: 1.3, sheenWidth: 3,
+  ...NO_SHINE, // examples/GlassNotification.tsx: specular 1.3; the uniform CSS hairline instead
 };
-const WIDGET_LENS_DARK: Partial<GlassOptics> = { ...WIDGET_LENS, brightness: -0.12, glow: 0.2 };
+const WIDGET_LENS_DARK: Partial<GlassOptics> = { ...WIDGET_LENS, brightness: -0.12 };
 
 type Geo = { w: number; h: number; left: number; top: number; bw: number; bh: number; r: number };
 const RefractCard: React.FC<{
@@ -404,7 +403,7 @@ const ControlCenter: React.FC<{
     surface: dark ? "#221e4c" : "#f3eefb",
     trackColor: dark ? "#3a3569" : "#d9d4e8",
     filterResolution: fr,
-    lens: { specular: 0 },
+    lens: NO_SHINE,
   };
   return (
     <GlassPanel className="cc">

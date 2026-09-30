@@ -41,7 +41,9 @@
   --text-dim:#3a3a3c;
   --faint:#5d5b6e;
   --link:#0a6cff;
-  --focus:#0a84ff;
+  /* Keyboard focus: never blue (docs/DESIGN-CONTRATO.md N10). A neutral,
+     translucent ring in the text colour, like the selected pill's edge. */
+  --focus:rgba(28,28,30,.5);
   --gutter-l:max(20px, env(safe-area-inset-left, 0px));
   --gutter-r:max(20px, env(safe-area-inset-right, 0px));
   --glass-float:0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08);
@@ -65,6 +67,7 @@
   --text-dim:#d1d1d6;
   --faint:#b3b0c8;
   --link:#64d2ff;
+  --focus:rgba(245,245,247,.62);
   --rim:rgba(255,255,255,.14);
 }
 *{box-sizing:border-box}
@@ -122,6 +125,8 @@ a{color:inherit}
 picture{display:contents}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:10px}
+/* Over a photo (galeria viewer): white, the neutral that reads there. */
+:root{--focus-on-photo:rgba(255,255,255,.85)}
 code{font-family:ui-monospace,monospace;font-size:.9em} /* SF Mono in Safari; the default mono elsewhere (P7) */
 .skip{
   position:absolute;left:12px;top:-60px;z-index:100;

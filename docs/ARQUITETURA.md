@@ -1,6 +1,11 @@
 # Arquitetura
 
-> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11). As versões vêm de `package.json` e `pnpm-lock.yaml`.
+> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11), atualizado até o PR #15 (`lentes-e-foco`, a partir de `4748463`, merge do PR #14). As versões vêm de `package.json` e `pnpm-lock.yaml`.
+
+**Prioridade do projeto (decisão do usuário, PR #15): a translucidez e o vídeo são o foco.**
+
+- **A-P0. Uma mudança que disputa com a translucidez do vidro ou com a refração sobre imagem em movimento DEVE perder.** O vídeo hoje é a apresentação da Galeria (`<Glass draw lenses>`, WebGL 2). Um recurso de vídeo de verdade (`<Glass src>` com um arquivo de vídeo, o modo que a biblioteca oferece para o que o Safari não filtra em SVG) fica para um PR próprio; o PR #15 só registra a prioridade.
+  *Por quê:* é o que o projeto quer mostrar. As regras de desempenho (P1–P7) existem para que o vidro possa ser translúcido e vivo sem travar, não para trocá-lo por superfícies opacas.
 
 ## 1. Stack
 
@@ -72,7 +77,7 @@ HTML/
     │   ├── pages.ts              # PAGES (o portal, a lista ☰) e pageNav(): as seções do menu
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
-    │   ├── optics.ts             # óticas CONTROL, FROST e PANEL (todas com specular: 0)
+    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL
     │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
     ├── pages/
@@ -272,7 +277,7 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 
 ### 4.5 A lente do título (`Hero`)
 
-- **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `HERO_LENS` (baseada na do docs, com `specular: 0`).
+- **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `HERO_LENS` (baseada na do docs, com `NO_SHINE`: `specular`, `sheen` e `glow` 0).
 - **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `76px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
 - **Tamanho da lente:** `round(clamp(130, 0.42 × largura do palco, 200))` px, com `radius = size / 2`.
 - **Posição:** o centro é um par de `glassValue` (`x`, `y`) em frações do palco.
@@ -293,25 +298,28 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 - Um `<Glass refract={cópia} behind={--band-edge}>` com `width`, `height` e `radius` medidos (ResizeObserver no cartão e na faixa).
 - A cópia é um `div` com `background: var(--band-bg)`, deslocado por `-left` e `-top` para ficar alinhado com a faixa real.
-- A ótica é `PANEL_LENS` (`mapSize: 256`, `strength: 0.17`, `specular: 0`…) com `brightnessInFilter`.
+- A ótica é `PANEL_LENS` (`mapSize: 256`, `strength: 0.17`, `NO_SHINE`…) com `brightnessInFilter`.
 - O conteúdo nítido fica por cima, em `.gcard-body`.
 
 ### 4.7 Painel (`pages/Painel.tsx`)
 
 - **Palco `#tela`:** um papel de parede (`Picture`) que muda com a hora do dia (manhã: Lençóis; tarde: Rio; noite: aurora), com brilho ajustável.
-- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`SEG_LENS`, `specular: 0`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
-- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `WIDGET_LENS` (receita do `examples/GlassNotification.tsx`, `specular: 0`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
-- **Central de controles `#controles`:** duas `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={{ specular: 0 }}` e `filterResolution` do aparelho.
+- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`SEG_LENS`, `NO_SHINE`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
+- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `WIDGET_LENS` (receita do `examples/GlassNotification.tsx`, `NO_SHINE`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
+- **Central de controles `#controles`:** duas `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={NO_SHINE}` e `filterResolution` do aparelho.
 - **Avisos e widgets:** tudo fosco em CSS (`GlassPanel`): notificações com "Limpar avisos", calendário, baterias, tarefas e previsão de 5 dias.
 - **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com indicador deslizante e `useSectionSpy`. Ela repete as seções; a pílula do topo continua igual à das outras páginas.
 - **Montagem adiada (P6):** a lente do segmentado e os widgets montam um por vez depois da primeira pintura (`useDeferredMount`); as chaves e o controle deslizante montam quando a central chega perto da tela (`useNear`), sobre chaves planas do mesmo tamanho, que já funcionam (`role="switch"`).
 
 ### 4.8 Galeria (`pages/Galeria.tsx`)
 
-- **Visor `#visor`:** uma apresentação de 9 fotos. O pôster é um `Picture`. Quando o visor está na tela, a aba visível, a apresentação tocando, a primeira foto decodificada **e o WebGL roda na GPU**, monta um `<Glass draw lenses maxDpr={1}>` (modo `draw` + `lenses` do README do fork): o `draw` pinta a foto com zoom lento e transição, e o WebGL desenha quatro lentes (voltar, tocar/pausar, avançar e a barra de progresso), com óticas do `GlassVideoControls` do fork e `specular: 0`. O canvas usa a mesma variante (largura e formato) que o pôster escolheu.
-- **Sem lentes:** pausado, fora da tela, com movimento reduzido ou com WebGL em software (`softwareGL()`), os controles são discos e barra `<Frost>`; sem GPU, a apresentação começa pausada e, ao tocar, troca as fotos com um temporizador simples.
+- **Visor `#visor`:** uma apresentação de 9 fotos. O pôster é um `Picture`. Quando o visor está na tela, a aba visível, a apresentação tocando, a primeira foto decodificada **e o WebGL roda na GPU**, monta um `<Glass draw lenses maxDpr={1}>` (modo `draw` + `lenses` do README do fork): o `draw` pinta a foto com zoom lento e transição, e o WebGL desenha quatro lentes (voltar, tocar/pausar, avançar e a barra de progresso), com óticas do `GlassVideoControls` do fork e `NO_SHINE`. O canvas usa a mesma variante (largura e formato) que o pôster escolheu.
+- **Sem lentes:** pausado, fora da tela, com movimento reduzido, sem WebGL 2 ou com WebGL em software (`softwareGL()`), os controles são discos e barra `<Frost>`; sem GPU, a apresentação começa pausada e, ao tocar, troca as fotos com um temporizador simples.
+- **WebGL 2 (PR #15):** o renderizador da biblioteca só funciona com WebGL 2 (`src/glassWebGL.ts` lança "webgl2 unavailable", e o `<Glass draw>` mostra então um texto cinza em inglês, "WebGL unavailable"). Por isso `hasWebGL()` testa só `getContext("webgl2")`, e `softwareGL()` (`lib/device.ts`) lê o renderizador de um contexto WebGL 2. Um aparelho só com WebGL 1 recebe o fosco do site.
 - **Coleção `#colecao`:** barra de chips fixa (`<Frost>`, `aria-pressed`) com Todas/Brasil/Mundo/À noite e uma grade de fotos com `GlassCaption`.
 - **Folha:** um `<dialog>` modal com a foto e uma **lupa** `<Glass refract>` sobre uma cópia ampliada 1,8× (`LOUPE_LENS`), movida por ponteiro ou setas. A folha tem tinta mais densa, porque o WebKit não desfoca atrás de um `<dialog>` na top layer.
+- **A lupa sem render (PR #15):** a posição fica num ref (fração da foto). O ponteiro e as setas só gravam a posição e pedem um quadro (`requestAnimationFrame`, um por quadro, por mais eventos que cheguem); o quadro escreve o `transform` do invólucro `.loupe` e o `left`/`top` da cópia, direto no DOM. Nada disso passa pelo estado do React (0 commits num arrasto de 120 movimentos; antes, 121). O `transform` fica no invólucro, nunca no elemento filtrado. A cópia fica dentro de um recorte do tamanho da lupa mais o alcance da lente (`COPY_REACH`, 40px), então cada quadro rasteriza uma fonte pequena, não a foto inteira ampliada.
+  - **Por que não o `<Glass pixelUnits center>` do fork** (a lente do tamanho do palco, movida só pelo `center`): no WebKit, a região `userSpaceOnUse` desse modo, fixada em 0,0 pela biblioteca, é resolvida a partir do ancestral com `transform` mais próximo (ou da página), não do elemento. Com o palco a mais de ~150px do topo da página, como na folha, a lente fica vazia ou deslocada. Medido no PR #15 com um banco de teste isolado (a mesma lente funciona a 20–100px do topo e some a partir de 200px; no Chromium funciona em qualquer posição).
 
 ### 4.9 Páginas de contrato (`pages/Docs.tsx`)
 
@@ -356,14 +364,14 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
-| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `specular: 0` (`frost` 6, `saturate` 1.15) | Amostra |
+| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE` (`frost` 6, `saturate` 1.15) | Amostra |
 | Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
 | Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
 | Cartões do portal, documentos, avisos, widgets, notas e rodapés | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
 | Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
 | Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
 | Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |
-| Chaves (2) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: { specular: 0 }` | Painel |
+| Chaves (2) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: NO_SHINE` | Painel |
 | Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `PLAYER_OPTICS`, `SCRUB_OPTICS` | Galeria |
 | Controles do visor sem lentes | `.vw-disc`, `.vw-bar` | `<Frost>` + `.tint-ink` | `FROST` | Galeria |
 | Lupa da folha | `SheetBody` | `<Glass refract>` | `LOUPE_LENS` | Galeria |
@@ -406,13 +414,13 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 ## 7. Óticas (`src/lib/optics.ts`)
 
 ```ts
-const FLAT_RIM = { specular: 0 };
-export const CONTROL = { ...FLAT_RIM };                                                   // material padrão, sem aro
-export const FROST   = { ...FLAT_RIM, strength: 0, dispersion: 0, frost: 6,  saturate: 1.15 };
-export const PANEL   = { ...FLAT_RIM, strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };
+export const NO_SHINE = { specular: 0, sheen: 0, glow: 0 };
+export const CONTROL = { ...NO_SHINE };                                                   // material padrão, sem aro nem brilho
+export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 6,  saturate: 1.15 };
+export const PANEL   = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };
 ```
 
-- **A14. Toda ótica DEVE ter `specular: 0`.** A hairline DEVE vir do CSS (`.glass::after`).
-  *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também controla o brilho direcional e o glow interno. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3.
+- **A14. Toda ótica DEVE espalhar `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`).** A hairline DEVE vir do CSS (`.glass::after`).
+  *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também é o ganho do brilho direcional e do glow interno, mas a biblioteca só tira as duas primitivas deles do filtro quando `sheen` e `glow` também são 0 (`hasSpecular = glow > 0 || sheen > 0`). No WebGL, o brilho usa `u_sheen = specular`, que já é 0. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3 e D7.
 
 `frostFilter(optics)` em `Frost.tsx` converte a ótica em CSS: `blur(${frost ?? 6}px) saturate(${saturate ?? 1.15})`. Um termo é omitido quando o blur é 0 ou a saturação é 1.

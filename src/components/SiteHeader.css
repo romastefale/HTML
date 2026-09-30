@@ -108,9 +108,10 @@
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   cursor:pointer;transition:transform .12s ease;-webkit-tap-highlight-color:transparent;
 }
-/* The site's keyboard focus ring (site/index.html), drawn so the nav's clip keeps it. */
-.site-header a:focus-visible,.sh-pill:focus-visible{outline:2px solid #4c9aff;outline-offset:-2px;border-radius:17px}
-.sh-pill:focus-visible{border-radius:999px;outline-offset:2px}
+/* Keyboard focus: the same neutral ring as the page list below (never blue,
+   N10), inset so the nav's clip keeps it. */
+.site-header a:focus-visible,.sh-pill:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub);border-radius:17px}
+.sh-pill:focus-visible{border-radius:999px}
 /* Search mode: the pill becomes the search bar (PageSearch.css). The
    links and theme button fade out but keep their room, so nothing moves or
    resizes; the magnifier stays in place, shown active, and closes it. */
