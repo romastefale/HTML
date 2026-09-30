@@ -629,7 +629,7 @@ export const Painel: React.FC = () => {
         <section id="avisos" className="pn-section" aria-labelledby="nt-title">
           <h2 id="nt-title">Avisos</h2>
           <p className="sub">
-            Notificações sobre o gradiente da página: como atrás delas não há nada para curvar, são vidro fosco em CSS,
+            Notificações sobre o fundo da página: como atrás delas não há nada para curvar, são vidro fosco em CSS,
             com a mesma linha fina de todo vidro. As da tela, acima, refratam a foto.
           </p>
           <Notifications />

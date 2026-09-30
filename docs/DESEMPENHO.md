@@ -183,6 +183,23 @@ Mesmo método da seção 3.1 (Lighthouse 12 mobile, 3 execuções, mediana, `dis
 
 Os ~90 e ~110 cartões com `backdrop-filter` dos contratos não aumentaram o TBT: as partes abaixo da dobra continuam montadas depois (regra P6). No Início, o TBT mediano subiu 70 ms (execuções de 130 a 160 ms). A causa não foi isolada: as outras páginas têm a mesma barra (☰, lista de páginas e faixa de rolagem) e não subiram. Todas as páginas continuam dentro do orçamento.
 
+### 3.3 Medições do PR #14
+
+Mesmo método, com o fundo orgânico e as camadas de borda:
+
+| Página | Nota | TBT | FCP | LCP | TTI | CLS | Peso | JS (transferido) |
+|---|---|---|---|---|---|---|---|---|
+| Início | 98 (era 97) | 130 ms (era 150) | 1,5 s | 2,0 s | 2,1 s | 0 | 187 KiB | 76 KiB |
+| Amostra | 93 | 230 ms | 1,7 s | 2,4 s | 2,7 s | 0 | 277 KiB | 95 KiB |
+| Painel | 98 (era 97) | 120 ms (era 140) | 1,7 s | 2,0 s | 2,0 s | 0 | 152 KiB | 103 KiB |
+| Galeria | 96 | 70 ms | 1,7 s | 2,6 s | 2,6 s | 0 | 313 KiB | 99 KiB |
+| Contrato de design | 98 | 90 ms (era 100) | 1,7 s | 2,0 s | 2,0 s | 0 | 158 KiB | 102 KiB |
+| Arquitetura e operação | 97 (era 98) | 90 ms (era 100) | 1,8 s (era 1,7) | 2,1 s (era 2,0) | 2,1 s | 0 | 153 KiB | 113 KiB |
+
+- **Peso:** os dois SVG do fundo (~2,7 kB cada) entram no CSS como data URL, sem requisição a mais. Cada página ganhou 2 a 3 KiB transferidos.
+- **Custo:** o fundo é rasterizado uma vez, numa camada fixa de `100lvh`, e as camadas de borda são degradês. Nenhum deles tem animação ou JS, e o CLS continua 0.
+- Na arquitetura, FCP e LCP subiram 0,1 s. Todas as páginas continuam dentro do orçamento.
+
 ## 4. Limites conhecidos (custo do próprio design)
 
 - **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 19 primitivas SVG sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.

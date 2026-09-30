@@ -52,12 +52,15 @@ HTML/
 │       ├── *.jpg                 # 12 originais (1600 px de largura, fallback)
 │       └── r/                    # 96 variantes: {nome}-{480,720,1080,1440}.{avif,webp}
 ├── scripts/
+│   ├── make-organic-bg.py        # gera src/assets/fundo-{claro,escuro}.svg (semente fixa; rodar só para mudar o desenho)
 │   ├── make-responsive-images.py # gera public/img/r/ a partir dos JPEG
 │   └── vite-docs.ts              # plugin: docs/*.md?doc → HTML no build (marked)
 └── src/
     ├── home.tsx · sample.tsx · painel.tsx · galeria.tsx
     ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
     ├── docs.d.ts                 # tipo do import *.md?doc
+    ├── assets/
+    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada, vira data URL no CSS)
     ├── components/
     │   ├── SiteHeader.tsx/.css   # menu flutuante (seções, ponto, páginas, tema, lupa)
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
@@ -80,7 +83,7 @@ HTML/
     │   ├── Docs.tsx/.css         # DocsPage: renderiza os documentos compilados
     │   └── ContratoDesign.tsx · ContratoArquitetura.tsx  # quais documentos e fotos cada página mostra
     └── styles/
-        └── global.css            # fundo, hairline, tintas, foco, variáveis
+        └── global.css            # fundo orgânico, camadas de borda, hairline, tintas, foco, variáveis
 ```
 
 ## 3. Entradas do Vite e `base`
@@ -221,7 +224,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Frost>` com `PANEL`, pos
 
 | Página | Seções na pílula |
 |---|---|
-| Início | Início (`#topo`), Páginas, Menu, Busca, Gradiente, Cartões, Céu noturno, Créditos |
+| Início | Início (`#topo`), Páginas, Menu, Busca, Fundo, Cartões, Céu noturno, Créditos |
 | Amostra | Lente (`#topo`), Componentes, Lugares, Suporte, Créditos |
 | Painel | Tela, Controles, Avisos, Widgets, Créditos |
 | Galeria | Visor, Coleção, Como funciona, Créditos |
