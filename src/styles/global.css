@@ -102,22 +102,32 @@ html::before{
   background:var(--page-bg) center/100% 100% no-repeat;
 }
 /* Edge fades over the scrolling content (see the header note). Solid through
-   the safe area, then an eased ramp to transparent. */
+   the safe area, then an eased ramp to transparent.
+   --fade-under: how far each fade reaches PAST its viewport edge (off-screen when the fixed
+   layer already meets the glass). Safari 26 on iPhone lets the page scroll
+   under its translucent bottom toolbar, but position:fixed bottom:0 can end at
+   the small viewport, above that toolbar: content below the fade showed crisp
+   under the URL pill (PR #17). So the solid end colour runs on past the edge by
+   at least the toolbar's height (100lvh - 100svh) and never less than 120px. */
+:root{--fade-under:120px}
+@supports (height:100lvh){:root{--fade-under:max(120px, 100lvh - 100svh)}}
 body::before,body::after{
   content:"";position:fixed;z-index:50;left:0;right:0;pointer-events:none;
 }
 body::before{
-  top:0;height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
-  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) env(safe-area-inset-top, 0px),
-    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
-    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
+  top:calc(-1 * var(--fade-under));
+  height:calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top));
+  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) calc(var(--fade-under) + env(safe-area-inset-top, 0px)),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
     var(--page-edge-0) 100%);
 }
 body::after{
-  bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom));
-  background:linear-gradient(0deg, var(--page-edge) 0, var(--page-edge) env(safe-area-inset-bottom, 0px),
-    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .3),
-    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .65),
+  bottom:calc(-1 * var(--fade-under));
+  height:calc(var(--fade-under) + env(safe-area-inset-bottom, 0px) + var(--fade-bottom));
+  background:linear-gradient(0deg, var(--page-edge) 0, var(--page-edge) calc(var(--fade-under) + env(safe-area-inset-bottom, 0px)),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(var(--fade-under) + env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(var(--fade-under) + env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .65),
     var(--page-edge-0) 100%);
 }
 a{color:inherit}
