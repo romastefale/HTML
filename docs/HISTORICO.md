@@ -1,0 +1,35 @@
+# Histórico de decisões (PRs #1 a #9)
+
+Todos os PRs foram mergeados em **29/09/2026**. Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
+
+```mermaid
+timeline
+  title romastefale/HTML, 29/09/2026 (BRT)
+  15h34 : #1 Amostra estática com bundle vendorizado
+  16h01 : #2 Sem hairlines, tela cheia, gradientes e fotos
+  16h42 : #3 Menu que recolhe, pesquisa e gradiente suave
+  18h29 : #4 App React + Vite + TS com a biblioteca do npm
+  19h02 : #5 Hairline de volta e lente corrigida
+  19h56 : #6 Hairline uniforme
+  20h29 : #7 Barra de largura total com rolagem lateral e tema
+  21h13 : #8 Pílula flutuante, seleção e pesquisa na lupa
+  21h57 : #9 Pesquisa sem contorno e página mais leve
+```
+
+| PR | Merge (BRT) | Branch | Decisão | Motivo | O que ficou valendo |
+|---|---|---|---|---|---|
+| [#1](https://github.com/romastefale/HTML/pull/1) | 15:34 | `liquid-glass-sample` | Página de amostra estática, com o fork compilado e empacotado com React em `assets/liquid-glass/liquid-glass.bundle.js`. Wallpapers do fork | Mostrar o efeito sem etapa de build | Nada da técnica (removida no #4). Ficaram a ideia da amostra, o link a partir do Início e a lente que segue o cursor |
+| [#2](https://github.com/romastefale/HTML/pull/2) | 16:01 | `liquid-glass-sample` | Tirou todas as hairlines. Mesmo estilo no `index.html`. Tela de ponta a ponta (`viewport-fit=cover`, safe areas, `svh`/`dvh`, `theme-color`, `black-translucent`). Gradientes no lugar dos wallpapers. Fotos livres do Wikimedia | Pedido de design. O Safari 26 ignora `theme-color` e tinge as barras pela cor de fundo | Tela cheia e safe areas; fotos com créditos; pinça permitida; sem `interactive-widget` (erro no WebKit). A remoção total das linhas foi revertida no #5 |
+| [#3](https://github.com/romastefale/HTML/pull/3) | 16:42 | `liquid-glass-nav-busca` | Menu compartilhado que recolhe em "…" com popover. Pesquisa na barra de baixo (Highlight API). Gradiente suave sem discos. `--page-edge` nas duas pontas do gradiente e em `html`/`body`. `theme-color` por esquema. Nada fixo encosta nas bordas | Os discos viravam manchas sob o vidro. As barras do navegador devem parecer a página | O fundo em gradiente suave, `--page-edge` (`#8b82e6` / `#1b1646`) e a regra das bordas. O "…" e a barra de baixo foram removidos depois |
+| [#4](https://github.com/romastefale/HTML/pull/4) | 18:29 | `liquid-glass-react` | Tudo refeito como app React 19 + Vite + TS, com `@samasante/liquid-glass@0.1.1` do npm (byte a byte igual ao fork em `4e7b769`). Três modos do `<Glass>`. Deploy por Actions. Pesquisa sem `<mark>` | Seguir a orientação da biblioteca (mesma stack do `site/` do fork). Uma dependência GitHub viria vazia. O React é dono dos nós de texto | **A arquitetura atual.** O aviso de trocar a fonte do Pages antes do merge |
+| [#5](https://github.com/romastefale/HTML/pull/5) | 19:02 | `liquid-glass-hairline` | Voltou o aro padrão da biblioteca (`specular` 1). Corrigiu a lente: sem `text-shadow`, palco do tamanho do título, centro preso, reaponta ao rolar, toque posiciona, `filterResolution={2}` em telas 1× | Sem nenhuma linha, o vidro perdia a forma. Bugs visuais da lente | O palco da lente, os comportamentos de toque e rolagem, e nada de `text-shadow` no texto refratado |
+| [#6](https://github.com/romastefale/HTML/pull/6) | 19:56 | `liquid-glass-hairline-uniforme` | `specular: 0` em tudo, e uma hairline uniforme em `.glass::after` (`--rim` `.18`/`.14`, `--rim-w` 1px / 0,5px), por fora da borda. O `.hero-ring` na lente. A pilha de bordas dos cartões `refract` reduzida à mesma linha | O aro da biblioteca sempre traz um realce de topo mais claro, e `specular` é o único controle | **A hairline atual** |
+| [#7](https://github.com/romastefale/HTML/pull/7) | 20:29 | `menu-scroll-horizontal` | Barra fosca de largura total, como o cabeçalho do site do fork: marca, links com rolagem lateral e degradê, scroll-spy e botão claro/escuro (`lg-theme`, padrão do sistema, script antes da pintura). Removeu o "…" | Menu igual em toda a página. Paleta e tamanhos do `site/` | A rolagem lateral, o tema e a paleta. A barra encostada no topo e a marca foram revertidas no #8 |
+| [#8](https://github.com/romastefale/HTML/pull/8) | 21:13 | `menu-flutuante-pesquisa` | Voltou a pílula flutuante (12px), sem marca. Pílula de seleção deslizante, com a seleção fixada ao tocar. A lupa transforma a pílula na pesquisa, e tocar de novo fecha. Removeu a barra de pesquisa de baixo. `theme-color` volta a ser `--page-edge` | Nada sólido deve encostar na borda (Safari 26). Uma coisa por lugar | **O menu e a pesquisa atuais** |
+| [#9](https://github.com/romastefale/HTML/pull/9) | 21:57 | `pesquisa-sem-contorno-desempenho` | Sem anel azul no modo pesquisa. `<Frost>` (CSS) nas superfícies só de fosco. `<Glass>` material só no Blink. `<picture>` AVIF/WebP. Biblioteca só no chunk da amostra. `filterResolution` e fps condicionados ao aparelho. Favicon `data:` | Pedido de design. A página pesava por causa do código (mapas, filtros identidade, JPEGs grandes), não do deploy | **As regras de desempenho atuais** (veja [DESEMPENHO.md](DESEMPENHO.md)) |
+
+## Padrões que se repetiram
+
+1. **Seguir a fonte:** cada decisão técnica foi conferida no fork (`BROWSERS.md`, `src/GlassMaterial.tsx`, `site/`, `examples/`). Quando o fork não dava um controle (por exemplo, a hairline uniforme), a solução foi CSS em camada própria, **sem** `!important` e sem mexer na biblioteca.
+2. **Reverter é normal:** o menu passou por pílula → "…" → barra → pílula. Registrar o motivo de cada volta evita repetir a tentativa (veja [DESIGN-CONTRATO.md §10](DESIGN-CONTRATO.md#10-o-que-não-fazer-lições-das-iterações)).
+3. **Cada PR saiu de uma branch nova a partir da `main` atual, com título e descrição em pt-BR,** e verificado em Chromium e WebKit, desktop e iPhone 15, claro e escuro, sem erros de console.
