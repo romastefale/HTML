@@ -128,8 +128,9 @@ export const Home: React.FC = () => {
 
         <Card id="cartoes" title="Cartões de vidro" subtitle="Componentes React">
           <p className="card-body">
-            Cada cartão é um componente React que usa o <code>&lt;Glass&gt;</code> da biblioteca liquid-glass: vidro
-            fosco sobre o gradiente, com uma linha fina, uniforme e bem transparente na borda.
+            Cada cartão é um componente React de vidro fosco feito em CSS, com o mesmo desfoque e a mesma saturação do
+            material da biblioteca liquid-glass: vidro fosco sobre o gradiente, com uma linha fina, uniforme e bem
+            transparente na borda. O <code>&lt;Glass&gt;</code> da biblioteca fica para a refração, na amostra.
           </p>
         </Card>
 

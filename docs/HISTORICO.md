@@ -1,4 +1,4 @@
-# Histórico de decisões (PRs #1 a #9)
+# Histórico de decisões (PRs #1 a #10)
 
 Todos os PRs foram mergeados em **29/09/2026**. Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
 
@@ -14,6 +14,7 @@ timeline
   20h29 : #7 Barra de largura total com rolagem lateral e tema
   21h13 : #8 Pílula flutuante, seleção e pesquisa na lupa
   21h57 : #9 Pesquisa sem contorno e página mais leve
+  22h14 : #10 Relato técnico e contrato em docs/
 ```
 
 | PR | Merge (BRT) | Branch | Decisão | Motivo | O que ficou valendo |
@@ -27,6 +28,7 @@ timeline
 | [#7](https://github.com/romastefale/HTML/pull/7) | 20:29 | `menu-scroll-horizontal` | Barra fosca de largura total, como o cabeçalho do site do fork: marca, links com rolagem lateral e degradê, scroll-spy e botão claro/escuro (`lg-theme`, padrão do sistema, script antes da pintura). Removeu o "…" | Menu igual em toda a página. Paleta e tamanhos do `site/` | A rolagem lateral, o tema e a paleta. A barra encostada no topo e a marca foram revertidas no #8 |
 | [#8](https://github.com/romastefale/HTML/pull/8) | 21:13 | `menu-flutuante-pesquisa` | Voltou a pílula flutuante (12px), sem marca. Pílula de seleção deslizante, com a seleção fixada ao tocar. A lupa transforma a pílula na pesquisa, e tocar de novo fecha. Removeu a barra de pesquisa de baixo. `theme-color` volta a ser `--page-edge` | Nada sólido deve encostar na borda (Safari 26). Uma coisa por lugar | **O menu e a pesquisa atuais** |
 | [#9](https://github.com/romastefale/HTML/pull/9) | 21:57 | `pesquisa-sem-contorno-desempenho` | Sem anel azul no modo pesquisa. `<Frost>` (CSS) nas superfícies só de fosco. `<Glass>` material só no Blink. `<picture>` AVIF/WebP. Biblioteca só no chunk da amostra. `filterResolution` e fps condicionados ao aparelho. Favicon `data:` | Pedido de design. A página pesava por causa do código (mapas, filtros identidade, JPEGs grandes), não do deploy | **As regras de desempenho atuais** (veja [DESEMPENHO.md](DESEMPENHO.md)) |
+| [#10](https://github.com/romastefale/HTML/pull/10) | 22:14 | `docs-contrato-tecnico` | Relato técnico e contrato normativo em `docs/` (arquitetura, design, tela cheia, desempenho, deploy, acessibilidade, checklist e histórico). README da raiz atualizado | Projetos futuros devem repetir a implementação que deu certo, com cada regra justificada | **Este contrato.** A regra de manter os textos do site em dia com o código (os textos desatualizados foram corrigidos logo depois) |
 
 ## Padrões que se repetiram
 

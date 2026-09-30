@@ -53,15 +53,8 @@ Um site estático de duas páginas, em pt-BR, feito como app **React 19 + Vite +
 | [DEPLOY.md](DEPLOY.md) | GitHub Pages via Actions, passos do workflow, cache, como verificar um deploy e como regenerar as imagens |
 | [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILIDADE-E-INTERACAO.md) | Teclado, ARIA, Esc e toque fora, movimento e transparência reduzidos, anéis de foco e o algoritmo da pesquisa |
 | [CHECKLIST-VERIFICACAO.md](CHECKLIST-VERIFICACAO.md) | Checklist antes do merge, matriz de testes e comandos |
-| [HISTORICO.md](HISTORICO.md) | Linha do tempo dos PRs #1 a #9, com a decisão e o motivo de cada um |
+| [HISTORICO.md](HISTORICO.md) | Linha do tempo dos PRs #1 a #10, com a decisão e o motivo de cada um |
 
-## Pendências conhecidas (textos do próprio site)
+## Textos do site
 
-Estes pontos foram encontrados ao escrever o contrato. Eles **não** fazem parte deste PR, que só adiciona documentação, e ficam registrados para um PR futuro:
-
-- **`src/pages/Home.tsx`, cartão "Cartões de vidro":** diz que cada cartão "usa o `<Glass>`". Desde o PR #9, os cartões são `Frost` (CSS), com o mesmo visual.
-- **`src/pages/Sample.tsx`, seção "Vidro sobre fotos":** diz que no Chrome "a foto se curva atrás da legenda". As legendas usam `FROST` (`strength: 0`), ou seja, só fosco, sem curvatura, e isso já valia antes do PR #9.
-- **`src/pages/Sample.tsx`, nota "Arquitetura":** diz que "cada superfície é um componente que usa o `<Glass>`". Hoje isso vale só para a lente, os cartões `refract` e os botões no Chromium.
-- **`src/styles/global.css`, comentário do topo:** fala em "search panel", que não existe desde o PR #8, e em uma linha "inset" na pílula do menu, que hoje usa a linha por fora.
-- **`public/img/CREDITS.md`:** descreve só os JPEG de 1600 px. Não menciona as variantes AVIF/WebP em `public/img/r/`, que continuam sob a licença de cada foto.
-- **`README.md` da raiz:** estava desatualizado (citava `GlassNav.tsx` e o menu "…"). Foi atualizado neste PR.
+Os textos das páginas, os comentários do CSS e o `public/img/CREDITS.md` foram conferidos contra o código atual depois do PR #10 e não há pendências conhecidas. Se a implementação mudar, o texto DEVE mudar no mesmo PR (regra D28 em [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md)).

@@ -2,6 +2,10 @@
 
 Todas as fotos vêm do [Wikimedia Commons](https://commons.wikimedia.org/) e têm licença livre.
 Elas foram redimensionadas para no máximo 1600 px de largura e recomprimidas em JPEG; não houve outra alteração.
+Para carregar mais rápido, `scripts/make-responsive-images.py` gera a partir desses JPEG versões menores em AVIF e WebP,
+com 480, 720, 1080 e 1440 px de largura, em `img/r/` (por exemplo, `img/r/santorini-oia-1080.avif`). O navegador escolhe a
+versão conforme a tela, e os JPEG continuam como alternativa. As versões menores são só redimensionadas e recomprimidas,
+sem outra alteração.
 Os fundos das páginas são gradientes CSS (`src/styles/global.css`), sem imagens.
 
 | Arquivo | Onde aparece | Lugar | Autor | Licença | Fonte |
@@ -14,5 +18,5 @@ Os fundos das páginas são gradientes CSS (`src/styles/global.css`), sem imagen
 | `lencois-maranhenses.jpg` | `liquid-glass-sample.html` | Lençóis Maranhenses | Gerda Arendt | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [File:Lagoon in curved sanddunes, Lençóis Maranhenses.jpg](https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg) |
 
 A foto de Santorini é CC BY-SA 4.0: a atribuição aparece na legenda da própria foto em
-`liquid-glass-sample.html`, e a versão redimensionada continua sob a mesma licença (CC BY-SA 4.0).
+`liquid-glass-sample.html`, e todas as versões redimensionadas (JPEG, AVIF e WebP) continuam sob a mesma licença (CC BY-SA 4.0).
 As demais não exigem atribuição, mas também têm crédito nas legendas.
