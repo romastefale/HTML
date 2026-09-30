@@ -85,7 +85,7 @@ export const Home: React.FC = () => {
           <p className="card-body">
             O menu é uma pílula de vidro que flutua no topo, igual do início ao fim da página e em todas as páginas.
             Quando as seções não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
-            do mouse). A seção que você está lendo fica em negrito e sempre visível no menu. O botão com a lua ou o sol
+            do mouse). A seção que você está lendo (ou a que você tocou) fica selecionada, com uma pílula clara atrás, e sempre visível no menu. O botão com a lua ou o sol
             troca o modo claro e escuro, e a escolha fica salva.
           </p>
           <Photo

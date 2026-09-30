@@ -5,7 +5,6 @@ import { FROST } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
-import { HOME_URL } from "./Surfaces";
 import "./SiteHeader.css";
 
 export interface NavItem {
@@ -47,12 +46,13 @@ const EDGE = 12; // px kept clear around an item scrolled into view
 /**
  * The shared top menu (home + sample), the same at the top of the page and all
  * the way down: a floating glass pill inset under the safe area, holding the
- * fork demo-site header's parts (site/src/components/SiteHeader.tsx): the
- * wordmark, text links (current one bolder), and round 34px buttons for the
- * page search (magnifier) and the light/dark mode. When the links don't fit
- * they scroll sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden
- * and a soft fade on the side with more. The magnifier opens the search panel
- * under the pill; Esc, the button again or a tap outside closes it.
+ * fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
+ * the wordmark: the section links (the current one on a soft selected pill
+ * that slides between them) and round 34px buttons for the light/dark mode
+ * and the page search (magnifier). When the links don't fit they scroll
+ * sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden and a soft
+ * fade on the side with more. The magnifier turns the pill itself into the
+ * search bar; the magnifier again, Esc or a tap outside turns it back.
  */
 export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScope?: string }> = ({
   items,
@@ -72,6 +72,19 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
   const [fade, setFade] = useState({ start: false, end: false });
   const reduceMotion = useReducedMotion();
   const first = useRef(true);
+  // A tapped section stays selected through its own smooth scroll: the spy is
+  // paused until the page has been still for a moment (then the next real
+  // scroll takes over again).
+  const pinned = useRef(false);
+  const pinTimer = useRef(0);
+  const pin = useCallback((ms: number) => {
+    pinned.current = true;
+    clearTimeout(pinTimer.current);
+    pinTimer.current = window.setTimeout(() => (pinned.current = false), ms);
+  }, []);
+  useEffect(() => () => clearTimeout(pinTimer.current), []);
+  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(null);
+  const [animate, setAnimate] = useState(false);
 
   // Scroll one link into view INSIDE the bar only (never the page).
   const reveal = useCallback(
@@ -138,6 +151,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
       setActive(idx);
     };
     const onScroll = () => {
+      if (pinned.current) return pin(220); // still scrolling to a tapped section
       if (!raf) raf = requestAnimationFrame(compute);
     };
     compute();
@@ -148,7 +162,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
       removeEventListener("scroll", onScroll);
       removeEventListener("resize", onScroll);
     };
-  }, [items]);
+  }, [items, pin]);
 
   // Keep the current link visible in the bar: instantly on load, smoothly after.
   useLayoutEffect(() => {
@@ -156,6 +170,24 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
     reveal(active, !first.current);
     first.current = false;
   }, [active, reveal]);
+
+  // The selected pill behind the current link: one soft glass highlight that
+  // slides (and resizes) to the link, measured in the nav's scroll content.
+  useLayoutEffect(() => {
+    const a = active >= 0 ? linkRefs.current[active] : null;
+    const measure = () => setIndicator(a ? { x: a.offsetLeft, w: a.offsetWidth } : null);
+    measure();
+    if (!a) return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(a);
+    return () => ro.disconnect();
+  }, [active]);
+  // No slide on the first placement (only once it's been drawn).
+  useEffect(() => {
+    if (!indicator || animate) return;
+    const r = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(r);
+  }, [indicator, animate]);
 
   // Open synchronously inside the tap (flushSync) so focus() still counts as
   // user-initiated and iOS brings the keyboard up.
@@ -215,11 +247,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
           style={{ display: "flex" }}
           data-mode={searchOpen ? "search" : "menu"}
         >
-          {/* Menu mode. In search mode these stay in the layout (hidden, inert)
-              so the pill keeps exactly its size and place. */}
-          <a className="sh-brand" href={HOME_URL} inert={searchOpen}>
-            <span className="sh-brand-ns">romastefale/</span>vidro
-          </a>
+          {/* Menu mode. In search mode the links stay in the layout (hidden,
+              inert) so the pill keeps exactly its size and place. */}
           <nav
             ref={navRef}
             className="sh-nav"
@@ -229,6 +258,12 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
             onScroll={syncFade}
             inert={searchOpen}
           >
+            <span
+              className="sh-indicator"
+              aria-hidden="true"
+              data-animate={animate || undefined}
+              style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
+            />
             {items.map((it, i) => (
               <a
                 key={it.href + it.label}
@@ -239,7 +274,14 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
                 aria-label={it.ariaLabel}
                 aria-current={i === active ? "location" : undefined}
                 onFocus={() => reveal(i, false)}
-                onClick={(e) => it.onSelect?.(e)}
+                onClick={(e) => {
+                  it.onSelect?.(e);
+                  // A section link is selected at once, before the page scrolls.
+                  if (it.spy !== false && it.href.startsWith("#")) {
+                    pin(700);
+                    setActive(i);
+                  }
+                }}
               >
                 {it.back && <Chevron />}
                 {/* data-text reserves the bold width: the pill never changes size

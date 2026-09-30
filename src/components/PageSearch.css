@@ -1,7 +1,7 @@
 /* In-page search, INSIDE the floating menu pill (SiteHeader.css): in search
    mode the pill itself is the search bar. The form covers the pill from its
    left edge up to the magnifier (which stays put and closes it again); the
-   brand, links and theme button fade out underneath, still in the layout, so
+   links and theme button fade out underneath, still in the layout, so
    the pill keeps exactly its size and place. */
 .page-search{
   position:absolute;z-index:1;top:0;bottom:0;left:0;right:var(--ps-right, 49px);
