@@ -156,9 +156,10 @@ export const Home: React.FC = () => {
 
         <GlassPanel className="card-glass">
           <footer className="foot" id="creditos">
-            Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Efeito:{" "}
-            <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), via o pacote{" "}
-            <code>@samasante/liquid-glass</code>.
+            Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Vidro: o fosco
+            desta página segue os valores do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT ©
+            Sam Asante), e o <code>&lt;Glass&gt;</code> do pacote <code>@samasante/liquid-glass</code> é usado na{" "}
+            <a href={SAMPLE_URL}>amostra</a>.
           </footer>
         </GlassPanel>
       </main>
