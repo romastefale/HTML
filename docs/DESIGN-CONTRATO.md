@@ -1,31 +1,44 @@
 # Contrato de design
 
-Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`).
+Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`) e atualizados até o PR #14 (fundo orgânico e camadas de borda, a partir de `edf5632`).
 
 ## 1. Princípios
 
 1. **As bordas vêm do vidro,** não de linhas desenhadas: fosco, tinta translúcida, refração onde ela aparece e uma sombra de flutuação suave. A única linha é uma hairline uniforme, fina e quase transparente.
-2. **O fundo é cor, não forma:** um gradiente suave, sem manchas, discos ou fotos de fundo.
+2. **O fundo é cor desfocada:** campos de cor orgânicos e muito desfocados, sem bordas nítidas, discos ou fotos de fundo. Ele termina, em cima e embaixo, na cor das barras do navegador.
 3. **Os controles flutuam:** nada sólido encosta nas bordas da tela.
 4. **Uma coisa por lugar:** o menu é a pesquisa, e a lupa abre e fecha. Não há painéis extras, "…", barra de baixo nem marca. Componentes de exemplo dentro de uma página (a barra de abas do painel, os chips da galeria) são conteúdo: eles não substituem a pílula, que continua igual no topo.
 5. **O texto é em pt-BR,** e o texto das fotos é creditado.
 
 ## 2. Fundo
 
-- **D1. O fundo da página DEVE ser um gradiente CSS em `body`, sem imagens e sem formas de borda nítida** (`--page-bg`).
-  *Por quê:* os discos de borda nítida (PR #2) e os wallpapers fotográficos (PR #1) foram trocados no PR #3 por um gradiente suave. Com vidro por cima, formas nítidas viram "manchas" distorcidas, e o gradiente deixa o fosco aparecer só como variação de cor.
-- **D2. O gradiente DEVE começar e terminar na cor de borda do modo** (`--page-edge`), e essa mesma cor DEVE ser o `background-color` de `html` e `body`.
-  *Por quê:* a barra do navegador e o overscroll mostram essa cor. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
+- **D1. O fundo da página DEVE ser uma imagem SVG estática de campos de cor orgânicos e muito desfocados** (`--page-bg`: `src/assets/fundo-claro.svg` e `fundo-escuro.svg`, embutidas como data URL no CSS). Ela fica num `html::before` fixo, da altura da viewport grande (`100lvh`), com `z-index: -1` e `pointer-events: none`.
+  - Os campos são curvas fechadas irregulares (7 pontos em raios e ângulos sorteados, com semente fixa), nunca círculos nem elipses limpas. Eles se sobrepõem, e o `feGaussianBlur` (`stdDeviation` 70 numa caixa de 1000×1600) tira qualquer borda.
+  - Quem muda o desenho edita e roda `scripts/make-organic-bg.py` e faz commit dos dois SVGs. O build não gera nada.
+  *Por quê:* pedido de design no PR #14, que substitui o "fundo sem formas" do PR #3. O que o PR #3 proibia eram formas de **borda nítida**: sob o vidro, elas viram manchas distorcidas. Campos desfocados passam pelo fosco só como variação de cor, e esse era o motivo da regra.
+- **D2. O fundo DEVE começar e terminar em `--page-edge`, a cor das barras do navegador** (o `theme-color` do modo).
+  - A base é um degradê vertical que sai de `--page-edge` e volta a ela.
+  - Uma máscara vertical tira os campos dos 14% de cima e dos 14% de baixo, então as duas bordas são a cor sólida exata.
+  - `html` NÃO tem fundo. O `background-color` do `body` é `--page-edge` e vira a cor do canvas, que também preenche o overscroll (o "elástico" do iOS) e aparece antes de o CSS carregar (inline no `<head>`).
+  *Por quê:* a barra de status, a barra de baixo do Safari e o overscroll mostram essa cor. Se o fundo terminar nela, a borda da página não aparece. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
+- **D2.1. O conteúdo que rola DEVE se dissolver em `--page-edge` no topo e embaixo da viewport.**
+  - Duas camadas fixas fazem isso: `body::before` no topo (altura `safe-area-inset-top + 64px`) e `body::after` embaixo (`safe-area-inset-bottom + 56px`).
+  - Cada uma é sólida em `--page-edge` na área segura e depois desce até transparente, com paradas em 72% e 30%.
+  - Elas usam `z-index: 50` e `pointer-events: none`, e são só `background-image`: nada de `background-color` nem `backdrop-filter`.
+  - O menu (`.site-header`, z 70) e a barra de abas do painel (`.tabbar-wrap`, z 60) ficam **acima** das camadas e continuam nítidos. Os ancestrais deles não criam contexto de empilhamento. A folha da galeria é um `<dialog>` modal, que fica na camada do topo.
+  *Por quê:* o texto que passa por baixo da status bar ou vai para a barra de baixo some na cor da barra, em vez de ser cortado por ela.
+- **D2.2. O fundo e as camadas NÃO DEVEM ter animação, JS nem mudar de tamanho durante a rolagem.** O `100lvh` não muda quando as barras do iPhone recolhem, então o SVG é rasterizado uma vez só. A rolagem só move o conteúdo por cima.
+- **D2.3. Nenhuma sombra de elemento flutuante pode alcançar a borda da viewport.** Por exemplo, a barra de abas fica a 12px da borda, então a sombra dela chega no máximo a 10px (`0 2px 8px`). A sombra padrão (`0 10px 28px`) escurecia a última linha da tela.
 
 | Token | Claro | Escuro |
 |---|---|---|
-| `--page-edge` | `#8b82e6` | `#1b1646` |
-| Faixa linear (180°) | `edge 0%` → `#c3b9f7 12%` → `#f1e7fb 30%` → `#eaf3ff 50%` → `#fbe9f1 70%` → `#c3b9f7 88%` → `edge 100%` | `edge 0%` → `#2a2170 12%` → `#1d2b63 30%` → `#16324f 50%` → `#2c1f5a 70%` → `#2a2170 88%` → `edge 100%` |
-| 4 radiais suaves (até transparente) | rosa `rgba(255,158,205,.75)` a 10% 34% · azul `rgba(120,205,255,.75)` a 92% 44% · pêssego `rgba(255,210,150,.70)` a 22% 64% · menta `rgba(140,240,210,.65)` a 84% 74% | `rgba(214,70,160,.45)` · `rgba(40,160,220,.42)` · `rgba(230,140,60,.30)` · `rgba(40,200,170,.32)`, nas mesmas posições |
+| `--page-edge` (= `theme-color` = canvas) | `#8b82e6` | `#1b1646` |
+| Base vertical do SVG | `edge 0` → `#c4bbf6 12%` → `#f2ebfb 28%` → `#eef2ff 50%` → `#fbecf3 72%` → `#c4bbf6 88%` → `edge 100%` | `edge 0` → `#281f6a 12%` → `#1d2a60 28%` → `#16304d 50%` → `#2b1e58 72%` → `#281f6a 88%` → `edge 100%` |
+| 7 campos orgânicos (opacidade) | rosa `#ff9ecd` .70 · azul `#7fcfff` .68 · pêssego `#ffd49a` .66 · menta `#8ef0d2` .60 · lilás `#c9a6ff` .62 · salmão `#ffb8a8` .50 · azul-claro `#a9c8ff` .55 | `#d646a0` .42 · `#28a0dc` .40 · `#e68c3c` .28 · `#28c8aa` .30 · `#7850e6` .40 · `#c8508c` .26 · `#3c78dc` .32 |
+| Máscara dos campos | 0 até 14% · cheia de 30% a 70% · 0 a partir de 86% | igual |
+| Camadas de borda | topo `safe-top + 64px`, embaixo `safe-bottom + 56px`: `edge` → 72% → 30% → transparente | igual |
 | `--text` / `--text-dim` / `--faint` | `#1c1c1e` / `#3a3a3c` / `#5d5b6e` | `#f5f5f7` / `#d1d1d6` / `#b3b0c8` |
 | `--link` | `#0a6cff` | `#64d2ff` |
-
-O `body` usa `background-attachment: fixed`, `no-repeat` e `background-size: 100% 100%`. O iOS ignora o `fixed` e rola o fundo, mas as bordas continuam batendo.
 
 A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radiais (`#ffb3d9`, `#9ecbff`, `#c9a4ff`, `#8ff0d0`, `#ffe1a8`) sobre `linear-gradient(135deg, #fbe3f1, #e4dcff)`. A cor de borda é `--band-edge: #eadcf6`, e é ela que entra no `behind` do `refract`.
 
@@ -47,7 +60,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
   *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
 - **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
 - **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
-  *Por quê:* por fora, ela aparece contra o gradiente nos dois temas. Por dentro, uma linha branca some nos preenchimentos claros e foscos.
+  *Por quê:* por fora, ela aparece contra o fundo nos dois temas. Por dentro, uma linha branca some nos preenchimentos claros e foscos.
   - **Exceção:** um elemento que recorta o próprio conteúdo (`overflow: hidden` ou `clip-path`) cortaria a linha de fora. Nesse caso, a mesma linha DEVE ir por dentro (`inset`). Hoje isso acontece só no `.hero-ring` (`box-shadow: inset 0 0 0 var(--rim-w) var(--rim)`), o anel que acompanha a lente.
 - **D6. É PROIBIDO:**
   - um realce mais claro no topo (o `specular` > 0 da biblioteca);
@@ -225,7 +238,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N2 | Dependência GitHub da biblioteca | O fork não versiona `dist/` e não tem `prepare`, então o pacote viria vazio | PR #4 |
 | N3 | Tirar toda a borda do vidro | O vidro perde a forma. Deve haver exatamente uma hairline | PR #2 → #5 |
 | N4 | Realce de topo na hairline (`specular` > 0) ou luz interna em CSS | A linha deve ser uniforme em volta toda | PR #5 → #6 |
-| N5 | Manchas, discos de borda nítida ou wallpapers no fundo | Viram formas distorcidas sob o vidro | PRs #1–#2 → #3 |
+| N5 | Manchas ou discos de **borda nítida**, círculos limpos ou wallpapers no fundo (campos orgânicos desfocados são permitidos desde o PR #14, D1) | Viram formas distorcidas sob o vidro | PRs #1–#2 → #3, revisto no #14 |
 | N6 | Menu que recolhe em "…" com popover | O menu deve ser igual em toda a página | PRs #3–#6 → #7 |
 | N7 | Barra de pesquisa fixa embaixo, ou painel separado de pesquisa | A pesquisa é a própria pílula | PRs #3–#7 → #8 |
 | N8 | Barra de menu de largura total encostada no topo | O Safari 26 pinta a barra com a cor dela | PR #7 → #8 |
@@ -248,3 +261,5 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N27 | Botão Início (casa) na pílula | Pedido de design: o Início é um item da lista ☰, e o ☰ fica na ponta esquerda | PR #13 |
 | N25 | Um documento inteiro num painel fosco só | Um bloco contínuo, difícil de ler e de achar. Use os cartões de D29 | PR #12 → #13 |
 | N26 | Seleção do controle segmentado com tinta fina e sombra dentro da lente | O filtro da lente deixava a pílula cinza, e o recorte da lente cortava a sombra numa borda escura. Use tinta quase opaca e a sombra no aro, fora da lente | PR #13 |
+| N28 | Fundo animado, gerado por JS ou do tamanho do documento (`background-attachment: fixed`, imagem esticada na página inteira) | Custa pintura a cada quadro ou rasteriza uma imagem de milhares de pixels; o iOS ignora o `fixed`. Use a camada fixa `html::before` de `100lvh` (D1, D2.2) | PR #14 |
+| N29 | Sombra, faixa ou fundo que escureça a primeira ou a última linha da viewport | A borda deixa de ser a cor da barra e a emenda aparece (D2.3) | PR #14 |

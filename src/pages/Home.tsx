@@ -10,7 +10,7 @@ const NAV: NavItem[] = pageNav("inicio", [
   { href: "#paginas", label: "Páginas" },
   { href: "#menu", label: "Menu" },
   { href: "#busca", label: "Busca" },
-  { href: "#gradiente", label: "Gradiente" },
+  { href: "#fundo", label: "Fundo" },
   { href: "#cartoes", label: "Cartões" },
   { href: "#ceu", label: "Céu noturno" },
   { href: "#creditos", label: "Créditos" },
@@ -136,10 +136,11 @@ export const Home: React.FC = () => {
           </p>
         </Card>
 
-        <Card id="gradiente" avatar="alt2" title="Fundo em gradiente suave" subtitle="Transparência">
+        <Card id="fundo" avatar="alt2" title="Fundo de cores orgânicas" subtitle="Transparência">
           <p className="card-body">
-            O fundo é um único gradiente translúcido, sem formas. Ele começa e termina na mesma cor, que também é a cor
-            usada pelo navegador atrás das barras, então o topo da tela parece continuar a página.
+            O fundo são manchas de cor irregulares e muito desfocadas, uma imagem SVG estática, sem animação. Em cima e
+            embaixo, ele termina na mesma cor que o navegador usa nas barras. O texto que rola some nessa cor perto da
+            barra de status e da barra de baixo, então a borda da página não aparece.
           </p>
           <Photo
             name="rio-pao-de-acucar"
@@ -156,7 +157,7 @@ export const Home: React.FC = () => {
         <Card id="cartoes" title="Cartões de vidro" subtitle="Componentes React">
           <p className="card-body">
             Cada cartão é um componente React de vidro fosco feito em CSS, com o mesmo desfoque e a mesma saturação do
-            material da biblioteca liquid-glass: vidro fosco sobre o gradiente, com uma linha fina, uniforme e bem
+            material da biblioteca liquid-glass: vidro fosco sobre o fundo colorido, com uma linha fina, uniforme e bem
             transparente na borda. O <code>&lt;Glass&gt;</code> da biblioteca fica para a refração, na amostra.
           </p>
         </Card>

@@ -3,11 +3,18 @@
    by .glass::after) and a soft float shadow.
 
    ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
-   • The page gradient STARTS and ENDS on --page-edge, and html + body
-     background-color are --page-edge too (also set inline in the HTML head, so
-     it holds before this file loads). Whether the browser shows live page
-     pixels behind its bars or its fallback tint from body/html
-     background-color, it's the same colour: the bars read as the page.
+   • The page background (html::before, a fixed, viewport-tall static SVG of
+     blurred organic colour fields) STARTS and ENDS on --page-edge, and the
+     canvas colour (body background-color, propagated) is --page-edge too (also
+     set inline in the HTML head, so it holds before this file loads and in the
+     rubber-band overscroll). Whether the browser shows live page pixels behind
+     its bars or its fallback tint, it's the same colour: the bars read as the page.
+   • Two fixed fades (body::before at the top, body::after at the bottom) take
+     the scrolling content from transparent to solid --page-edge at the viewport
+     edges. They sit above the content and BELOW the menu (z 70) and the painel
+     tab bar (z 60), so those stay crisp. Gradient only, no background-color and
+     no backdrop-filter: at the edge their pixels are --page-edge, the same
+     colour Safari would pick up or show (docs/TELA-CHEIA-E-BARRAS.md T11).
    • No fixed/sticky element with background-color or backdrop-filter touches
      a viewport edge (Safari 26 samples those into its bars): the floating
      menu's fixed wrapper (SiteHeader.css) is transparent and inset 12px under
@@ -17,12 +24,8 @@
      toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
 :root{
   --page-edge:#8b82e6;
-  --page-bg:
-    radial-gradient(62% 26% at 10% 34%, rgba(255,158,205,.75) 0%, rgba(255,158,205,0) 100%),
-    radial-gradient(58% 26% at 92% 44%, rgba(120,205,255,.75) 0%, rgba(120,205,255,0) 100%),
-    radial-gradient(62% 26% at 22% 64%, rgba(255,210,150,.70) 0%, rgba(255,210,150,0) 100%),
-    radial-gradient(58% 24% at 84% 74%, rgba(140,240,210,.65) 0%, rgba(140,240,210,0) 100%),
-    linear-gradient(180deg, var(--page-edge) 0%, #c3b9f7 12%, #f1e7fb 30%, #eaf3ff 50%, #fbe9f1 70%, #c3b9f7 88%, var(--page-edge) 100%);
+  --page-edge-0:rgba(139,130,230,0); /* --page-edge, transparent: the fades end on it */
+  --page-bg:url("../assets/fundo-claro.svg");
   /* The cards band's own smooth multi-colour field (the cards refract a copy). */
   --band-bg:
     radial-gradient(70% 90% at 0% 0%, #ffb3d9 0%, rgba(255,179,217,0) 70%),
@@ -32,6 +35,8 @@
     radial-gradient(50% 60% at 50% 50%, #ffe1a8 0%, rgba(255,225,168,0) 75%),
     linear-gradient(135deg, #fbe3f1 0%, #e4dcff 100%);
   --band-edge:#eadcf6;
+  --fade-top:64px;
+  --fade-bottom:56px;
   --text:#1c1c1e;
   --text-dim:#3a3a3c;
   --faint:#5d5b6e;
@@ -54,12 +59,8 @@
 :root[data-theme="dark"]{
   color-scheme:dark;
   --page-edge:#1b1646;
-  --page-bg:
-    radial-gradient(62% 26% at 10% 34%, rgba(214,70,160,.45) 0%, rgba(214,70,160,0) 100%),
-    radial-gradient(58% 26% at 92% 44%, rgba(40,160,220,.42) 0%, rgba(40,160,220,0) 100%),
-    radial-gradient(62% 26% at 22% 64%, rgba(230,140,60,.30) 0%, rgba(230,140,60,0) 100%),
-    radial-gradient(58% 24% at 84% 74%, rgba(40,200,170,.32) 0%, rgba(40,200,170,0) 100%),
-    linear-gradient(180deg, var(--page-edge) 0%, #2a2170 12%, #1d2b63 30%, #16324f 50%, #2c1f5a 70%, #2a2170 88%, var(--page-edge) 100%);
+  --page-edge-0:rgba(27,22,70,0);
+  --page-bg:url("../assets/fundo-escuro.svg");
   --text:#f5f5f7;
   --text-dim:#d1d1d6;
   --faint:#b3b0c8;
@@ -67,8 +68,9 @@
   --rim:rgba(255,255,255,.14);
 }
 *{box-sizing:border-box}
+/* html has NO background, so body's background-color becomes the canvas
+   colour (it fills the overscroll too) and html::before paints above it. */
 html{
-  background-color:var(--page-edge);
   scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
   scroll-padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
 }
@@ -81,16 +83,39 @@ body{
   min-height:100dvh;
   color:var(--text);
   background-color:var(--page-edge);
-  background-image:var(--page-bg);
-  background-attachment:fixed; /* iOS ignores it (scrolls); the edges still match */
-  background-repeat:no-repeat;
-  background-size:100% 100%;
   /* system-ui first: SF Pro on Apple, Roboto/Segoe elsewhere, and it always
      resolves, so no missing family is looked up (docs/DESEMPENHO.md P7). */
   font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
+}
+/* The page background: static, no animation, no JS. Fixed and one large
+   viewport tall (100lvh), so it's rasterised once and never resized when the
+   iPhone toolbars collapse; scrolling only moves the content over it. */
+html::before{
+  content:"";position:fixed;z-index:-1;left:0;right:0;top:0;height:100vh;height:100lvh;
+  pointer-events:none;
+  background:var(--page-bg) center/100% 100% no-repeat;
+}
+/* Edge fades over the scrolling content (see the header note). Solid through
+   the safe area, then an eased ramp to transparent. */
+body::before,body::after{
+  content:"";position:fixed;z-index:50;left:0;right:0;pointer-events:none;
+}
+body::before{
+  top:0;height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
+  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) env(safe-area-inset-top, 0px),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
+    var(--page-edge-0) 100%);
+}
+body::after{
+  bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom));
+  background:linear-gradient(0deg, var(--page-edge) 0, var(--page-edge) env(safe-area-inset-bottom, 0px),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(env(safe-area-inset-bottom, 0px) + var(--fade-bottom) * .65),
+    var(--page-edge-0) 100%);
 }
 a{color:inherit}
 /* <picture> is only a source picker: the <img> inside is what gets laid out. */

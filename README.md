@@ -42,7 +42,7 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
 - `src/pages/`: as páginas (`Home`, `Sample`, `Painel`, `Galeria` e `Docs`, que renderiza os documentos).
 - `src/lib/device.ts`: medidas, pausa fora da tela, montagem adiada e detecção de WebGL em software.
-- `src/styles/global.css`: o fundo em gradiente, a hairline, as tintas e o foco.
+- `src/styles/global.css`: o fundo orgânico (`src/assets/fundo-*.svg`, gerados por `scripts/make-organic-bg.py`), as camadas de borda, a hairline, as tintas e o foco.
 - `public/img/`: as fotos, as variantes AVIF/WebP (`r/`) e o `CREDITS.md`. As variantes são geradas por `scripts/make-responsive-images.py`.
 
 A biblioteca de vidro fica num chunk próprio, carregado só pela amostra, pelo painel e pela galeria. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.

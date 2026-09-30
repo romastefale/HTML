@@ -25,8 +25,8 @@
      "lg-theme", as in the fork's site/src/theme.ts), else the system setting.
      It also sets theme-color to the page edge colour for that mode. -->
 <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("lg-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.setAttribute("data-theme",t);d.style.colorScheme=t;var c=t==="dark"?"#1b1646":"#8b82e6",m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",c)})()</script>
-<!-- First paint (before the CSS/JS bundle): html/body already in the mode's colour. -->
-<style>html,body{margin:0;background-color:#8b82e6}html[data-theme=dark],html[data-theme=dark] body{background-color:#1b1646}</style>
+<!-- First paint (before the CSS/JS bundle): the canvas (body background, propagated) already in the mode's colour. -->
+<style>html,body{margin:0}body{background-color:#8b82e6}html[data-theme=dark] body{background-color:#1b1646}</style>
 </head>
 <body>
 <div id="root"></div>
