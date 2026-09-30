@@ -10,11 +10,15 @@ import "./SiteHeader.css";
 export interface NavItem {
   href: string;
   label: string;
-  /** Leading "‹" chevron (the Back item on the sample page). */
+  /** Leading "‹" chevron (the "‹ Início" item on every page but the home). */
   back?: boolean;
+  /** First link that leaves the page: a small gap (a dot) before it separates
+   *  the page's own sections from the links to other pages (src/lib/pages.ts). */
+  sep?: boolean;
   ariaLabel?: string;
-  /** Section items ("#id") follow the scroll (aria-current="location");
-   *  set false for an item that isn't a section. */
+  /** Section items ("#id") follow the scroll (aria-current="location") and are
+   *  the only ones that get the selected pill; set false for an item that
+   *  isn't a section. Links to other pages are never selected. */
   spy?: boolean;
   onSelect?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
@@ -44,11 +48,11 @@ const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).sty
 const EDGE = 12; // px kept clear around an item scrolled into view
 
 /**
- * The shared top menu (home + sample), the same at the top of the page and all
+ * The shared top menu (every page), the same at the top of the page and all
  * the way down: a floating glass pill inset under the safe area, holding the
  * fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
- * the wordmark: the section links (the current one on a soft selected pill
- * that slides between them) and round 34px buttons for the light/dark mode
+ * the wordmark: the page's section links first (the current one on a soft
+ * selected pill that slides between them), then the links to the other pages and round 34px buttons for the light/dark mode
  * and the page search (magnifier). When the links don't fit they scroll
  * sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden and a soft
  * fade on the side with more. The magnifier turns the pill itself into the
@@ -271,6 +275,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
                   linkRefs.current[i] = el;
                 }}
                 href={it.href}
+                data-sep={it.sep || undefined}
                 aria-label={it.ariaLabel}
                 aria-current={i === active ? "location" : undefined}
                 onFocus={() => reveal(i, false)}

@@ -1,16 +1,27 @@
 # HTML
 
-Site: https://romastefale.github.io/HTML/ · Amostra: https://romastefale.github.io/HTML/liquid-glass-sample.html
+Site: https://romastefale.github.io/HTML/
 
-App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. Tem duas páginas em pt-BR e as duas compartilham:
+App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. É um portal de seis páginas em pt-BR:
 
-- um menu flutuante em forma de pílula de vidro;
+| Página | Endereço | O que mostra |
+|---|---|---|
+| Início | [`/HTML/`](https://romastefale.github.io/HTML/) | o portal: cartões das páginas, feed de vidro fosco e fotos |
+| Amostra | [`liquid-glass-sample.html`](https://romastefale.github.io/HTML/liquid-glass-sample.html) | lente no lugar sobre o título, cartões com `refract` e botões materiais |
+| Painel | [`painel.html`](https://romastefale.github.io/HTML/painel.html) | segmentado com lente, widgets com `refract` sobre a foto, chaves e controle deslizante de vidro, avisos e barra de abas |
+| Galeria | [`galeria.html`](https://romastefale.github.io/HTML/galeria.html) | visor em WebGL em que cada controle é uma lente, chips de filtro e uma folha com lupa |
+| Contrato de design | [`contrato-design.html`](https://romastefale.github.io/HTML/contrato-design.html) | `docs/` README, DESIGN-CONTRATO, TELA-CHEIA-E-BARRAS e ACESSIBILIDADE, com fotos de skylines |
+| Arquitetura e operação | [`contrato-arquitetura.html`](https://romastefale.github.io/HTML/contrato-arquitetura.html) | `docs/` ARQUITETURA, DESEMPENHO, DEPLOY, CHECKLIST e HISTORICO, com fotos de skylines |
+
+Todas compartilham:
+
+- um menu flutuante em forma de pílula de vidro: primeiro as seções da página e, depois de um ponto, "‹ Início" e as outras páginas;
 - a pesquisa na página, que abre pela lupa;
 - o modo claro/escuro.
 
 ## Documentação
 
-O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](docs/README.md):
+O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](docs/README.md). Os mesmos arquivos são o conteúdo das duas páginas de contrato: o build os compila (`scripts/vite-docs.ts`), então editar o `.md` atualiza o site.
 
 - [Arquitetura](docs/ARQUITETURA.md)
 - [Contrato de design](docs/DESIGN-CONTRATO.md)
@@ -23,13 +34,18 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 
 ## Estrutura
 
-- `index.html` e `liquid-glass-sample.html`: entradas do Vite (`base: "/HTML/"`).
-- `src/components/SiteHeader.tsx`: o menu compartilhado (links com rolagem lateral, item atual selecionado, tema e lupa).
+- `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
+- `src/lib/pages.ts`: a lista de páginas do portal e `pageNav()`, que monta o menu de cada página.
+- `src/components/SiteHeader.tsx`: o menu compartilhado (links com rolagem lateral, seção atual selecionada, tema e lupa).
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
-- `src/pages/Home.tsx` e `src/pages/Sample.tsx`: as duas páginas.
+- `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
+- `src/pages/`: as páginas (`Home`, `Sample`, `Painel`, `Galeria` e `Docs`, que renderiza os documentos).
+- `src/lib/device.ts`: medidas, pausa fora da tela, montagem adiada e detecção de WebGL em software.
 - `src/styles/global.css`: o fundo em gradiente, a hairline, as tintas e o foco.
 - `public/img/`: as fotos, as variantes AVIF/WebP (`r/`) e o `CREDITS.md`. As variantes são geradas por `scripts/make-responsive-images.py`.
+
+A biblioteca de vidro fica num chunk próprio, carregado só pela amostra, pelo painel e pela galeria. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.
 
 ```bash
 pnpm install

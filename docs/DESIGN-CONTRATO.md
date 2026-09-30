@@ -1,13 +1,13 @@
 # Contrato de design
 
-Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` em `main` (`aab3bc1`).
+Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`).
 
 ## 1. Princípios
 
 1. **As bordas vêm do vidro,** não de linhas desenhadas: fosco, tinta translúcida, refração onde ela aparece e uma sombra de flutuação suave. A única linha é uma hairline uniforme, fina e quase transparente.
 2. **O fundo é cor, não forma:** um gradiente suave, sem manchas, discos ou fotos de fundo.
 3. **Os controles flutuam:** nada sólido encosta nas bordas da tela.
-4. **Uma coisa por lugar:** o menu é a pesquisa, e a lupa abre e fecha. Não há painéis extras, "…", barra de baixo nem marca.
+4. **Uma coisa por lugar:** o menu é a pesquisa, e a lupa abre e fecha. Não há painéis extras, "…", barra de baixo nem marca. Componentes de exemplo dentro de uma página (a barra de abas do painel, os chips da galeria) são conteúdo: eles não substituem a pílula, que continua igual no topo.
 5. **O texto é em pt-BR,** e o texto das fotos é creditado.
 
 ## 2. Fundo
@@ -102,10 +102,11 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 ## 5. Menu flutuante
 
 ```text
-┌──────────── 12px + safe-area-inset-top ────────────┐
-│  ◖ Início  Amostra  Menu  Busca  Grad…░  (☾) (⌕) ◗ │  ← 52px de altura, raio 26px
-└────────────────────────────────────────────────────┘
-   ↑ 12px ou a safe area lateral (o maior)          ↑
+┌────────────────── 12px + safe-area-inset-top ──────────────────┐
+│  ◖ Lente  Componentes  Lugares … · ‹ Início  Pain…░  (☾) (⌕) ◗ │  ← 52px de altura, raio 26px
+└────────────────────────────────────────────────────────────────┘
+   ↑ 12px ou a safe area lateral (o maior)                       ↑
+   seções da página primeiro · depois do ponto, as outras páginas
 ```
 
 | Propriedade | Valor |
@@ -117,7 +118,8 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 | Botões redondos | 34×34, `border: 1px solid var(--chip-border)`, `background: var(--chip-bg)`, `blur(14px)`, `scale(.96)` ao tocar |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
 | Pílula de seleção | `.sh-indicator`: 34px, raio 17px, `--sel-bg` e `--sel-shadow`, **sem borda**. Transição de 0,45s em `--glass-ease` = `cubic-bezier(.34,1.36,.42,1)` (a mola da biblioteca) |
-| Fonte | `-apple-system, "SF Pro Text", ui-sans-serif, system-ui, sans-serif` |
+| Separador | o primeiro link de outra página (`[data-sep]`) tem `margin-left: 12px` e um ponto de 4px antes dele, na cor do texto com opacidade .45 |
+| Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
 
 Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
@@ -136,11 +138,14 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
   - os links de seção;
+  - os links para as outras páginas do portal;
   - o botão de tema;
   - a lupa, que é **o último botão à direita**.
 
   *Por quê:* pedido de design do PR #8.
-- **D12. Em subpáginas, o primeiro item DEVE ser "‹ Início"** (chevron SVG, `back: true`, `aria-label="Voltar ao início"`). É um link de página, sem scroll-spy.
+- **D12. A ordem do menu DEVE ser: primeiro as seções da página, depois os links para outras páginas.** As seções são os links que rolam dentro da página. Depois delas vêm "‹ Início" (em toda página menos no Início: chevron SVG, `back: true`, `aria-label="Voltar ao início"`) e as outras páginas, na ordem de `PAGES`. `pageNav()` (`src/lib/pages.ts`) monta essa lista; nenhuma página DEVE montá-la à mão.
+  *Por quê (PR #12):* com seis páginas, os links de saída empurravam as seções para fora da tela. O que se usa mais (andar na página) vem primeiro; o que tira da página fica no fim.
+- **D12.1. Um ponto pequeno DEVE separar os dois grupos** (`sep: true` no primeiro link de saída). Os links de outras páginas NÃO DEVEM receber seleção nem scroll-spy (`spy: false`): a pílula de seleção só fica atrás de seções.
 - **D13. Os links que não cabem DEVEM rolar para o lado,** com a barra de rolagem oculta e degradê no lado em que há mais itens. Isso vale para toque, trackpad e Shift + roda.
 - **D14. O item atual DEVE ter uma pílula suave atrás,** com uma só pílula que desliza e muda de largura entre os links, e sempre DEVE ficar visível no menu.
   *Por quê:* a pílula não pode mudar de tamanho quando o negrito muda. Por isso cada rótulo reserva a largura em negrito com `.sh-label::after { content: attr(data-text); font-weight: 600; height: 0; visibility: hidden }`.
@@ -174,7 +179,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 ## 8. Fotos
 
-- **D24. As fotos DEVEM ter licença livre** (CC0, domínio público ou CC BY-SA) e vir de uma fonte verificável (Wikimedia Commons). Cada foto DEVE ter uma linha em `public/img/CREDITS.md` (arquivo, onde aparece, lugar, autor, licença e fonte) e crédito na legenda.
+- **D24. As fotos DEVEM ter licença livre** (CC0, domínio público, CC BY ou CC BY-SA; nas duas últimas, autor e licença na legenda) e vir de uma fonte verificável (Wikimedia Commons). Cada foto DEVE ter uma linha em `public/img/CREDITS.md` (arquivo, onde aparece, lugar, autor, licença e fonte) e crédito na legenda.
   *Por quê:* a CC BY-SA 4.0 (Santorini) exige atribuição, e a versão redimensionada continua sob a mesma licença. As outras também recebem crédito, por consistência.
 - **D25. O `alt` DEVE ser descritivo e em pt-BR.**
 - **D26. As fotos DEVEM ser servidas como `<picture>` responsivo** (AVIF, WebP e o JPEG de fallback). Veja [DESEMPENHO.md](DESEMPENHO.md).
@@ -208,3 +213,6 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N18 | Estilos escuros por `prefers-color-scheme` | Ignoram a escolha manual | PR #7 |
 | N19 | `filterResolution={2}` sempre ligado | Quadruplica os pixels do filtro. Use só em tela 1× e em máquina forte | PRs #5, #9 |
 | N20 | Merge da troca para Vite antes de mudar a fonte do Pages para Actions | O site fica em branco (os fontes sem build seriam publicados) | PR #4 |
+| N21 | "‹ Início" e outras páginas antes das seções no menu | As seções, que são o uso principal, ficavam fora da tela | PR #12 |
+| N22 | Copiar o texto de `docs/` para dentro de um componente | Dois textos envelhecem separados. Importe `docs/X.md?doc` | PR #12 |
+| N23 | Laço WebGL contínuo quando o WebGL roda no processador | No Lighthouse, TBT de ~147 s. Use `softwareGL()` e o fosco | PR #12 |

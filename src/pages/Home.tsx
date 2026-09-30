@@ -1,19 +1,31 @@
 import React from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
+import { PAGES, pageNav } from "../lib/pages";
 import "./Home.css";
 
-// Every section of the page, in order (plus the sample page).
-const NAV: NavItem[] = [
+// Every section of the page, in order; then the other pages (src/lib/pages.ts).
+const NAV: NavItem[] = pageNav("inicio", [
   { href: "#topo", label: "Início" },
-  { href: SAMPLE_URL, label: "Amostra" },
+  { href: "#paginas", label: "Páginas" },
   { href: "#menu", label: "Menu" },
   { href: "#busca", label: "Busca" },
   { href: "#gradiente", label: "Gradiente" },
   { href: "#cartoes", label: "Cartões" },
   { href: "#ceu", label: "Céu noturno" },
   { href: "#creditos", label: "Créditos" },
-];
+]);
+
+// The portal: one card per page. Each page's accent is a CSS gradient disc
+// (no photo here: the cards sit near the top, and the home stays light).
+const ACCENT: Record<string, string> = { amostra: "", painel: "alt", galeria: "alt2", contrato: "alt3", arquitetura: "alt4" };
+const KIND: Record<string, string> = {
+  amostra: "Exemplo · lente no lugar",
+  painel: "Exemplo · widgets",
+  galeria: "Exemplo · mídia",
+  contrato: "Contrato · docs/",
+  arquitetura: "Contrato · docs/",
+};
 
 const Photo: React.FC<{ name: string; alt: string; w: number; h: number; lazy?: boolean; children: React.ReactNode }> = ({
   name,
@@ -67,25 +79,38 @@ export const Home: React.FC = () => {
           <section className="intro" id="topo" aria-labelledby="home-title">
             <h1 id="home-title">Interface de vidro</h1>
             <p>
-              O menu de vidro flutuante no topo reúne todas as seções desta página: deslize-o para o lado para ver o
-              resto. A lupa transforma o menu na pesquisa da página e o botão ao lado troca o modo claro e escuro.
+              O menu de vidro flutuante no topo reúne primeiro as seções desta página e, no fim, as outras páginas do
+              portal: deslize-o para o lado para ver o resto. A lupa transforma o menu na pesquisa da página e o botão
+              ao lado troca o modo claro e escuro.
             </p>
           </section>
         </GlassPanel>
 
-        <Card avatar="alt2" title="Amostra Liquid Glass" subtitle="Nova página">
-          <p className="card-body">
-            Vidro líquido que refrata o conteúdo ao vivo, com fallback em blur.{" "}
-            <a className="card-link" href={SAMPLE_URL}>
-              Abrir a amostra →
-            </a>
-          </p>
-        </Card>
+        <section className="portal" id="paginas" aria-labelledby="paginas-title">
+          <h2 id="paginas-title" className="portal-title">Páginas do portal</h2>
+          <ul className="portal-grid">
+            {PAGES.filter((p) => p.key !== "inicio").map((p) => (
+              <li key={p.key}>
+                <GlassPanel className="card-glass portal-card">
+                  <a className="portal-link" href={p.href}>
+                    <span className={`avatar ${ACCENT[p.key]}`} aria-hidden="true" />
+                    <span className="portal-text">
+                      <span className="card-subtitle">{KIND[p.key]}</span>
+                      <strong className="card-title">{p.title}</strong>
+                      <span className="card-body">{p.summary}</span>
+                    </span>
+                    <span className="portal-go" aria-hidden="true">›</span>
+                  </a>
+                </GlassPanel>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <Card id="menu" title="Menu com rolagem lateral" subtitle="Navegação">
           <p className="card-body">
             O menu é uma pílula de vidro que flutua no topo, igual do início ao fim da página e em todas as páginas.
-            Quando as seções não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
+            Primeiro vêm as seções da página; depois de um pontinho, os links que levam a outras páginas. Quando os links não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
             do mouse). A seção que você está lendo (ou a que você tocou) fica selecionada, com uma pílula clara atrás, e sempre visível no menu. O botão com a lua ou o sol
             troca o modo claro e escuro, e a escolha fica salva.
           </p>
@@ -94,6 +119,7 @@ export const Home: React.FC = () => {
             alt="Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer"
             w={1600}
             h={1063}
+            lazy
           >
             Porto de Victoria, Hong Kong · Foto:{" "}
             <a href="https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg">Wilfredor</a>, CC0
@@ -159,7 +185,7 @@ export const Home: React.FC = () => {
             Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Vidro: o fosco
             desta página segue os valores do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT ©
             Sam Asante), e o <code>&lt;Glass&gt;</code> do pacote <code>@samasante/liquid-glass</code> é usado na{" "}
-            <a href={SAMPLE_URL}>amostra</a>.
+            <a href={SAMPLE_URL}>amostra</a>, no painel e na galeria.
           </footer>
         </GlassPanel>
       </main>

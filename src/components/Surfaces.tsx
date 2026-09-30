@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { FROST, PANEL } from "../lib/optics";
 import { Frost } from "./Frost";
 
@@ -26,7 +26,7 @@ export const GlassCaption: React.FC<{ className?: string; children: React.ReactN
  * fallback. `sizes` is the width the image is actually drawn at (object-fit:
  * cover can draw it wider than its box).
  */
-const WIDTHS = [480, 720, 1080, 1440];
+export const WIDTHS = [480, 720, 1080, 1440];
 export const Picture: React.FC<{
   name: string;
   alt: string;
@@ -34,13 +34,37 @@ export const Picture: React.FC<{
   h: number;
   sizes: string;
   lazy?: boolean;
-}> = ({ name, alt, w, h, sizes, lazy }) => {
+  /** The page's largest first-view image (LCP): fetched first. */
+  priority?: boolean;
+  className?: string;
+  /** object-position (what stays in view when object-fit: cover crops). */
+  position?: string;
+}> = ({ name, alt, w, h, sizes, lazy, priority, className, position }) => {
   const set = (ext: string) => WIDTHS.map((x) => `${asset(`img/r/${name}-${x}.${ext}`)} ${x}w`).join(", ");
+  // React sets an <img>'s src before the <img> is inside its <picture>, and
+  // WebKit starts fetching that src at once: an eager photo downloaded the
+  // 1600 px JPEG as well as the AVIF. So the fallback src is set here, after
+  // the <source>s are in place (lazy images wait for layout anyway).
+  const img = useRef<HTMLImageElement>(null);
+  const jpg = asset(`img/${name}.jpg`);
+  useLayoutEffect(() => {
+    if (img.current && img.current.getAttribute("src") !== jpg) img.current.src = jpg;
+  }, [jpg]);
   return (
     <picture>
       <source type="image/avif" srcSet={set("avif")} sizes={sizes} />
       <source type="image/webp" srcSet={set("webp")} sizes={sizes} />
-      <img src={asset(`img/${name}.jpg`)} alt={alt} width={w} height={h} loading={lazy ? "lazy" : undefined} decoding="async" />
+      <img
+        className={className}
+        style={position ? { objectPosition: position } : undefined}
+        ref={img}
+        alt={alt}
+        width={w}
+        height={h}
+        loading={lazy ? "lazy" : undefined}
+        fetchPriority={priority ? "high" : undefined}
+        decoding="async"
+      />
     </picture>
   );
 };

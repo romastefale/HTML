@@ -1,6 +1,6 @@
-# Histórico de decisões (PRs #1 a #10)
+# Histórico de decisões (PRs #1 a #12)
 
-Todos os PRs foram mergeados em **29/09/2026**. Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
+Os PRs #1 a #11 foram mergeados em **29/09/2026**; o #12 está aberto (sem merge). Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
 
 ```mermaid
 timeline
@@ -15,6 +15,8 @@ timeline
   21h13 : #8 Pílula flutuante, seleção e pesquisa na lupa
   21h57 : #9 Pesquisa sem contorno e página mais leve
   22h14 : #10 Relato técnico e contrato em docs/
+  22h21 : #11 Textos do site de acordo com o código
+  aberto : #12 Seis páginas, menu com seções primeiro e o contrato no site
 ```
 
 | PR | Merge (BRT) | Branch | Decisão | Motivo | O que ficou valendo |
@@ -29,6 +31,8 @@ timeline
 | [#8](https://github.com/romastefale/HTML/pull/8) | 21:13 | `menu-flutuante-pesquisa` | Voltou a pílula flutuante (12px), sem marca. Pílula de seleção deslizante, com a seleção fixada ao tocar. A lupa transforma a pílula na pesquisa, e tocar de novo fecha. Removeu a barra de pesquisa de baixo. `theme-color` volta a ser `--page-edge` | Nada sólido deve encostar na borda (Safari 26). Uma coisa por lugar | **O menu e a pesquisa atuais** |
 | [#9](https://github.com/romastefale/HTML/pull/9) | 21:57 | `pesquisa-sem-contorno-desempenho` | Sem anel azul no modo pesquisa. `<Frost>` (CSS) nas superfícies só de fosco. `<Glass>` material só no Blink. `<picture>` AVIF/WebP. Biblioteca só no chunk da amostra. `filterResolution` e fps condicionados ao aparelho. Favicon `data:` | Pedido de design. A página pesava por causa do código (mapas, filtros identidade, JPEGs grandes), não do deploy | **As regras de desempenho atuais** (veja [DESEMPENHO.md](DESEMPENHO.md)) |
 | [#10](https://github.com/romastefale/HTML/pull/10) | 22:14 | `docs-contrato-tecnico` | Relato técnico e contrato normativo em `docs/` (arquitetura, design, tela cheia, desempenho, deploy, acessibilidade, checklist e histórico). README da raiz atualizado | Projetos futuros devem repetir a implementação que deu certo, com cada regra justificada | **Este contrato.** A regra de manter os textos do site em dia com o código (os textos desatualizados foram corrigidos logo depois) |
+| [#11](https://github.com/romastefale/HTML/pull/11) | 22:21 | `textos-atualizados` | Textos do site, `noscript` do Início e crédito do rodapé conferidos com o código: vidro fosco em CSS × `<Glass>`, legendas e créditos das variantes AVIF/WebP | Regra D28: o texto deve descrever o que a página faz | Os textos corretos, e a seção "Textos do site" do README de `docs/` |
+| [#12](https://github.com/romastefale/HTML/pull/12) | — (aberto) | `novas-paginas-e-contrato` | Menu com as seções primeiro e, depois de um ponto, "‹ Início" e as outras páginas (`pageNav`). Duas páginas de exemplo: **Painel** (segmentado com lente, widgets `refract`, chaves e controle deslizante do `examples/`, barra de abas) e **Galeria** (visor WebGL com `draw` + `lenses`, chips, folha com lupa). Duas páginas de **contrato**, que mostram `docs/*.md` compilado no build, com fotos de skylines livres. Regras P5 a P7 de desempenho (WebGL em software, montagem adiada, pilha de fontes) e o `src` do JPEG aplicado depois da montagem (o WebKit baixava o JPEG além do AVIF nas fotos eager) | Pedido de mais composições e menus com a mesma arquitetura leve, e do contrato como conteúdo do próprio site | O portal de seis páginas, a ordem do menu (D12), `docs/` como fonte única do site (A15) e as regras P5 a P7 |
 
 ## Padrões que se repetiram
 

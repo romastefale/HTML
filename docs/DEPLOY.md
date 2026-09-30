@@ -68,7 +68,8 @@ gh api repos/romastefale/HTML/pages --jq .build_type
 
 # 3. O HTML ao vivo aponta para os assets do build novo (compare com dist/ local)
 curl -s https://romastefale.github.io/HTML/ | grep -o 'assets/[^"]*'
-curl -s https://romastefale.github.io/HTML/liquid-glass-sample.html | grep -o 'assets/[^"]*'
+for p in liquid-glass-sample painel galeria contrato-design contrato-arquitetura; do
+  curl -s "https://romastefale.github.io/HTML/$p.html" | grep -o 'assets/[^"]*'; done
 
 # 4. Cabeçalhos
 curl -sI https://romastefale.github.io/HTML/ | grep -iE '^(cache-control|content-encoding|last-modified|etag)'
@@ -78,7 +79,7 @@ for a in $(curl -s https://romastefale.github.io/HTML/ | grep -o 'assets/[^"]*')
   curl -s -o /dev/null -w "%{http_code} $a\n" "https://romastefale.github.io/HTML/$a"; done
 ```
 
-Depois, abra as duas páginas num navegador com cache limpo e o console aberto: deve haver 0 erros e 0 respostas 404 na aba de rede.
+Depois, abra as seis páginas num navegador com cache limpo e o console aberto: deve haver 0 erros e 0 respostas 404 na aba de rede.
 
 ## 5. Regenerar as imagens
 
@@ -94,6 +95,6 @@ Quando uma foto entrar ou for trocada:
 
    - Saída: `public/img/r/{nome}-{480,720,1080,1440}.{avif,webp}`.
    - AVIF com `quality=55, speed=4`; WebP com `quality=78, method=6`; redimensionamento LANCZOS.
-   - Requer Pillow com suporte a AVIF. O script tenta `pillow_avif` se ele estiver instalado. Testado com Pillow 12.3.0, onde gerou os 48 arquivos byte a byte iguais aos versionados.
+   - Requer Pillow com suporte a AVIF. O script tenta `pillow_avif` se ele estiver instalado. Testado com Pillow 12.3.0, onde gerou os 48 arquivos originais byte a byte iguais aos versionados. No PR #12, o mesmo script gerou as 48 variantes das seis fotos de skylines (hoje são 96 arquivos em `r/`).
 4. Use `<Picture name="{nome}" … sizes="…">` com o `sizes` da largura desenhada (veja [DESEMPENHO.md §P1](DESEMPENHO.md#p1-imagens-responsivas-obrigatório)).
 5. Versione as variantes. O CI **não** gera imagens.
