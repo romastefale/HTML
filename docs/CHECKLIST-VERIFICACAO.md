@@ -35,6 +35,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] 0 respostas ≥ 400 na rede (inclui o favicon).
 - [ ] Nenhuma mudança visual não intencional. **RECOMENDADO:** comparar capturas de antes e depois.
 - [ ] Textos novos em pt-BR, e textos antigos ainda verdadeiros.
+- [ ] **Nenhum foco azul** (DESIGN D31, N10): com Tab (no WebKit, Alt+Tab) por todas as páginas, nos dois temas, cada elemento focado tem um anel visível (`outline` ou um `box-shadow` `inset`), e nenhuma cor desse anel tem matiz entre 190° e 250° (saturada, alfa ≥ 0,1). No PR #15: 703 elementos, 0 azuis, 0 sem anel.
 
 ### Menu
 - [ ] A pílula flutua: 12px abaixo da safe area e 12px das laterais, sem encostar no topo. Ela é igual no topo e rolando, em todas as páginas.
@@ -51,7 +52,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Pesquisa
 - [ ] A lupa abre a pesquisa na própria pílula, que mantém a mesma posição e o mesmo tamanho (compare o `getBoundingClientRect` da pílula antes e depois).
 - [ ] O campo fica em foco, e a lupa fica no mesmo ponto com `aria-expanded="true"`.
-- [ ] "vidro" encontra resultados em todas as páginas (no PR #14: **1 de 11** no Início, **1 de 7** na amostra, **1 de 5** no painel, **1 de 4** na galeria, **1 de 24** no contrato de design e **1 de 14** em arquitetura; nos contratos o número segue o texto de `docs/`). Enter leva a 2 de N.
+- [ ] "vidro" encontra resultados em todas as páginas (no PR #15: **1 de 11** no Início, **1 de 7** na amostra, **1 de 5** no painel, **1 de 4** na galeria, **1 de 26** no contrato de design e **1 de 16** em arquitetura; nos contratos o número segue o texto de `docs/`). Enter leva a 2 de N.
 - [ ] "acucar" e "Açúcar" dão 1 de 1; "liquido" e "LÍQUIDO" dão 1 de 1.
 - [ ] Fechar pela lupa, por Esc ou por um toque fora deixa o campo vazio, zera os destaques (`CSS.highlights.get("page-search")` vazio) e traz o menu de volta. Com Esc, o foco volta à lupa.
 - [ ] Rolar a página com a pesquisa aberta não a fecha.
@@ -82,6 +83,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] A lente fica inteira dentro do palco do título, sem passar sob o menu nem ser cortada.
 - [ ] O mouse move a lente. Um toque posiciona e segura por ~1,6 s. Rolando com o mouse parado, a lente segue o cursor.
 - [ ] A animação pausa com o hero fora da tela e com a aba oculta.
+- [ ] O filtro da lente não tem as primitivas do brilho: 17 filhos no `<filter>` de `.hero-stage` (eram 19 com `sheen`/`glow` ligados), e as capturas com movimento reduzido são iguais às da `main` pixel a pixel.
 
 ### Painel
 - [ ] O segmentado troca o papel de parede; setas movem a seleção; a lente acompanha com a mola.
@@ -92,6 +94,8 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Com GPU (ou `?webgl=forcar`), o visor tocando tem `.vw[data-live]` e um canvas; pausar tira o canvas.
 - [ ] Sem GPU (Chromium headless sem o parâmetro), o visor começa pausado com os controles foscos, e "Reproduzir" troca a foto depois de ~6 s.
 - [ ] Os chips filtram (Brasil = 4 fotos); a folha abre com a lupa, as setas movem a lupa, e Esc fecha.
+- [ ] A lupa se move sem render do React: um arrasto de 120 movimentos e 10 setas fazem 0 commits (conte com um `__REACT_DEVTOOLS_GLOBAL_HOOK__` falso que soma `onCommitFiberRoot`), o `transform` fica no `.loupe` (nunca no elemento com `filter: url()`), e a lente mostra a cópia ampliada no WebKit do iPhone 15 (compare o disco com e sem a lupa: tem de haver diferença).
+- [ ] Sem WebGL 2 (`getContext("webgl2")` devolvendo `null` num init script, com `?webgl=forcar`), o visor usa os controles foscos, sem o texto "WebGL unavailable" e sem erro, e "Reproduzir" troca a foto.
 
 ### Contratos
 - [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 84px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.

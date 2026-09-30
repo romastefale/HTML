@@ -3,7 +3,7 @@ import { Glass, type GlassOptics, type GlassSurfaceLens } from "@samasante/liqui
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL, WIDTHS, asset } from "../components/Surfaces";
-import { FROST, PANEL } from "../lib/optics";
+import { FROST, NO_SHINE, PANEL } from "../lib/optics";
 import { pageNav } from "../lib/pages";
 import { useReducedMotion } from "../lib/useMedia";
 import { softwareGL, useBox, useFilterResolution, useOnScreen } from "../lib/device";
@@ -92,12 +92,12 @@ const Credit: React.FC<{ p: Photo }> = ({ p }) => (
 const PLAYER_OPTICS: Partial<GlassOptics> = {
   mapSize: 512, clipToShape: true, softEdge: true,
   strength: 0.16, depth: 0.2, curvature: 0.55, bend: 0.25, bendWidth: 0.08, dispersion: 0.15,
-  specular: 0, sheenAngle: 50, glow: 0.15, glowSpread: 1, glowFalloff: 1.5, sheen: 0.95, sheenWidth: 2, sheenFalloff: 1.5,
+  ...NO_SHINE,
   frost: 3, brightness: 0,
 };
 const SCRUB_OPTICS: Partial<GlassOptics> = {
   strength: 0.03, depth: 0.3, curvature: 0.25, dispersion: 0.2, bend: 0.05, bendWidth: 0.06,
-  specular: 0, sheenAngle: 45, sheen: 0.35, sheenWidth: 3, sheenFalloff: 1.5, glow: 0.1, glowSpread: 1, glowFalloff: 1.5,
+  ...NO_SHINE,
   frost: 6, brightness: 0,
 };
 const PLAY = 72; // CSS px
@@ -114,7 +114,10 @@ const hasWebGL = (() => {
     if (v === null) {
       try {
         const c = document.createElement("canvas");
-        v = !!(c.getContext("webgl2") || c.getContext("webgl"));
+        // WebGL 2 only: the library's renderer requires it (src/glassWebGL.ts
+        // throws "webgl2 unavailable" and <Glass draw> then shows its own grey
+        // English "WebGL unavailable" text), so WebGL 1 gets the site's fallback.
+        v = !!c.getContext("webgl2");
       } catch {
         v = false;
       }
@@ -377,21 +380,42 @@ const FILTERS: { key: "todas" | Tag; label: string }[] = [
 // ── 3. The sheet, with a loupe (<Glass refract> on a magnified copy) ──────
 const LOUPE = 116;
 const ZOOM = 1.8;
+/** How far past the loupe the lens can sample (its displacement + edge), px. */
+const COPY_REACH = 40;
 const LOUPE_LENS: Partial<GlassOptics> = {
   mapSize: 256, clipToShape: true, softEdge: true,
   strength: 0.2, depth: 0.9, curvature: 0.6, dispersion: 0.3, bend: 0.5, bendWidth: 0.1,
-  frost: 0, brightness: 0.04, specular: 0, glow: 0.2, glowSpread: 1, glowFalloff: 1,
+  frost: 0, brightness: 0.04, ...NO_SHINE,
 };
 
-/** The sheet's content, mounted with the photo (so its measurements start with it). */
+/** The sheet's content, mounted with the photo (so its measurements start with it).
+ *
+ *  The loupe follows the fork's copy-loupe idea (site/src/components/GlassDemo.tsx):
+ *  the lens refracts a MAGNIFIED COPY of the photo, and a drag moves it without
+ *  React: the pointer only records a position and asks for one frame, and that
+ *  frame writes the wrapper's transform and the copy's offset through refs
+ *  (no state, no re-render, no new filter). The transform sits on the
+ *  WRAPPER, never on the filtered element (Safari drops `filter: url()` on a
+ *  transformed filtered element, src/Glass.tsx).
+ *
+ *  Why not the fork's stage-sized `<Glass pixelUnits center>`: WebKit resolves
+ *  that mode's userSpaceOnUse filter region (pinned at 0,0) against the nearest
+ *  transformed ancestor or the page, not the element, so a stage lower than
+ *  ~150px on the page — like this sheet — gets an empty or misplaced lens
+ *  (measured in PR #15, docs/DESEMPENHO.md). The loupe-sized surface uses
+ *  objectBoundingBox units and has no such offset. */
 const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => void; closeRef: React.Ref<HTMLButtonElement> }> = ({
   photo, onClose, onView, closeRef,
 }) => {
   const stageRef = useRef<HTMLDivElement>(null);
+  const loupeRef = useRef<HTMLDivElement>(null);
+  const copyRef = useRef<HTMLImageElement>(null);
   const { w, h } = useBox(stageRef);
-  const [pos, setPos] = useState({ x: 0.62, y: 0.46 });
   const [src, setSrc] = useState("");
   const fr = useFilterResolution();
+  // Pointer position as a 0..1 fraction of the stage: a ref, never state.
+  const pos = useRef({ x: 0.62, y: 0.46 });
+  const frame = useRef(0);
   useLayoutEffect(() => {
     const img = stageRef.current?.querySelector<HTMLImageElement>("img");
     if (!img) return;
@@ -401,28 +425,51 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
     return () => img.removeEventListener("load", sync);
   }, []);
 
+  // The loupe stays inside the photo; the copy is the photo, cover-fitted like
+  // the <img>, scaled ZOOM× around the point under the loupe's centre.
+  const r = LOUPE / 2;
+  const ar = photo.w / photo.h;
+  const coverW = w / h > ar ? w : h * ar;
+  const coverH = w / h > ar ? w / ar : h;
+  const offX = (w - coverW) / 2;
+  const offY = (h - coverH) / 2;
+
+  /** Writes the wrapper's transform and the copy's offset: no React state. */
+  const place = useCallback(() => {
+    frame.current = 0;
+    if (!(w > 0 && h > 0)) return;
+    const cx = Math.min(w - r - 6, Math.max(r + 6, pos.current.x * w));
+    const cy = Math.min(h - r - 6, Math.max(r + 6, pos.current.y * h));
+    if (loupeRef.current) loupeRef.current.style.transform = `translate(${cx - r}px, ${cy - r}px)`;
+    const copy = copyRef.current;
+    if (copy) {
+      copy.style.left = `${COPY_REACH + r - (cx - offX) * ZOOM}px`;
+      copy.style.top = `${COPY_REACH + r - (cy - offY) * ZOOM}px`;
+    }
+  }, [w, h, r, offX, offY]);
+  // One write per frame, however many pointer events arrive.
+  const schedule = useCallback(() => {
+    if (!frame.current) frame.current = requestAnimationFrame(place);
+  }, [place]);
+  useLayoutEffect(() => {
+    place();
+  }, [place, src]);
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
   const move = (e: React.PointerEvent) => {
-    const r = stageRef.current!.getBoundingClientRect();
-    setPos({ x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) });
+    const b = stageRef.current!.getBoundingClientRect();
+    pos.current = { x: Math.min(1, Math.max(0, (e.clientX - b.left) / b.width)), y: Math.min(1, Math.max(0, (e.clientY - b.top) / b.height)) };
+    schedule();
   };
   const key = (e: React.KeyboardEvent) => {
     const step = e.shiftKey ? 0.1 : 0.04;
     const d = ({ ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] } as Record<string, number[]>)[e.key];
     if (!d) return;
     e.preventDefault();
-    setPos((p) => ({ x: Math.min(1, Math.max(0, p.x + d[0])), y: Math.min(1, Math.max(0, p.y + d[1])) }));
+    const p = pos.current;
+    pos.current = { x: Math.min(1, Math.max(0, p.x + d[0])), y: Math.min(1, Math.max(0, p.y + d[1])) };
+    schedule();
   };
-
-  // The loupe stays inside the photo; the copy is the photo, cover-fitted like
-  // the <img>, scaled ZOOM× around the point under the loupe's centre.
-  const r = LOUPE / 2;
-  const cx = Math.min(w - r - 6, Math.max(r + 6, pos.x * w));
-  const cy = Math.min(h - r - 6, Math.max(r + 6, pos.y * h));
-  const ar = photo.w / photo.h;
-  const coverW = w / h > ar ? w : h * ar;
-  const coverH = w / h > ar ? w / ar : h;
-  const offX = (w - coverW) / 2;
-  const offY = (h - coverH) / 2;
 
   return (
     <Frost className="glass sheet-glass tint-frost" optics={PANEL}>
@@ -442,7 +489,7 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
       >
         <Picture name={photo.name} alt={photo.alt} w={photo.w} h={photo.h} sizes="(max-width: 700px) calc(100vw - 48px), 656px" />
         {w > 0 && h > 0 && src && (
-          <div className="loupe" style={{ transform: `translate(${cx - r}px, ${cy - r}px)`, width: LOUPE, height: LOUPE }}>
+          <div ref={loupeRef} className="loupe" style={{ width: LOUPE, height: LOUPE }}>
             <Glass
               optics={LOUPE_LENS}
               width={LOUPE}
@@ -451,16 +498,17 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
               filterResolution={fr}
               behind="#222"
               refract={
-                <img
-                  alt=""
-                  aria-hidden
-                  src={src}
-                  style={{
-                    position: "absolute", maxWidth: "none",
-                    width: coverW * ZOOM, height: coverH * ZOOM,
-                    left: r - (cx - offX) * ZOOM, top: r - (cy - offY) * ZOOM,
-                  }}
-                />
+                // The copy is ~1.8× the photo; clipped to the loupe plus the
+                // displacement's reach (COPY_REACH), so a frame rasterises a
+                // loupe-sized source instead of the whole magnified photo.
+                <div aria-hidden style={{ position: "absolute", inset: -COPY_REACH, overflow: "hidden" }}>
+                  <img
+                    ref={copyRef}
+                    alt=""
+                    src={src}
+                    style={{ position: "absolute", maxWidth: "none", width: coverW * ZOOM, height: coverH * ZOOM }}
+                  />
+                </div>
               }
               style={{ position: "absolute", inset: 0, borderRadius: r }}
             />

@@ -100,14 +100,15 @@ stateDiagram-v2
 
 | Onde | Estilo |
 |---|---|
-| Global | `:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 10px }`, com `--focus: #0a84ff` |
-| Links do menu | `outline: 2px solid #4c9aff; outline-offset: -2px; border-radius: 17px` (desenhado por dentro, porque a rolagem da `nav` cortaria um anel de fora) |
-| Botões redondos do menu | `outline: 2px solid #4c9aff; outline-offset: 2px; border-radius: 999px` (o anel do `site/index.html` do fork) |
-| Botões ▲▼✕ da pesquisa | `outline: 2px solid #4c9aff; outline-offset: 1px; border-radius: 17px` |
-| **Pílula e campo no modo pesquisa** | **nenhum** (`outline: none`). O cursor mostra o foco, e a pílula aberta já indica a pesquisa |
+| Global | `:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 10px }`, com `--focus` neutro e translúcido: `rgba(28,28,30,.5)` no claro, `rgba(245,245,247,.62)` no escuro (era `#0a84ff` até o PR #14) |
+| Links do menu, itens da lista ☰, botões redondos do menu e botões ▲▼✕ da pesquisa | `outline: none; box-shadow: inset 0 0 0 1.5px var(--bar-sub)` (um aro por dentro, porque a rolagem da `nav` cortaria um anel de fora); no item atual da lista, o aro se soma a `--sel-shadow`. Até o PR #14 era `outline: 2px solid #4c9aff` |
+| Chips da galeria e barra de abas do painel | o mesmo aro interno `--bar-sub`; num chip marcado, somado a `--sel-shadow` |
+| Controle segmentado, switch e slider do painel, cartões e foto da lupa da galeria | `outline` com `var(--focus)` (2px; 3px nos cartões e na foto). No switch e no slider o anel vai no elemento visível depois do `<input>` (`input:focus-visible + *`) |
+| Botões sobre a foto do visor | `outline: 2px solid var(--focus-on-photo)` (`rgba(255,255,255,.85)`) |
+| **Pílula e campo no modo pesquisa** | **nenhum** (`outline: none`). O cursor (`caret-color: var(--bar-text)`, neutro) mostra o foco, e a pílula aberta já indica a pesquisa |
 
-- **I9. Todo controle interativo DEVE ter anel de `:focus-visible`,** exceto a pílula e o campo no modo pesquisa (DESIGN D17).
-  *Por quê:* o foco por teclado precisa ser visível. A exceção é um pedido de design, e o foco continua evidente pelo cursor dentro do campo aberto.
+- **I9. Todo controle interativo DEVE ter anel de `:focus-visible`,** exceto a pílula e o campo no modo pesquisa (DESIGN D17). **O anel NUNCA é azul** (DESIGN D31 e N10).
+  *Por quê:* o foco por teclado precisa ser visível. A exceção é um pedido de design, e o foco continua evidente pelo cursor dentro do campo aberto. A cor neutra também é pedido de design (PR #15). No teste do PR #15, Tab por todas as páginas, nos dois temas, no Chromium e no WebKit: 703 elementos focados, todos com anel, nenhum azul.
 
 ## 5. Preferências do sistema
 
@@ -130,7 +131,7 @@ stateDiagram-v2
 | Visor da galeria | botões "Foto anterior", "Pausar/Reproduzir a apresentação" (`aria-pressed`), "Próxima foto"; contador "N de 9" em `aria-live="polite"`; o canvas e os discos são `aria-hidden` | ← → trocam a foto quando o foco está no visor |
 | Chips da coleção | `role="toolbar"` com `aria-label="Filtrar a coleção"`; cada chip é um botão com `aria-pressed`; a contagem é `aria-live` | Tab |
 | Folha da galeria | `<dialog>` modal (`showModal`), `aria-labelledby` no título; o foco vai para "Fechar" ao abrir e volta para a foto da grade ao fechar; toque fora da folha fecha | `Esc` fecha |
-| Lupa da folha | a foto é focável, com `aria-label` "Foto com lupa: arraste ou use as setas para mover a lupa" | setas movem a lupa (4% por toque; 10% com Shift) |
+| Lupa da folha | a foto é focável, com `aria-label` "Foto com lupa: arraste ou use as setas para mover a lupa" | setas movem a lupa (4% por toque; 10% com Shift), no mesmo caminho do arrasto: um ref e um quadro, sem render |
 | Documentos nas páginas de contrato | cada documento é um `article` com `aria-labelledby` no título; tabelas e blocos de código são regiões roláveis com `tabindex="0"`; o índice de chips é `data-search-skip` | Tab entra na tabela ou no código para rolar com as setas |
 
 ## 7. Toque

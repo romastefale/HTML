@@ -146,7 +146,8 @@ export const softwareGL = (() => {
     v = false;
     try {
       if (new URLSearchParams(location.search).get("webgl") === "forcar") return v;
-      const gl = document.createElement("canvas").getContext("webgl");
+      // WebGL 2, the context the library renders with (src/glassWebGL.ts).
+      const gl = document.createElement("canvas").getContext("webgl2");
       if (gl) {
         const ext = gl.getExtension("WEBGL_debug_renderer_info");
         const name = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER));

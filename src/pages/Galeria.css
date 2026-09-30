@@ -36,7 +36,7 @@ html{scroll-behavior:smooth}
 .vw-btn{position:absolute;z-index:3;transform:translateX(-50%);border:0;padding:0;border-radius:50%;background:none;color:#fff;
   display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
 .vw-btn:active{transform:translateX(-50%) scale(.94)}
-.vw-btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.vw-btn:focus-visible{outline:2px solid var(--focus-on-photo);outline-offset:3px}
 .vw-scrub{position:absolute;z-index:3;left:7%;right:7%;bottom:22px;height:22px;border-radius:7px;display:flex;align-items:center;padding:0 12px;cursor:pointer;touch-action:none}
 .vw-track{position:relative;width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.34);overflow:hidden;box-shadow:0 0 3px rgba(0,0,0,.25)}
 .vw-fill{position:absolute;inset:0;background:#fff;transform-origin:0 50%;transform:scaleX(0)}
@@ -48,7 +48,8 @@ html{scroll-behavior:smooth}
 .chip{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:18px;background:none;color:var(--bar-sub);font-size:14px;font-weight:600;
   -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,color .2s ease}
 .chip[aria-pressed="true"]{background:var(--sel-bg);color:var(--bar-text);box-shadow:var(--sel-shadow)}
-.chip:focus-visible{outline:2px solid #4c9aff;outline-offset:-2px}
+.chip:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
+.chip[aria-pressed="true"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
 .gl-count{flex:0 0 auto;padding:0 10px 0 6px;font-size:12.5px;color:var(--bar-sub);font-variant-numeric:tabular-nums}
 .gl-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:700px){.gl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -91,6 +92,10 @@ html{scroll-behavior:smooth}
 .sheet-photo{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:4/3;touch-action:none;cursor:crosshair;background:#222}
 .sheet-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .sheet-photo:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* The loupe: a loupe-sized <Glass> that refracts a magnified copy. A drag
+   writes the wrapper's transform and the copy's left/top once per frame
+   through refs (Galeria.tsx › SheetBody): no React render. The transform is on
+   the wrapper, never on the filtered element. */
 .loupe{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform;box-shadow:0 10px 26px rgba(0,0,0,.35)}
 .loupe-ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 var(--rim-w) var(--rim)}
 .sheet-body{padding:14px 8px 0}

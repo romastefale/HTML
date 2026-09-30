@@ -82,6 +82,8 @@ Uma superfície só de fosco DEVE usar `<Frost>` (CSS). O `<Glass>` material só
 
 *Por quê:* isso tirou 12 mapas e 12 filtros da página inicial, e a rolagem no Chromium foi de 13,7 para 60 fps.
 
+No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada: toda ótica espalha `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`, `src/lib/optics.ts`). Com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só tira as duas primitivas dele (`feColorMatrix` + `feComposite`) quando `sheen` e `glow` também são 0. No PR #15, as capturas ficaram idênticas e a lente do título ganhou fps (§3.4).
+
 ### P3. A biblioteca só nas páginas que a usam (OBRIGATÓRIO)
 
 Módulos compartilhados DEVEM importar só **tipos** da biblioteca (`import type`). O valor só é importado nas páginas com refração (`Sample.tsx`, `Painel.tsx`, `Galeria.tsx`), em `GlassPill.tsx` e em `components/examples/*`. Com três páginas usando a biblioteca, o Rollup a separa num chunk próprio, `dist-*.js` (49,35 kB, ou 16,60 kB gz), que só a amostra, o painel e a galeria baixam. O Início e os contratos não o baixam. O mermaid das páginas de contrato é um `import()` dinâmico: não entra no carregamento inicial nem em `modulepreload`.
@@ -200,10 +202,45 @@ Mesmo método, com o fundo orgânico e as camadas de borda:
 - **Custo:** o fundo é rasterizado uma vez, numa camada fixa de `100lvh`, e as camadas de borda são degradês. Nenhum deles tem animação ou JS, e o CLS continua 0.
 - Na arquitetura, FCP e LCP subiram 0,1 s. Todas as páginas continuam dentro do orçamento.
 
+### 3.4 Medições do PR #15
+
+Mesmo método (Lighthouse 12 mobile, 3 execuções, mediana, `dist/` local), com `NO_SHINE`, WebGL 2, o foco neutro e a lupa nova:
+
+| Página | Nota | TBT | FCP | LCP | TTI | CLS | Peso | JS (transferido) |
+|---|---|---|---|---|---|---|---|---|
+| Início | 98 | 140 ms (era 130) | 1,5 s | 2,0 s | 2,2 s | 0 | 187 KiB | 76 KiB |
+| Amostra | 94 (era 93) | 220 ms (era 230) | 1,7 s | 2,4 s | 2,6 s | 0 | 277 KiB | 95 KiB |
+| Painel | 97 (era 98) | 140 ms (era 120) | 1,7 s | 2,0 s | 2,0 s | 0 | 152 KiB | 103 KiB |
+| Galeria | 96 | 70 ms | 1,7 s | 2,6 s | 2,6 s | 0 | 313 KiB | 99 KiB |
+| Contrato de design | 98 | 100 ms (era 90) | 1,7 s | 2,0 s | 2,0 s | 0 | 159 KiB | 104 KiB |
+| Arquitetura e operação | 97 | 100 ms (era 90) | 1,8 s | 2,1 s | 2,1 s | 0 | 155 KiB | 115 KiB |
+
+As variações de TBT (10–20 ms) estão dentro do ruído entre execuções (no Painel, 120, 190 e 140 ms). Todas as páginas continuam dentro do orçamento.
+
+- **Pixels:** 96 capturas de tela de antes (`main`) e depois (3 contextos: Chromium desktop, iPhone 15 emulado no Chromium e iPhone 15 no WebKit; claro e escuro; Início, Amostra, Painel e Galeria; 4 posições de rolagem; movimento reduzido para as lentes pararem): todas idênticas, diferença máxima 0/255.
+- **Lente do título da amostra** (fps do `requestAnimationFrame` em 6 s com a lente orbitando, mediana de 3 execuções, render por software): o `<filter>` caiu de 19 para 17 primitivas.
+
+  | Contexto | Antes | Depois | p95 do quadro |
+  |---|---|---|---|
+  | iPhone 15 emulado no Chromium | 10,3 fps | **13,7 fps** | 117 → 83 ms |
+  | Chromium desktop, CPU 4× mais lenta | 8,5 fps | **10,2 fps** | 133 → 117 ms |
+  | iPhone 15 no WebKit | 8,7 fps | 8,8 fps | igual |
+
+  No WebKit o ganho não aparece: ali o custo é a rasterização do bloco inteiro do título (§4), não as duas primitivas.
+- **Lupa da galeria** (arrasto de 120 pontos em duas voltas, fps do `requestAnimationFrame` durante o arrasto):
+
+  | Contexto | Antes | Depois | Duração do arrasto |
+  |---|---|---|---|
+  | iPhone 15 no WebKit (eventos de toque, 16 ms entre eles) | 2,5 fps (p95 460 ms) | **12,7 fps** (p95 88 ms) | 15,7 → 4,6 s |
+  | iPhone 15 emulado no Chromium | 40 fps (p95 33 ms) | **43 fps** (p95 33 ms) | igual (~2 s) |
+  | Chromium desktop (`filterResolution` 2) | 12,8 fps (p95 150 ms) | **19,1 fps** (p95 67 ms) | 9,4 → 6,4 s |
+
+  React: 121 commits por arrasto antes, 0 depois; no Chromium, o tempo de script do arrasto caiu de 53 para 16 ms (iPhone emulado) e de 83 para 27 ms (desktop). O maior ganho no WebKit vem do recorte da cópia: antes, a fonte do filtro era a foto inteira ampliada 1,8× (≈700×470 CSS px, ×3 no iPhone), e o WebKit a rasterizava a cada quadro e ainda a reduzia (a lupa ficava mais borrada); agora é a lupa mais 40px de cada lado. No Chromium a lupa parada ficou igual à de antes (84 pixels com diferença acima de 8/255, na borda); no WebKit ela ficou mais nítida.
+
 ## 4. Limites conhecidos (custo do próprio design)
 
-- **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 19 primitivas SVG sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.
-  - Parada no topo da amostra: ~11–12 fps em render por software, igual antes e depois. Com movimento reduzido, 60 fps.
+- **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 17 primitivas SVG (19 até o PR #14) sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.
+  - Parada no topo da amostra: ~11–12 fps em render por software no PR #14; 13,7 fps no PR #15 (iPhone emulado no Chromium, §3.4). Com movimento reduzido, 60 fps.
   - Reduzir esse custo exige mudar a biblioteca (restringir a região do filtro) ou o efeito.
 - **Os 5 botões com curvatura ao vivo no Chromium e os desfoques fortes** (22px nos painéis) são o próprio visual. Nos experimentos do PR #9 na amostra, no Chromium, com movimento reduzido:
 

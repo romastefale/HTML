@@ -1,8 +1,10 @@
 # Contrato de design
 
-Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`) e atualizados até o PR #14 (fundo orgânico e camadas de borda, a partir de `edf5632`).
+Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`) e atualizados até o PR #15 (lentes sem brilho, foco neutro, WebGL 2 e lupa sem re-render, a partir de `4748463`).
 
 ## 1. Princípios
+
+**A translucidez e o vídeo são o foco do projeto** (decisão do usuário, registrada no PR #15). Quando duas escolhas disputarem, vence a que deixa o vidro mais translúcido e a refração mais viva sobre imagem em movimento. Hoje o vídeo aparece como a apresentação da Galeria (fotos com zoom lento desenhadas pelo WebGL); um recurso de vídeo de verdade (`<Glass src>` com um arquivo de vídeo) fica para um PR próprio.
 
 1. **As bordas vêm do vidro,** não de linhas desenhadas: fosco, tinta translúcida, refração onde ela aparece e uma sombra de flutuação suave. A única linha é uma hairline uniforme, fina e quase transparente.
 2. **O fundo é cor desfocada:** campos de cor orgânicos e muito desfocados, sem bordas nítidas, discos ou fotos de fundo. Ele termina, em cima e embaixo, na cor das barras do navegador.
@@ -71,7 +73,8 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
   *Por quê:*
   - O PR #5 voltou com o aro padrão da biblioteca, mas ele sempre traz o realce de topo (`inset 0 1px 0 rgba(255,255,255,.55·g)`). O PR #6 trocou por uma linha uniforme, que é o pedido de design.
   - Nos cartões `refract`, a pilha de bordas do `GlassNotification` (brilho no topo, realce branco interno, glow e linha escura) foi reduzida à mesma hairline: `.gcard-body { box-shadow: 0 0 0 var(--rim-w) var(--rim), 0 14px 36px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.14) }`.
-- **D7. Toda ótica DEVE usar `specular: 0`** (`src/lib/optics.ts`, `HERO_LENS` e `PANEL_LENS`).
+- **D7. Toda ótica DEVE usar `specular: 0`, e junto `sheen: 0` e `glow: 0`:** o objeto `NO_SHINE` de `src/lib/optics.ts`, espalhado em `CONTROL`, `FROST`, `PANEL`, `HERO_LENS`, `PANEL_LENS`, nas lentes do Painel (segmentado, widgets, `common.lens` do switch e do slider) e nas da Galeria (`PLAYER_OPTICS`, `SCRUB_OPTICS`, `LOUPE_LENS`).
+  *Por quê:* com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só pula as duas primitivas do brilho (`feColorMatrix` + `feComposite`) quando `glow` e `sheen` também são 0 (`hasSpecular = glow > 0 || sheen > 0`, `src/Glass.tsx`). No PR #15 as 96 capturas de antes e depois (3 contextos, 2 temas, 4 páginas, 4 posições) ficaram idênticas pixel a pixel, o filtro da lente do título da Amostra caiu de 19 para 17 primitivas e o fps dela subiu de 10,3 para 13,7 no iPhone emulado no Chromium ([DESEMPENHO.md](DESEMPENHO.md) §3.4).
 
 **Sombra de flutuação:** `--glass-float: 0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08)`, igual nos dois modos.
 
@@ -186,8 +189,8 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
   *Por quê:* nada se mexe nem muda de tamanho ao abrir. Um painel ou barra separada (a barra fixa embaixo dos PRs #3–#7) foi removido no PR #8.
 - **D16. A lupa DEVE ficar no mesmo lugar, em estado ativo** (`aria-expanded="true"`, preenchida com `background: var(--bar-text)` e `color: var(--bar-bg-solid)`). **Um novo toque nela DEVE fechar a pesquisa.**
-- **D17. No modo pesquisa, é PROIBIDO anel ou contorno de foco na pílula e no campo** (`.sh-bar[data-mode="search"], .page-search input:focus, .page-search input:focus-visible { outline: none }`). A pílula fica só com a hairline uniforme. O cursor de texto (`caret-color: #4c9aff`) mostra onde se digita.
-  *Por quê:* o anel azul `0 0 0 2px rgba(76,154,255,.55)` via `:has(input:focus)` foi removido no PR #9, a pedido. Os anéis de teclado dos links, dos botões redondos e dos botões ▲▼✕ (`.ps-btn:focus-visible`) continuam.
+- **D17. No modo pesquisa, é PROIBIDO anel ou contorno de foco na pílula e no campo** (`.sh-bar[data-mode="search"], .page-search input:focus, .page-search input:focus-visible { outline: none }`). A pílula fica só com a hairline uniforme. O cursor de texto (`caret-color: var(--bar-text)`, neutro desde o PR #15) mostra onde se digita.
+  *Por quê:* o anel azul `0 0 0 2px rgba(76,154,255,.55)` via `:has(input:focus)` foi removido no PR #9, a pedido. Os anéis de teclado dos links, dos botões redondos e dos botões ▲▼✕ (`.ps-btn:focus-visible`) continuam, neutros (D31).
 - **D18. O campo DEVE ter `font-size` ≥ 16px** (17px aqui).
   *Por quê:* abaixo de 16px, o iOS dá zoom ao focar.
 - **D19. Destaques:**
@@ -230,7 +233,25 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - Células de tabela quebram, com coluna de no mínimo 5,5em. Só uma tabela realmente larga (5 colunas ou mais no celular) rola para o lado, dentro do cartão. Os desenhos em texto (```` ```text ````: o desenho do menu e a árvore de pastas) mantêm as linhas e rolam para o lado dentro do cartão. Nada é cortado.
   - O teste (`CHECKLIST`) confere 320px, 393px e paisagem em todas as páginas, no WebKit e no Chromium.
 
-## 10. O que NÃO fazer (lições das iterações)
+## 10. Foco de teclado
+
+- **D31. É PROIBIDO foco azul em qualquer lugar.** O foco de teclado DEVE ser uma indicação neutra e translúcida, do mesmo vidro:
+  - na pílula do menu, na lista ☰, na pesquisa (▲▼✕), nos chips da Galeria e na barra de abas do Painel: um aro interno `inset 0 0 0 1.5px var(--bar-sub)`, sem `outline`; num item já selecionado, o aro se soma a `--sel-shadow` (a pílula de seleção);
+  - no resto (links do texto, controle segmentado, switch, slider, cartões da Galeria, foto da lupa, botões): `outline: 2px solid var(--focus)` (3px nos cartões e na foto), com `outline-offset`;
+  - sobre foto (os botões do visor da Galeria): `--focus-on-photo`, branco translúcido;
+  - o anel só aparece com `:focus-visible` (teclado), nunca num toque.
+
+  *Por quê:* pedido de design no PR #15 ("remove contorno azul de tudo"). Até o PR #14 o `--focus` era `#0a84ff` e a pílula, os chips e a barra de abas usavam `#4c9aff`. O teste do PR #15 passa com Tab por todas as páginas, nos dois temas, no Chromium e no WebKit: 703 elementos focados, nenhum anel azul e nenhum sem anel.
+
+| Token | Claro | Escuro |
+|---|---|---|
+| `--focus` | `rgba(28,28,30,.5)` | `rgba(245,245,247,.62)` |
+| `--focus-on-photo` | `rgba(255,255,255,.85)` | igual |
+| Aro da pílula (`--bar-sub`) | `rgba(0,0,0,.6)` | `rgba(255,255,255,.6)` |
+
+O azul que continua no site é preenchimento, não foco: o trilho ligado do switch e do slider (`activeColor #0a84ff`), a tinta `.tint-blue` ("Ver no visor", "Desenhar diagrama"), os avatares, o anel "Relógio" e o `accent-color` da lista de tarefas.
+
+## 11. O que NÃO fazer (lições das iterações)
 
 | # | Proibido | Motivo | Onde se aprendeu |
 |---|---|---|---|
@@ -243,7 +264,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N7 | Barra de pesquisa fixa embaixo, ou painel separado de pesquisa | A pesquisa é a própria pílula | PRs #3–#7 → #8 |
 | N8 | Barra de menu de largura total encostada no topo | O Safari 26 pinta a barra com a cor dela | PR #7 → #8 |
 | N9 | Palavra de marca no menu | Pedido de design | PR #8 |
-| N10 | Anel azul de foco na pílula ou no campo em modo pesquisa | Pedido de design, e o cursor já basta | PR #9 |
+| N10 | Foco azul em qualquer lugar: anel ou contorno azul na pílula, no campo de pesquisa, nos chips, na barra de abas, no controle segmentado, no switch, no slider ou em qualquer outro elemento (inclusive o cursor de texto `#4c9aff`) | Pedido de design. Use a indicação neutra de D31 | PR #9, estendido a tudo no PR #15 |
 | N11 | `text-shadow` no texto refratado | Com dispersão, o halo vira névoa cinza | PR #5 |
 | N12 | Lente cobrindo o hero ou a viewport inteira | Passa por baixo do menu e da status bar, é cortada na borda e custa GPU | PR #5 |
 | N13 | `<mark>` para destacar ocorrências | O React é dono dos nós de texto. Use a Highlight API com overlay de fallback | PR #4 |
@@ -263,3 +284,4 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N26 | Seleção do controle segmentado com tinta fina e sombra dentro da lente | O filtro da lente deixava a pílula cinza, e o recorte da lente cortava a sombra numa borda escura. Use tinta quase opaca e a sombra no aro, fora da lente | PR #13 |
 | N28 | Fundo animado, gerado por JS ou do tamanho do documento (`background-attachment: fixed`, imagem esticada na página inteira) | Custa pintura a cada quadro ou rasteriza uma imagem de milhares de pixels; o iOS ignora o `fixed`. Use a camada fixa `html::before` de `100lvh` (D1, D2.2) | PR #14 |
 | N29 | Sombra, faixa ou fundo que escureça a primeira ou a última linha da viewport | A borda deixa de ser a cor da barra e a emenda aparece (D2.3) | PR #14 |
+| N30 | Lente de lupa que re-renderiza o React a cada movimento do dedo, ou `transform` no elemento filtrado | Um render por evento travava o arrasto no WebKit, e o Safari descarta o `filter: url()` de um elemento filtrado com `transform`. Guarde a posição num ref, escreva uma vez por quadro (`requestAnimationFrame`) e mova o invólucro | PR #15 |
