@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Glass } from "@samasante/liquid-glass";
 import { FROST } from "../lib/optics";
+import { Frost } from "./Frost";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
@@ -241,7 +241,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
   return (
     <header ref={headerRef} className="site-header">
       <div ref={barRef} className="sh-anchor">
-        <Glass
+        <Frost
           className="glass sh-bar tint-bar"
           optics={FROST}
           style={{ display: "flex" }}
@@ -326,7 +326,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
               <Magnifier />
             </button>
           </div>
-        </Glass>
+        </Frost>
       </div>
     </header>
   );

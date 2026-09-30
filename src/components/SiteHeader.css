@@ -106,7 +106,9 @@
 .sh-bar[data-mode="search"] .sh-theme{transform:scale(.7)}
 .sh-search-btn{transition:transform .12s ease, background-color .2s ease, color .2s ease}
 .sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
-.sh-bar[data-mode="search"]:has(input:focus){box-shadow:var(--glass-float),0 0 0 2px rgba(76,154,255,.55)}
+/* No focus ring on the pill or the field in search mode: the caret shows
+   where you type, and the pill keeps only its uniform hairline. */
+.sh-bar[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
 @media (max-width:760px){
   .sh-anchor{flex:1 1 auto}
   .sh-bar{width:100%;gap:8px;padding:0 8px}
