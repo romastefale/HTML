@@ -70,6 +70,7 @@ Cada HTML de entrada traz, **nesta ordem**, no `<head>`:
   - o script e o `<style>` inline dos **dois** HTML.
 - **T11. Nenhum elemento `fixed` ou `sticky` com `background-color` ou `backdrop-filter` pode encostar numa borda da viewport.** O wrapper fixo do menu é transparente, fica afastado 12px e só o filho tem vidro.
   - O mesmo vale para os componentes do PR #12: a **barra de abas** do painel é um wrapper fixo transparente a `calc(12px + env(safe-area-inset-bottom, 0px))` do fundo, com só a pílula em vidro; o `main` do painel reserva `112px + safe-bottom` embaixo e `scroll-padding-bottom` para as âncoras não caírem sob ela. A **barra de chips** da galeria é `sticky` abaixo da pílula (não encosta no topo). A **folha** da galeria fica a `12px + safe-bottom` do fundo, e sua altura máxima desconta as duas safe areas.
+  - PR #13: a **faixa de desfoque** em volta da pílula (`.site-header::before`) começa 2px abaixo da safe area e não tem cor, só `backdrop-filter` com máscara em degradê; a **lista de páginas** (☰) fica 8px abaixo da pílula e sua altura máxima desconta a safe area de cima. Nenhuma das duas encosta na borda.
 
 ### Por que funciona assim
 

@@ -1,10 +1,10 @@
-# Histórico de decisões (PRs #1 a #12)
+# Histórico de decisões (PRs #1 a #13)
 
-Os PRs #1 a #11 foram mergeados em **29/09/2026**; o #12 está aberto (sem merge). Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
+Os PRs #1 a #11 foram mergeados em **29/09/2026**, o #12 em **30/09/2026** às 00:25 e o #13 logo depois, no mesmo dia, depois dos testes. Os horários estão em **BRT** (UTC−3), convertidos do `mergedAt` do GitHub.
 
 ```mermaid
 timeline
-  title romastefale/HTML, 29/09/2026 (BRT)
+  title romastefale/HTML, 29 e 30/09/2026 (BRT)
   15h34 : #1 Amostra estática com bundle vendorizado
   16h01 : #2 Sem hairlines, tela cheia, gradientes e fotos
   16h42 : #3 Menu que recolhe, pesquisa e gradiente suave
@@ -16,7 +16,8 @@ timeline
   21h57 : #9 Pesquisa sem contorno e página mais leve
   22h14 : #10 Relato técnico e contrato em docs/
   22h21 : #11 Textos do site de acordo com o código
-  aberto : #12 Seis páginas, menu com seções primeiro e o contrato no site
+  00h25 (30/09) : #12 Seis páginas, menu com seções primeiro e o contrato no site
+  30/09 : #13 Lista de páginas no ☰, contrato em cartões e revisão
 ```
 
 | PR | Merge (BRT) | Branch | Decisão | Motivo | O que ficou valendo |
@@ -32,7 +33,8 @@ timeline
 | [#9](https://github.com/romastefale/HTML/pull/9) | 21:57 | `pesquisa-sem-contorno-desempenho` | Sem anel azul no modo pesquisa. `<Frost>` (CSS) nas superfícies só de fosco. `<Glass>` material só no Blink. `<picture>` AVIF/WebP. Biblioteca só no chunk da amostra. `filterResolution` e fps condicionados ao aparelho. Favicon `data:` | Pedido de design. A página pesava por causa do código (mapas, filtros identidade, JPEGs grandes), não do deploy | **As regras de desempenho atuais** (veja [DESEMPENHO.md](DESEMPENHO.md)) |
 | [#10](https://github.com/romastefale/HTML/pull/10) | 22:14 | `docs-contrato-tecnico` | Relato técnico e contrato normativo em `docs/` (arquitetura, design, tela cheia, desempenho, deploy, acessibilidade, checklist e histórico). README da raiz atualizado | Projetos futuros devem repetir a implementação que deu certo, com cada regra justificada | **Este contrato.** A regra de manter os textos do site em dia com o código (os textos desatualizados foram corrigidos logo depois) |
 | [#11](https://github.com/romastefale/HTML/pull/11) | 22:21 | `textos-atualizados` | Textos do site, `noscript` do Início e crédito do rodapé conferidos com o código: vidro fosco em CSS × `<Glass>`, legendas e créditos das variantes AVIF/WebP | Regra D28: o texto deve descrever o que a página faz | Os textos corretos, e a seção "Textos do site" do README de `docs/` |
-| [#12](https://github.com/romastefale/HTML/pull/12) | — (aberto) | `novas-paginas-e-contrato` | Menu com as seções primeiro e, depois de um ponto, "‹ Início" e as outras páginas (`pageNav`). Duas páginas de exemplo: **Painel** (segmentado com lente, widgets `refract`, chaves e controle deslizante do `examples/`, barra de abas) e **Galeria** (visor WebGL com `draw` + `lenses`, chips, folha com lupa). Duas páginas de **contrato**, que mostram `docs/*.md` compilado no build, com fotos de skylines livres. Regras P5 a P7 de desempenho (WebGL em software, montagem adiada, pilha de fontes) e o `src` do JPEG aplicado depois da montagem (o WebKit baixava o JPEG além do AVIF nas fotos eager) | Pedido de mais composições e menus com a mesma arquitetura leve, e do contrato como conteúdo do próprio site | O portal de seis páginas, a ordem do menu (D12), `docs/` como fonte única do site (A15) e as regras P5 a P7 |
+| [#12](https://github.com/romastefale/HTML/pull/12) | 00:25 (30/09) | `novas-paginas-e-contrato` | Menu com as seções primeiro e, depois de um ponto, "‹ Início" e as outras páginas (`pageNav`). Duas páginas de exemplo: **Painel** (segmentado com lente, widgets `refract`, chaves e controle deslizante do `examples/`, barra de abas) e **Galeria** (visor WebGL com `draw` + `lenses`, chips, folha com lupa). Duas páginas de **contrato**, que mostram `docs/*.md` compilado no build, com fotos de skylines livres. Regras P5 a P7 de desempenho (WebGL em software, montagem adiada, pilha de fontes) e o `src` do JPEG aplicado depois da montagem (o WebKit baixava o JPEG além do AVIF nas fotos eager) | Pedido de mais composições e menus com a mesma arquitetura leve, e do contrato como conteúdo do próprio site | O portal de seis páginas, a ordem do menu (D12), `docs/` como fonte única do site (A15) e as regras P5 a P7 |
+| [#13](https://github.com/romastefale/HTML/pull/13) | 30/09 | `testes-pos-pr12` | Os links de outras páginas saíram da pílula: ela rola só pelas seções, e um botão ☰ na ponta esquerda (em toda página) abre a lista de páginas, com o Início como um item (vidro fosco ancorado sob o ☰, `aria-current="page"`, Esc, toque fora, setas). Um botão Início (casa) chegou a ser feito e foi removido, a pedido. A lista tem a largura do nome mais longo. Todo texto quebra a linha: blocos de código dentro do cartão, código em linha, links e células de tabela; só tabelas largas e desenhos em texto rolam para o lado, dentro do cartão. O corpo dos contratos virou uma coluna de cartões montada no build (um por `###`, regra, tabela, diagrama e PR). Revisão visual: seleção do segmentado limpa, faixa de desfoque em volta da pílula, hairline no contador da galeria, textos do Início. O teste de link direto passou a mirar um título que consegue chegar ao topo. | Pedido de navegação mais clara (as páginas separadas das seções) e de leitura em blocos. O teste antigo mirava o último título da página, que nunca chega ao topo. | DESIGN D12–D12.2, D29, D30 e N24–N27; o teste de quebra de linha (320px, 393px e paisagem); a lista de páginas; os cartões; a suíte com 48 casos mais os extras |
 
 ## Padrões que se repetiram
 

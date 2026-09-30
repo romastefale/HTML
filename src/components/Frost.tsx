@@ -23,7 +23,7 @@ export const frostFilter = (optics: Partial<GlassOptics>) => {
  * stays the element's own background (className), the hairline .glass::after.
  */
 export const Frost: React.FC<
-  React.HTMLAttributes<HTMLDivElement> & { optics: Partial<GlassOptics>; children?: React.ReactNode }
+  React.HTMLAttributes<HTMLDivElement> & { optics: Partial<GlassOptics>; children?: React.ReactNode; ref?: React.Ref<HTMLDivElement> }
 > = ({ optics, style, children, ...rest }) => {
   const filter = frostFilter(optics);
   return (

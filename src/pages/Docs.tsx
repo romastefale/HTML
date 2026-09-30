@@ -62,7 +62,7 @@ const Part: React.FC<{ html: string }> = ({ html }) => {
   );
 };
 
-/** One document: its own heading (the pill links here), the h2 chips, the body. */
+/** One document: its own heading (the pill links here), the h2 chips, the body (cards). */
 const DocSection: React.FC<{ doc: Doc }> = ({ doc }) => {
   const h2 = doc.headings.filter((h) => h.depth === 2);
   // P6: the titles render at once (the pill's links); the body is split at
@@ -70,8 +70,9 @@ const DocSection: React.FC<{ doc: Doc }> = ({ doc }) => {
   // single task lays out a whole document.
   const parts = useMemo(() => doc.html.split(/(?=<h3[\s>])/), [doc.html]);
   return (
-    <GlassPanel className="doc-glass">
-      <article className="doc" aria-labelledby={doc.id}>
+    // D29: the document's title, source and chips sit on the page; its
+    // body is a column of frosted cards (built by scripts/vite-docs.ts).
+    <article className="doc" aria-labelledby={doc.id}>
         <p className="doc-src">
           Fonte: <a href={REPO + doc.file}>{doc.file}</a>
         </p>
@@ -91,16 +92,15 @@ const DocSection: React.FC<{ doc: Doc }> = ({ doc }) => {
             <Part key={i} html={html} />
           ))}
         </div>
-      </article>
-    </GlassPanel>
+    </article>
   );
 };
 
 /**
  * The contract pages: docs/*.md rendered as site content (single source of
  * truth: the markdown is compiled at build time, no parser in the browser).
- * Each document is a frosted reading panel; its title is the pill's section
- * link; freely licensed skyline photos sit between documents with glass
+ * Each document is a heading (the pill's section link) over a column of
+ * frosted cards, one per subsection, rule, table, diagram or PR; freely licensed skyline photos sit between documents with glass
  * captions. No <Glass> here: every surface is flat (frost in CSS), so the
  * library isn't downloaded.
  */
@@ -140,7 +140,7 @@ export const DocsPage: React.FC<{
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <SiteHeader items={nav} />
+      <SiteHeader items={nav} current={self} />
       <main id="conteudo" className="docs-main" ref={mainRef} onClick={onClick}>
         <header className="doc-hero">
           <Picture name={hero.name} alt={hero.alt} w={1600} h={900} priority sizes={HERO_SIZES} className="doc-hero-img" position={hero.pos} />

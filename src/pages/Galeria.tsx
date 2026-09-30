@@ -519,7 +519,7 @@ export const Galeria: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <SiteHeader items={NAV} />
+      <SiteHeader items={NAV} current={"galeria"} />
       <main id="conteudo" className="gl">
         <section id="visor" className="gl-section gl-first" aria-labelledby="gl-title">
           <div className="gl-intro">

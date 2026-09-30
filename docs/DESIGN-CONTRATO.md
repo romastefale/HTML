@@ -103,10 +103,16 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 ```text
 ┌────────────────── 12px + safe-area-inset-top ──────────────────┐
-│  ◖ Lente  Componentes  Lugares … · ‹ Início  Pain…░  (☾) (⌕) ◗ │  ← 52px de altura, raio 26px
+│ (≡)  Lente  Componentes  Lugares  Suporte  C...  (tema) (lupa) │  ← 52px de altura, raio 26px
 └────────────────────────────────────────────────────────────────┘
    ↑ 12px ou a safe area lateral (o maior)                       ↑
-   seções da página primeiro · depois do ponto, as outras páginas
+   (≡) = ☰, lista de páginas (em toda página) · depois, só as seções
+ ┌──────────────────────┐
+ │ Início               │ ← lista de páginas (☰): vidro fosco
+ │ Amostra              │   ancorado sob a ponta esquerda da pílula
+ │ [Painel]       atual │
+ │ Galeria ...          │
+ └──────────────────────┘
 ```
 
 | Propriedade | Valor |
@@ -118,7 +124,8 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 | Botões redondos | 34×34, `border: 1px solid var(--chip-border)`, `background: var(--chip-bg)`, `blur(14px)`, `scale(.96)` ao tocar |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
 | Pílula de seleção | `.sh-indicator`: 34px, raio 17px, `--sel-bg` e `--sel-shadow`, **sem borda**. Transição de 0,45s em `--glass-ease` = `cubic-bezier(.34,1.36,.42,1)` (a mola da biblioteca) |
-| Separador | o primeiro link de outra página (`[data-sep]`) tem `margin-left: 12px` e um ponto de 4px antes dele, na cor do texto com opacidade .45 |
+| Lista de páginas | `.sh-picker`: vidro fosco (`<Frost>` com `PANEL`, 22px de blur) com tinta mais densa (`--picker-bg`: `rgba(242,243,247,.9)` / `rgba(22,22,26,.88)`), raio 22px, `padding: 6px`, a mesma hairline `.glass::after`; `top: 100% + 8px`, alinhada à esquerda da pílula (sob o ☰), largura pelo conteúdo (`width: max-content`, no máximo a largura da pílula, no mínimo 180px): o nome mais longo, "Arquitetura e operação", mais o padding e o lugar do ✓. Itens de 44px de altura, raio 16px, em grade `auto 15px` com `gap: 14px`, então o ✓ fica logo depois do texto; a página atual fica na pílula de seleção (`--sel-bg`), em 600 e com um ✓ |
+| Rolagem de borda | `.site-header::before`: uma faixa sem cor, só `backdrop-filter: blur(6px)` com máscara em degradê, de 10px acima a 30px abaixo da pílula (nunca encosta na borda, T11) |
 | Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
 
 Paleta do menu (a mesma do `site/src/theme.ts` do fork):
@@ -137,15 +144,23 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
+  - o botão ☰ da lista de páginas, **o primeiro à esquerda**;
   - os links de seção;
-  - os links para as outras páginas do portal;
   - o botão de tema;
   - a lupa, que é **o último botão à direita**.
 
   *Por quê:* pedido de design do PR #8.
-- **D12. A ordem do menu DEVE ser: primeiro as seções da página, depois os links para outras páginas.** As seções são os links que rolam dentro da página. Depois delas vêm "‹ Início" (em toda página menos no Início: chevron SVG, `back: true`, `aria-label="Voltar ao início"`) e as outras páginas, na ordem de `PAGES`. `pageNav()` (`src/lib/pages.ts`) monta essa lista; nenhuma página DEVE montá-la à mão.
-  *Por quê (PR #12):* com seis páginas, os links de saída empurravam as seções para fora da tela. O que se usa mais (andar na página) vem primeiro; o que tira da página fica no fim.
-- **D12.1. Um ponto pequeno DEVE separar os dois grupos** (`sep: true` no primeiro link de saída). Os links de outras páginas NÃO DEVEM receber seleção nem scroll-spy (`spy: false`): a pílula de seleção só fica atrás de seções.
+- **D12. Os links da pílula DEVEM ser só as seções da página** (os que rolam dentro dela). Os links para outras páginas NÃO DEVEM ficar na pílula: eles ficam na lista de páginas (D12.2). `pageNav()` (`src/lib/pages.ts`) monta a lista de seções; a lista de páginas vem de `PAGES`. Só seções recebem seleção e scroll-spy.
+  *Por quê:* no PR #12 as outras páginas ficavam no fim da pílula, depois de um ponto; no PR #13 elas saíram da pílula, a pedido, para que ela role só pelas seções e a navegação entre páginas fique num lugar próprio.
+- **D12.1. NÃO DEVE haver botão Início (casa) nem link para a página inicial na pílula.** O Início é só um item da lista ☰, como as outras páginas. (Na própria página inicial, o link de seção "Início" leva ao `#topo` dela: é uma seção, não uma página.)
+- **D12.2. O botão ☰ DEVE ficar na ponta esquerda da pílula, em todas as páginas (inclusive no Início), e abrir a lista de páginas.** À direita ficam só o tema e a lupa. A lista:
+  - é um popover de vidro fosco ancorado sob a ponta esquerda da pílula, NÃO uma tela cheia;
+  - lista as seis páginas na ordem de `PAGES` (Início, Amostra, Painel, Galeria, Contrato de design, Arquitetura e operação);
+  - marca a página atual com `aria-current="page"`, a pílula de seleção, peso 600 e um ✓ (não só cor);
+  - fecha com Esc (o foco volta ao ☰), com um toque fora, ao escolher uma página e ao tocar no ☰ de novo; fecha também quando o foco sai dela;
+  - ao abrir, leva o foco para a página atual; ↑/↓, Home e End andam entre os itens; o ☰ tem `aria-expanded` e `aria-controls`;
+  - usa um anel de foco neutro (`inset 0 0 0 1.5px var(--bar-sub)`), NUNCA o azul;
+  - no modo pesquisa, o ☰ some como o botão de tema, e abrir a pesquisa fecha a lista.
 - **D13. Os links que não cabem DEVEM rolar para o lado,** com a barra de rolagem oculta e degradê no lado em que há mais itens. Isso vale para toque, trackpad e Shift + roda.
 - **D14. O item atual DEVE ter uma pílula suave atrás,** com uma só pílula que desliza e muda de largura entre os links, e sempre DEVE ficar visível no menu.
   *Por quê:* a pílula não pode mudar de tamanho quando o negrito muda. Por isso cada rótulo reserva a largura em negrito com `.sh-label::after { content: attr(data-text); font-weight: 600; height: 0; visibility: hidden }`.
@@ -188,6 +203,19 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 - **D27. `lang="pt-BR"` DEVE estar em todo HTML, e todo texto visível DEVE estar em pt-BR:** rótulos, `aria-label`, `title`, placeholder, contador ("N de M", "Nenhum resultado") e `noscript`.
 - **D28. Os textos DEVEM descrever o que a página realmente faz.** Se a implementação mudar, o texto muda no mesmo PR. Exemplo: quando os cartões e as legendas passaram a ser `<Frost>` (PR #9), os textos que diziam "usa o `<Glass>`" e "a foto se curva atrás da legenda" tiveram de ser corrigidos logo depois do PR #10.
+- **D29. Nas páginas de contrato, o corpo de cada documento DEVE ser uma coluna de cartões de vidro fosco,** não um painel único. O título do documento (a âncora do menu), a fonte e os chips ficam na página; cada título `##` fica na página, acima dos seus cartões. `scripts/vite-docs.ts` monta os cartões no build:
+  - cada `###` abre um cartão e é o título dele;
+  - cada tabela e cada diagrama mermaid tem um cartão só seu (`.md-card-wide`), e a tabela rola para o lado dentro dele;
+  - cada regra (`- **D12. …**`) é um cartão (`.md-rule`);
+  - cada PR do histórico é um cartão (`.md-entry`);
+  - o resto entre dois desses fica num cartão só.
+
+  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (22px, saturate 1,4) e a hairline de `.glass::after`.
+- **D30. Nenhum texto DEVE passar da largura da tela ou do seu cartão:** ele quebra a linha.
+  - `body` tem `overflow-wrap: break-word`; `code` e `kbd`, `overflow-wrap: anywhere`; `p`, `li`, `dd`, `dt`, títulos e `figcaption` têm `min-width: 0` (dentro de flex e grid eles podem encolher).
+  - Blocos de código quebram dentro do cartão (`white-space: break-spaces`, `overflow-wrap: anywhere`), mantendo a indentação. No celular (≤ 700px), o código em linha usa `word-break: break-all`, porque o WebKit deixava o padding de 6px de um trecho no fim da linha passar 2–4px do cartão.
+  - Células de tabela quebram, com coluna de no mínimo 5,5em. Só uma tabela realmente larga (5 colunas ou mais no celular) rola para o lado, dentro do cartão. Os desenhos em texto (```` ```text ````: o desenho do menu e a árvore de pastas) mantêm as linhas e rolam para o lado dentro do cartão. Nada é cortado.
+  - O teste (`CHECKLIST`) confere 320px, 393px e paisagem em todas as páginas, no WebKit e no Chromium.
 
 ## 10. O que NÃO fazer (lições das iterações)
 
@@ -216,3 +244,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | N21 | "‹ Início" e outras páginas antes das seções no menu | As seções, que são o uso principal, ficavam fora da tela | PR #12 |
 | N22 | Copiar o texto de `docs/` para dentro de um componente | Dois textos envelhecem separados. Importe `docs/X.md?doc` | PR #12 |
 | N23 | Laço WebGL contínuo quando o WebGL roda no processador | No Lighthouse, TBT de ~147 s. Use `softwareGL()` e o fosco | PR #12 |
+| N24 | Links de outras páginas no fim da pílula, depois de um ponto | Misturava a navegação entre páginas com as seções. Use a lista ☰ | PR #12 → #13 |
+| N27 | Botão Início (casa) na pílula | Pedido de design: o Início é um item da lista ☰, e o ☰ fica na ponta esquerda | PR #13 |
+| N25 | Um documento inteiro num painel fosco só | Um bloco contínuo, difícil de ler e de achar. Use os cartões de D29 | PR #12 → #13 |
+| N26 | Seleção do controle segmentado com tinta fina e sombra dentro da lente | O filtro da lente deixava a pílula cinza, e o recorte da lente cortava a sombra numa borda escura. Use tinta quase opaca e a sombra no aro, fora da lente | PR #13 |

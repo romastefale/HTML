@@ -66,7 +66,7 @@ HTML/
     │   ├── Surfaces.tsx          # GlassPanel, GlassCaption, Picture, WIDTHS, asset() e URLs
     │   └── examples/             # GlassSwitch e GlassSlider, copiados sem mudança do examples/ do fork (MIT)
     ├── lib/
-    │   ├── pages.ts              # PAGES (o portal) e pageNav(): a ordem do menu
+    │   ├── pages.ts              # PAGES (o portal, a lista ☰) e pageNav(): as seções do menu
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
     │   ├── optics.ts             # óticas CONTROL, FROST e PANEL (todas com specular: 0)
@@ -160,6 +160,7 @@ Os dois chunks de contrato são quase só o texto de `docs/` já em HTML, então
 - **Títulos:** ids no estilo do GitHub com o prefixo do documento (`arquitetura-6-onde-há-glass-e-onde-há-fosco-em-css`). O `#` do documento vira o `h2` da seção (id = prefixo) e é o link da pílula; os demais níveis descem um (a página tem o próprio `h1`).
 - **Links:** um link para outro documento vira a página do site que o mostra, com a âncora; links para outros arquivos do repositório vão para o GitHub.
 - **Tabelas** ficam em `div.md-table` (rolagem lateral pelo teclado). **Código** fica em `pre.md-code` com `tabindex="0"`.
+- **Cartões (PR #13, DESIGN D29):** o plugin percorre os tokens de primeiro nível do `marked` em ordem (os slugs não mudam) e agrupa o HTML em `div.glass.tint-frost.md-card`. Um `##` (`<h3>`) fica fora, acima dos cartões; um `###` abre um cartão; tabela e mermaid ganham um cartão próprio (`.md-card-wide`); cada item de uma lista de regras (`- **D12. …**`, regex `^\*\*[A-Z]{1,2}\d+(\.\d+)*\.\s`) vira um cartão (`.md-rule`); a tabela do HISTORICO (primeira coluna "PR") vira um cartão por PR (`.md-entry`, com `dl`). O fosco dos cartões é CSS puro (`backdrop-filter` em `Docs.css`), com a hairline de `.glass::after`. `Docs.tsx` continua dividindo o corpo nos `<h3>` para a montagem adiada (P6).
 - **Mermaid:** o bloco vira uma `figure` com o código legível (é o fallback) e um botão "Desenhar diagrama". O botão importa o mermaid (`src/lib/mermaid.ts`, `securityLevel: "strict"`) e desenha no tema atual; ao trocar o tema, o diagrama é redesenhado.
 - Se um documento novo entrar em `docs/`, ele DEVE ganhar uma linha em `DOC_PAGES` (o build falha sem ela) e um lugar em `ContratoDesign.tsx` ou `ContratoArquitetura.tsx`.
 
@@ -210,26 +211,29 @@ flowchart TD
 
 ### 4.1 `SiteHeader` (menu flutuante)
 
-As props são `items: NavItem[]`, `label = "Principal"` e `searchScope = "conteudo"`. Cada página monta a lista com `pageNav(página, seções)` (`src/lib/pages.ts`):
+As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta página"` e `searchScope = "conteudo"`. Desde o PR #13, a pílula tem, da esquerda para a direita:
 
-1. primeiro as **seções da própria página** (links `#…`, que rolam dentro dela e seguem o scroll-spy);
-2. depois os **links de saída**, com `spy: false`: "‹ Início" (`back: true`, `aria-label="Voltar ao início"`, em toda página menos no Início) e as outras páginas de `PAGES`, com `aria-label` "… (outra página)";
-3. o primeiro link de saída leva `sep: true`: a pílula desenha um ponto pequeno antes dele (`[data-sep]::before`).
+1. o **botão ☰** (`button.sh-pages-btn`, `aria-expanded`, `aria-controls`), na ponta esquerda, em toda página;
+2. as **seções da própria página**, montadas com `pageNav(página, seções)` (`src/lib/pages.ts`): links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
+3. o botão de tema e a lupa.
 
-| Página | Seções | Depois do ponto |
-|---|---|---|
-| Início | Início (`#topo`), Páginas, Menu, Busca, Gradiente, Cartões, Céu noturno, Créditos | Amostra, Painel, Galeria, Contrato, Arquitetura |
-| Amostra | Lente (`#topo`), Componentes, Lugares, Suporte, Créditos | ‹ Início, Painel, Galeria, Contrato, Arquitetura |
-| Painel | Tela, Controles, Avisos, Widgets, Créditos | ‹ Início, Amostra, Galeria, Contrato, Arquitetura |
-| Galeria | Visor, Coleção, Como funciona, Créditos | ‹ Início, Amostra, Painel, Contrato, Arquitetura |
-| Contrato de design | Visão geral, Design, Tela cheia, Acessibilidade, Créditos | ‹ Início, Amostra, Painel, Galeria, Arquitetura |
-| Arquitetura e operação | Arquitetura, Desempenho, Deploy, Checklist, Histórico, Créditos | ‹ Início, Amostra, Painel, Galeria, Contrato |
+O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Frost>` com `PANEL`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`. Ela só é montada enquanto está aberta.
+
+| Página | Seções na pílula |
+|---|---|
+| Início | Início (`#topo`), Páginas, Menu, Busca, Gradiente, Cartões, Céu noturno, Créditos |
+| Amostra | Lente (`#topo`), Componentes, Lugares, Suporte, Créditos |
+| Painel | Tela, Controles, Avisos, Widgets, Créditos |
+| Galeria | Visor, Coleção, Como funciona, Créditos |
+| Contrato de design | Visão geral, Design, Tela cheia, Acessibilidade, Créditos |
+| Arquitetura e operação | Arquitetura, Desempenho, Deploy, Checklist, Histórico, Créditos |
 
 Estado interno:
 
 | Estado | Para quê |
 |---|---|
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
+| `pickerOpen` | monta a lista de páginas. Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
 | `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
 | `indicator {x, w}` e `animate` | posição e largura da pílula de seleção; não anima na primeira colocação |
 | `fade {start, end}` | degradê só no lado em que há mais links |

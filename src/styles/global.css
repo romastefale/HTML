@@ -74,6 +74,9 @@ html{
 }
 body{
   margin:0;
+  /* Text wraps on every page (PR #13): long words, URLs and paths break
+     instead of overflowing; code, which has no break points, can break anywhere. */
+  overflow-wrap:break-word;
   min-height:100vh;
   min-height:100dvh;
   color:var(--text);
@@ -127,6 +130,10 @@ code{font-family:ui-monospace,monospace;font-size:.9em} /* SF Mono in Safari; th
      white-frosted fills. */
   box-shadow:0 0 0 var(--rim-w) var(--rim);
 }
+
+code,kbd{overflow-wrap:anywhere}
+/* Flex and grid children may shrink below their content, so their text wraps. */
+:where(p, li, dd, dt, h1, h2, h3, h4, figcaption){min-width:0}
 
 /* Tints: always TRANSLUCENT (the library rule: the background is the tint). */
 .tint-ink{background:rgba(24,20,56,.46);color:#fff}
