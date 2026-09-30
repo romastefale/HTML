@@ -57,7 +57,11 @@
 @media (prefers-reduced-transparency:reduce){.site-header::before{display:none}}
 .sh-anchor{position:relative;min-width:0;max-width:min(100%, 1040px);pointer-events:auto}
 .sh-bar{
-  align-items:center;gap:14px;min-width:0;max-width:100%;height:52px;
+  /* One gap for the whole pill (D11.1): the theme↔search gap, 6px, also sits
+     between ☰ and the first link, between the links and before the theme
+     button. The links keep their own 13px padding for the selection pill. */
+  --pill-gap:6px;
+  align-items:center;gap:var(--pill-gap);min-width:0;max-width:100%;height:52px;
   padding:0 9px;border-radius:26px;
 }
 .tint-bar{background:var(--bar-bg);color:var(--bar-text)}
@@ -68,7 +72,7 @@
 }
 .sh-nav{
   position:relative;flex:0 1 auto;min-width:0;
-  display:flex;align-items:center;gap:2px;padding:2px 0;
+  display:flex;align-items:center;gap:var(--pill-gap);padding:2px 0;
   overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
   scrollbar-width:none;-webkit-overflow-scrolling:touch;
   --fade-l:0px;--fade-r:0px;
@@ -86,7 +90,6 @@
 }
 /* The pill's links are only this page's sections (D12); every page, Início
    included, is in the ☰ picker, whose button is the pill's left end. */
-.sh-pages-btn{margin-right:-6px}
 /* Selected: a soft glass pill behind the current link (one element that slides
    between links), no border of its own: the pill's only line is the uniform
    hairline of the menu itself (PR #6). */
@@ -100,7 +103,7 @@
 .sh-nav a:hover{color:var(--bar-text)}
 .sh-nav a[aria-current]{color:var(--bar-text);font-weight:600}
 .sh-nav a:not([aria-current]):hover{background:var(--hover-bg)}
-.sh-actions{flex:0 0 auto;display:flex;align-items:center;gap:6px;margin-left:auto}
+.sh-actions{flex:0 0 auto;display:flex;align-items:center;gap:var(--pill-gap);margin-left:auto}
 .sh-pill{
   flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;border-radius:999px;box-sizing:border-box;
@@ -155,7 +158,7 @@
 .sh-pick-here{display:inline-flex;align-items:center;width:15px;height:15px;color:var(--bar-sub)}
 @media (max-width:760px){
   .sh-anchor{flex:1 1 auto}
-  .sh-bar{width:100%;gap:8px;padding:0 8px}
+  .sh-bar{width:100%;padding:0 8px}
   .sh-nav a{padding:0 12px}
 }
 @media (prefers-reduced-motion:reduce){

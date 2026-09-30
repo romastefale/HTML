@@ -135,7 +135,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 |---|---|
 | Wrapper fixo | `.site-header`: `position: fixed; z-index: 70`, `top: calc(12px + env(safe-area-inset-top))`, lateral `max(12px, env(safe-area-inset-*))`, **transparente**, com `pointer-events: none` (só a pílula recebe eventos) |
 | Largura | `max-width: min(100%, 1040px)`. Em telas ≤ 760px, `width: 100%` |
-| Pílula | `.sh-bar`: `height: 52px`, `border-radius: 26px`, `padding: 0 9px`, `gap: 14px`. Em telas ≤ 760px, `padding: 0 8px` e `gap: 8px` |
+| Pílula | `.sh-bar`: `height: 52px`, `border-radius: 26px`, `padding: 0 9px`, `gap: var(--pill-gap)` (6px, D11.1). Em telas ≤ 760px, `padding: 0 8px` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões redondos | 34×34, `border: 1px solid var(--chip-border)`, `background: var(--chip-bg)`, `blur(14px)`, `scale(.96)` ao tocar |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
@@ -166,6 +166,8 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - a lupa, que é **o último botão à direita**.
 
   *Por quê:* pedido de design do PR #8.
+- **D11.1. Os itens da pílula DEVEM ter um espaçamento só, `--pill-gap: 6px`** (definido em `.sh-bar`): entre o ☰ e o primeiro link, entre os links, entre o último link visível e o tema, e entre o tema e a lupa. Os links mantêm o `padding` deles (a pílula de seleção não muda); NÃO use `margin` negativa nem outro `gap` nos itens.
+  *Por quê:* pedido de design no PR #16: o espaço entre o tema e a lupa era o certo e passou a valer para o menu todo. Antes eram 14px (8px no celular) entre os blocos e 2px entre os links.
 - **D12. Os links da pílula DEVEM ser só as seções da página** (os que rolam dentro dela). Os links para outras páginas NÃO DEVEM ficar na pílula: eles ficam na lista de páginas (D12.2). `pageNav()` (`src/lib/pages.ts`) monta a lista de seções; a lista de páginas vem de `PAGES`. Só seções recebem seleção e scroll-spy.
   *Por quê:* no PR #12 as outras páginas ficavam no fim da pílula, depois de um ponto; no PR #13 elas saíram da pílula, a pedido, para que ela role só pelas seções e a navegação entre páginas fique num lugar próprio.
 - **D12.1. NÃO DEVE haver botão Início (casa) nem link para a página inicial na pílula.** O Início é só um item da lista ☰, como as outras páginas. (Na própria página inicial, o link de seção "Início" leva ao `#topo` dela: é uma seção, não uma página.)
