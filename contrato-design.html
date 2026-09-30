@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<!-- Android Chrome paints its top bar solid in theme-color: it equals the top
+     edge of the page gradient (--page-edge in src/styles/global.css; PAGE_EDGE
+     in src/lib/theme.ts), so the bar reads as the page. Safari 26 ignores
+     theme-color and tints its bars from the page itself (body/html
+     background-color; the floating menu never touches the edge). The inline
+     script below overrides both tags with the chosen mode. -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#8b82e6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1646">
+<!-- No icon file: an empty data: icon stops the automatic /favicon.ico request
+     (a 404 at the domain root, romastefale.github.io/favicon.ico). -->
+<link rel="icon" href="data:,">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Contrato">
+<title>Contrato de design · Interface de vidro</title>
+<meta name="description" content="O contrato de design da interface de vidro: fundo, hairline, fosco, menu, pesquisa, tema, tela cheia e acessibilidade, lidos de docs/.">
+<!-- Theme before first paint (no flash): the stored choice (localStorage
+     "lg-theme", as in the fork's site/src/theme.ts), else the system setting.
+     It also sets theme-color to the page edge colour for that mode. -->
+<script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("lg-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.setAttribute("data-theme",t);d.style.colorScheme=t;var c=t==="dark"?"#1b1646":"#8b82e6",m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute("content",c)})()</script>
+<!-- First paint (before the CSS/JS bundle): html/body already in the mode's colour. -->
+<style>html,body{margin:0;background-color:#8b82e6}html[data-theme=dark],html[data-theme=dark] body{background-color:#1b1646}</style>
+</head>
+<body>
+<div id="root"></div>
+<noscript><div class="noscript"><strong>Esta página precisa de JavaScript.</strong> Ela é um app React que mostra os documentos de docs/ com vidro fosco em CSS; o texto também está no repositório, em docs/. Ative o JavaScript para ver o conteúdo.</div></noscript>
+<script type="module" src="/src/contrato-design.tsx"></script>
+</body>
+</html>

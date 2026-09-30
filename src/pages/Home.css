@@ -28,3 +28,15 @@ kbd{font:600 .85em ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 6px;b
 .photo .cap{display:block;padding:6px 11px 7px;font-size:11.5px;line-height:1.35}
 .foot{padding:16px 18px;font-size:13.5px;line-height:1.45;color:var(--faint)}
 .foot a{color:var(--text);font-weight:600}
+/* The portal: one frosted card per page (src/lib/pages.ts). */
+.avatar.alt3{background:linear-gradient(135deg, #64d2ff, #5e5ce6)}
+.avatar.alt4{background:linear-gradient(135deg, #ff375f, #bf5af2)}
+.portal{display:flex;flex-direction:column;gap:10px}
+.portal-title{margin:6px 4px 0;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.portal-grid{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.portal-card{border-radius:20px}
+.portal-link{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;text-decoration:none;color:inherit;border-radius:inherit;min-height:44px}
+.portal-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.portal-text .card-body{font-size:13.5px;line-height:1.4}
+.portal-go{font-size:26px;line-height:1;color:var(--faint);padding:0 2px}
+.portal-link:active{transform:scale(.99)}

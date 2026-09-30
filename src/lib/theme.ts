@@ -63,3 +63,17 @@ export const useTheme = () => {
   }, []);
   return { theme, toggle };
 };
+
+/** The current mode for components other than the toggle (it follows
+ *  <html data-theme>, whoever changes it). */
+export const useThemeName = (): ThemeName => {
+  const read = (): ThemeName => (document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const [t, setT] = useState<ThemeName>(() => (typeof document !== "undefined" ? read() : "light"));
+  useEffect(() => {
+    const mo = new MutationObserver(() => setT(read()));
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    setT(read());
+    return () => mo.disconnect();
+  }, []);
+  return t;
+};

@@ -22,7 +22,8 @@
 | Toque num link de seção | seleciona na hora e pausa o spy por 700 ms. Enquanto a página rola, o prazo se renova por 220 ms |
 | Foco por teclado | `onFocus` rola o link para dentro da barra, com 12px de folga, sem rolar a página |
 | Rolagem lateral | toque e trackpad nativos. **Shift + roda** é tratado em JS (listener `passive: false`), porque WebKit e Gecko nem sempre fazem isso |
-| Link de outra página | "‹ Início" / "Amostra" não entram no spy (não são `#âncora`) |
+| Ordem | primeiro as seções da página, depois um ponto (decorativo, `::before`) e os links de outras páginas (DESIGN D12) |
+| Link de outra página | "‹ Início" e as outras páginas têm `spy: false`: nunca recebem `aria-current` nem a pílula de seleção. O `aria-label` diz "… (outra página)" |
 
 - **I4. O item atual DEVE ser comunicado por `aria-current`, e não só pela cor ou pela pílula.**
 - **I5. O item com foco ou selecionado DEVE ficar sempre visível dentro da barra.**
@@ -116,9 +117,22 @@ stateDiagram-v2
 | `prefers-color-scheme` | Tema padrão enquanto o usuário não escolhe. As mudanças do sistema são seguidas até haver escolha salva |
 | `(hover: none)` | A dica do hero diz "Toque no título para guiar a lente." (senão, "Mova o cursor…") |
 
-- **I10. Movimento e transparência reduzidos DEVEM ser respeitados em todo componente novo.**
+- **I10. Movimento e transparência reduzidos DEVEM ser respeitados em todo componente novo.** No painel, a lente do segmentado pula direto para a opção (sem mola). Na galeria, a apresentação começa pausada e sem zoom lento.
 
-## 6. Toque
+## 6. Componentes das páginas de exemplo (PR #12)
+
+| Componente | Papel e rótulos | Teclado |
+|---|---|---|
+| Segmentado do painel ("Hora do dia") | `role="radiogroup"` com `aria-label`; cada opção é `role="radio"` com `aria-checked`; só a marcada tem `tabIndex=0` (roving tabindex) | setas ← → ↑ ↓ trocam a opção e movem o foco |
+| Chaves e controle deslizante (examples/ do fork) | `role="switch"` / `input type="range"` da receita, com `aria-label` em pt-BR ("Widgets na tela", "Crédito da foto na tela", "Brilho do papel de parede"); o valor aparece num `<output aria-live="polite">` | Espaço / setas, como na receita |
+| Barra de abas do painel | `<nav aria-label="Seções do painel (barra de abas)">`, links `#âncora`, `aria-current="location"` na aba atual; `data-search-skip` | Tab entre as abas; o spy segue a rolagem |
+| Visor da galeria | botões "Foto anterior", "Pausar/Reproduzir a apresentação" (`aria-pressed`), "Próxima foto"; contador "N de 9" em `aria-live="polite"`; o canvas e os discos são `aria-hidden` | ← → trocam a foto quando o foco está no visor |
+| Chips da coleção | `role="toolbar"` com `aria-label="Filtrar a coleção"`; cada chip é um botão com `aria-pressed`; a contagem é `aria-live` | Tab |
+| Folha da galeria | `<dialog>` modal (`showModal`), `aria-labelledby` no título; o foco vai para "Fechar" ao abrir e volta para a foto da grade ao fechar; toque fora da folha fecha | `Esc` fecha |
+| Lupa da folha | a foto é focável, com `aria-label` "Foto com lupa: arraste ou use as setas para mover a lupa" | setas movem a lupa (4% por toque; 10% com Shift) |
+| Documentos nas páginas de contrato | cada documento é um `article` com `aria-labelledby` no título; tabelas e blocos de código são regiões roláveis com `tabindex="0"`; o índice de chips é `data-search-skip` | Tab entra na tabela ou no código para rolar com as setas |
+
+## 7. Toque
 
 - `-webkit-tap-highlight-color: transparent` nos links e botões do menu, com `scale(.96)` ao pressionar os botões redondos.
 - Na lente, um toque posiciona e a segura por 1,6 s; o `pointercancel` solta na hora.

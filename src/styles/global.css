@@ -82,7 +82,9 @@ body{
   background-attachment:fixed; /* iOS ignores it (scrolls); the edges still match */
   background-repeat:no-repeat;
   background-size:100% 100%;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  /* system-ui first: SF Pro on Apple, Roboto/Segoe elsewhere, and it always
+     resolves, so no missing family is looked up (docs/DESEMPENHO.md P7). */
+  font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
@@ -92,7 +94,7 @@ a{color:inherit}
 picture{display:contents}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:10px}
-code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:.9em}
+code{font-family:ui-monospace,monospace;font-size:.9em} /* SF Mono in Safari; the default mono elsewhere (P7) */
 .skip{
   position:absolute;left:12px;top:-60px;z-index:100;
   padding:10px 14px;border-radius:12px;background:#111;color:#fff;text-decoration:none;

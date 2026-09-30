@@ -1,6 +1,6 @@
 # Arquitetura
 
-> Estado descrito: `main` em `aab3bc1` (merge do PR #9). As versões vêm de `package.json` e `pnpm-lock.yaml`.
+> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11). As versões vêm de `package.json` e `pnpm-lock.yaml`.
 
 ## 1. Stack
 
@@ -13,6 +13,8 @@
 | Build | `@vitejs/plugin-react` | `^6.0.0` | **6.1.1** |
 | Tipos | `typescript` | `^5.7.0` | **5.9.3** |
 | Tipos | `@types/react` / `@types/react-dom` | `^19.2.0` | **19.3.0** / **19.3.0** |
+| Diagramas | `mermaid` | `11.17.2` (exato) | **11.17.2** (só num chunk carregado sob demanda nas páginas de contrato) |
+| Build | `marked` (dev) | `18.0.14` (exato) | **18.0.14** (compila `docs/*.md` no build; não vai para o navegador) |
 | Gerenciador | pnpm | `"packageManager": "pnpm@10.28.2"` | lockfile `lockfileVersion: '9.0'` |
 | Runtime de build | Node | workflow: `node-version: 22` | o Vite 8.3.1 exige `^20.19.0 \|\| >=22.12.0` |
 
@@ -27,42 +29,56 @@
 - **A4. Tailwind e outros frameworks de CSS NÃO DEVEM ser adicionados.**
   *Por quê:* o `site/` do fork usa Tailwind só "for the SITE only", e a biblioteca "works with any CSS". Aqui o CSS é simples, com um arquivo por componente ou página.
 
-`tsconfig.json`: `target`/`lib` ES2020 + DOM, `moduleResolution: "bundler"`, `jsx: "react-jsx"`, `strict: true`, `noEmit: true`, `types: ["vite/client"]`, `include: ["src"]`. A pasta `docs/` fica fora do typecheck e do build.
+`tsconfig.json`: `target`/`lib` ES2020 + DOM, `moduleResolution: "bundler"`, `jsx: "react-jsx"`, `strict: true`, `noEmit: true`, `types: ["vite/client"]`, `include: ["src"]`. A pasta `docs/` fica fora do typecheck; desde o PR #12 ela **entra no build** como conteúdo, pelo plugin `scripts/vite-docs.ts` (§3.1).
 
 ## 2. Estrutura de pastas
 
 ```text
 HTML/
 ├── .github/workflows/pages.yml   # build + deploy no GitHub Pages (Actions)
-├── docs/                         # este contrato (não entra no build)
-├── index.html                    # entrada do Vite: página inicial
+├── docs/                         # este contrato; também é o conteúdo das páginas de contrato
+├── index.html                    # entrada do Vite: página inicial (portal)
 ├── liquid-glass-sample.html      # entrada do Vite: amostra
+├── painel.html                   # entrada do Vite: painel de widgets
+├── galeria.html                  # entrada do Vite: galeria de lugares
+├── contrato-design.html          # entrada do Vite: contrato de design (docs/)
+├── contrato-arquitetura.html     # entrada do Vite: arquitetura e operação (docs/)
 ├── package.json / pnpm-lock.yaml
 ├── tsconfig.json
-├── vite.config.ts                # base /HTML/, duas entradas, portas 4178/4179
+├── vite.config.ts                # base /HTML/, seis entradas, plugin de docs, portas 4178/4179
 ├── public/                       # copiado como está para dist/
 │   └── img/
 │       ├── CREDITS.md            # autor, licença e fonte de cada foto
-│       ├── *.jpg                 # 6 originais (1600 px de largura, fallback)
-│       └── r/                    # 48 variantes: {nome}-{480,720,1080,1440}.{avif,webp}
+│       ├── *.jpg                 # 12 originais (1600 px de largura, fallback)
+│       └── r/                    # 96 variantes: {nome}-{480,720,1080,1440}.{avif,webp}
 ├── scripts/
-│   └── make-responsive-images.py # gera public/img/r/ a partir dos JPEG
+│   ├── make-responsive-images.py # gera public/img/r/ a partir dos JPEG
+│   └── vite-docs.ts              # plugin: docs/*.md?doc → HTML no build (marked)
 └── src/
-    ├── home.tsx                  # monta <Home/> em #root
-    ├── sample.tsx                # monta <Sample/> em #root
+    ├── home.tsx · sample.tsx · painel.tsx · galeria.tsx
+    ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
+    ├── docs.d.ts                 # tipo do import *.md?doc
     ├── components/
-    │   ├── SiteHeader.tsx/.css   # menu flutuante (links, indicador, tema, lupa)
+    │   ├── SiteHeader.tsx/.css   # menu flutuante (seções, ponto, páginas, tema, lupa)
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
     │   ├── Frost.tsx             # superfície fosca em CSS puro (blur + saturate)
     │   ├── GlassPill.tsx         # botão de vidro: <Glass> no Blink, <Frost> nos demais
-    │   └── Surfaces.tsx          # GlassPanel, GlassCaption, Picture, asset() e URLs
+    │   ├── Surfaces.tsx          # GlassPanel, GlassCaption, Picture, WIDTHS, asset() e URLs
+    │   └── examples/             # GlassSwitch e GlassSlider, copiados sem mudança do examples/ do fork (MIT)
     ├── lib/
+    │   ├── pages.ts              # PAGES (o portal) e pageNav(): a ordem do menu
+    │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
+    │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
     │   ├── optics.ts             # óticas CONTROL, FROST e PANEL (todas com specular: 0)
-    │   ├── theme.ts              # useTheme, applyTheme, THEME_KEY, PAGE_EDGE
+    │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
     ├── pages/
-    │   ├── Home.tsx/.css         # feed de cartões e fotos
-    │   └── Sample.tsx/.css       # lente do título, cartões refract, fotos, notas
+    │   ├── Home.tsx/.css         # portal: cartões das páginas, feed e fotos
+    │   ├── Sample.tsx/.css       # lente do título, cartões refract, fotos, notas
+    │   ├── Painel.tsx/.css       # segmentado com lente, widgets refract, chaves, avisos, abas
+    │   ├── Galeria.tsx/.css      # visor WebGL com lentes, coleção com chips, folha com lupa
+    │   ├── Docs.tsx/.css         # DocsPage: renderiza os documentos compilados
+    │   └── ContratoDesign.tsx · ContratoArquitetura.tsx  # quais documentos e fotos cada página mostra
     └── styles/
         └── global.css            # fundo, hairline, tintas, foco, variáveis
 ```
@@ -74,13 +90,17 @@ HTML/
 ```ts
 export default defineConfig({
   base: "/HTML/",                                   // site de projeto do GitHub Pages
-  plugins: [react()],
+  plugins: [react(), docsPlugin()],                 // docsPlugin: scripts/vite-docs.ts
   resolve: { dedupe: ["react", "react-dom"] },
   build: {
     rollupOptions: {
       input: {
         index: entry("./index.html"),
         sample: entry("./liquid-glass-sample.html"),
+        painel: entry("./painel.html"),
+        galeria: entry("./galeria.html"),
+        "contrato-design": entry("./contrato-design.html"),
+        "contrato-arquitetura": entry("./contrato-arquitetura.html"),
       },
     },
   },
@@ -90,7 +110,8 @@ export default defineConfig({
 ```
 
 - **A5. Cada página DEVE ser uma entrada HTML própria em `rollupOptions.input`.** NÃO DEVE haver roteador no cliente.
-  *Por quê:* as URLs públicas (`/HTML/`, `/HTML/index.html`, `/HTML/liquid-glass-sample.html`) existiam antes do React e continuaram iguais no PR #4. Com uma entrada por página, cada uma carrega só o JS de que precisa (veja [DESEMPENHO.md](DESEMPENHO.md)).
+  *Por quê:* as URLs públicas (`/HTML/`, `/HTML/index.html`, `/HTML/liquid-glass-sample.html`) existiam antes do React e continuaram iguais no PR #4. Com uma entrada por página, cada uma carrega só o JS de que precisa (veja [DESEMPENHO.md](DESEMPENHO.md)). As páginas novas (PR #12) seguem a mesma regra, com nomes curtos em pt-BR: `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`.
+- **A5.1. Toda página DEVE estar em `PAGES` (`src/lib/pages.ts`)**, com `href`, rótulo do menu, título e resumo. O cartão do portal e os links do menu saem dessa lista.
 - **A6. `base` DEVE ser o caminho do repositório** (`/HTML/`), e todo caminho de asset em runtime DEVE passar por `import.meta.env.BASE_URL`, via `asset()` em `Surfaces.tsx`:
 
   ```ts
@@ -104,48 +125,83 @@ export default defineConfig({
 - **A7. `resolve.dedupe: ["react", "react-dom"]` DEVE ser mantido.**
   *Por quê:* a biblioteca declara React como `peerDependency` (`>=18`). O dedupe garante uma cópia só de React no bundle.
 
-Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` inline com a cor de fundo. Os dois rodam antes do bundle (veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md)). O `<body>` tem só `<div id="root">`, um `<noscript>` em pt-BR e `<script type="module" src="/src/{home,sample}.tsx">`.
+Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` inline com a cor de fundo. Os dois rodam antes do bundle (veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md)). O `<body>` tem só `<div id="root">`, um `<noscript>` em pt-BR e `<script type="module" src="/src/{página}.tsx">`.
 
-**Chunks gerados** (`pnpm build` em `aab3bc1`):
+**Chunks gerados** (`pnpm build` no PR #12):
 
-| Arquivo | Bruto | gzip | Conteúdo |
-|---|---|---|---|
-| `assets/Surfaces-*.js` | 233,28 kB | 73,44 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces e tema |
-| `assets/index-*.js` | 5,88 kB | 2,35 kB | página inicial |
-| `assets/sample-*.js` | 62,38 kB | 20,65 kB | amostra, **incluindo `@samasante/liquid-glass`** |
-| `assets/Surfaces-*.css` | 11,24 kB | 3,36 kB | `global.css`, `SiteHeader.css` e `PageSearch.css` |
-| `assets/index-*.css` | 1,80 kB | 0,76 kB | `Home.css` |
-| `assets/sample-*.css` | 4,65 kB | 1,57 kB | `Sample.css` |
+| Arquivo | Bruto | gzip | Conteúdo | Carregado por |
+|---|---|---|---|---|
+| `assets/pages-*.js` | 235,33 kB | 74,21 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces, `pages.ts` e tema | todas |
+| `assets/index-*.js` | 7,13 kB | 2,73 kB | portal | Início |
+| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`** | Amostra, Painel e Galeria |
+| `assets/sample-*.js` | 14,40 kB | 5,35 kB | amostra | Amostra |
+| `assets/painel-*.js` | 34,70 kB | 11,11 kB | painel, com `GlassSwitch` e `GlassSlider` | Painel |
+| `assets/galeria-*.js` | 19,12 kB | 7,18 kB | galeria | Galeria |
+| `assets/device-*.js` | 2,69 kB | 1,23 kB | `lib/device.ts` | Painel, Galeria e contratos |
+| `assets/Docs-*.js` | 6,73 kB | 3,07 kB | `DocsPage` | contratos |
+| `assets/contrato-design-*.js` | ~66 kB | ~20 kB | README, DESIGN-CONTRATO, TELA-CHEIA-E-BARRAS e ACESSIBILIDADE já em HTML | Contrato de design |
+| `assets/contrato-arquitetura-*.js` | ~107 kB | ~32 kB | ARQUITETURA, DESEMPENHO, DEPLOY, CHECKLIST e HISTORICO já em HTML | Arquitetura e operação |
+| `assets/mermaid.core-*.js` e dependências | ~3,4 MB no total | — | o renderizador de diagramas | só quando alguém toca em "Desenhar diagrama" |
+| `assets/pages-*.css` | 11,39 kB | 3,37 kB | `global.css`, `SiteHeader.css` e `PageSearch.css` | todas |
+
+Os dois chunks de contrato são quase só o texto de `docs/` já em HTML, então o tamanho muda a cada edição dos documentos (por isso os valores aproximados). O Vite avisa que alguns chunks do mermaid passam de 500 kB. O aviso é esperado: eles nunca entram no carregamento inicial (não há `modulepreload` para eles).
+
+### 3.1 `docs/` como conteúdo (`scripts/vite-docs.ts`)
+
+- **A15. `docs/*.md` DEVE ser a fonte única do texto das páginas de contrato.** O plugin compila o Markdown no build. Uma página importa `docs/X.md?doc` e recebe `{ id, title, titleHtml, file, html, headings }`. Não há parser de Markdown no navegador.
+  *Por quê:* um texto copiado para dentro do site envelheceria separado do contrato. Com o import, editar o `.md` atualiza o site no próximo deploy.
+- `DOC_PAGES` diz em qual página cada documento aparece e o prefixo dos seus ids:
+
+  | Página | Documentos (prefixo) |
+  |---|---|
+  | `contrato-design.html` | README (`visao-geral`), DESIGN-CONTRATO (`design`), TELA-CHEIA-E-BARRAS (`tela-cheia`), ACESSIBILIDADE-E-INTERACAO (`acessibilidade`) |
+  | `contrato-arquitetura.html` | ARQUITETURA (`arquitetura`), DESEMPENHO (`desempenho`), DEPLOY (`deploy`), CHECKLIST-VERIFICACAO (`checklist`), HISTORICO (`historico`) |
+
+- **Títulos:** ids no estilo do GitHub com o prefixo do documento (`arquitetura-6-onde-há-glass-e-onde-há-fosco-em-css`). O `#` do documento vira o `h2` da seção (id = prefixo) e é o link da pílula; os demais níveis descem um (a página tem o próprio `h1`).
+- **Links:** um link para outro documento vira a página do site que o mostra, com a âncora; links para outros arquivos do repositório vão para o GitHub.
+- **Tabelas** ficam em `div.md-table` (rolagem lateral pelo teclado). **Código** fica em `pre.md-code` com `tabindex="0"`.
+- **Mermaid:** o bloco vira uma `figure` com o código legível (é o fallback) e um botão "Desenhar diagrama". O botão importa o mermaid (`src/lib/mermaid.ts`, `securityLevel: "strict"`) e desenha no tema atual; ao trocar o tema, o diagrama é redesenhado.
+- Se um documento novo entrar em `docs/`, ele DEVE ganhar uma linha em `DOC_PAGES` (o build falha sem ela) e um lugar em `ContratoDesign.tsx` ou `ContratoArquitetura.tsx`.
 
 ## 4. Componentes e fluxo de dados
 
 ```mermaid
 flowchart TD
-  subgraph Entradas["Entradas do Vite"]
-    IH["index.html<br/>script de tema inline"] --> HT["src/home.tsx"]
-    SH["liquid-glass-sample.html<br/>script de tema inline"] --> ST["src/sample.tsx"]
+  subgraph Entradas["Entradas do Vite (uma por página)"]
+    IH["index.html"] --> HT["src/home.tsx"]
+    SH["liquid-glass-sample.html"] --> ST["src/sample.tsx"]
+    PH["painel.html"] --> PT["src/painel.tsx"]
+    GH["galeria.html"] --> GT["src/galeria.tsx"]
+    CH["contrato-design.html<br/>contrato-arquitetura.html"] --> CT["src/contrato-*.tsx"]
   end
   HT --> HOME["pages/Home.tsx"]
   ST --> SAMPLE["pages/Sample.tsx"]
+  PT --> PAINEL["pages/Painel.tsx"]
+  GT --> GALERIA["pages/Galeria.tsx"]
+  CT --> DOCS["pages/Docs.tsx · DocsPage"]
+  MD[("docs/*.md")] -->|"scripts/vite-docs.ts<br/>no build"| CT
 
   HOME --> HEADER["components/SiteHeader.tsx"]
   SAMPLE --> HEADER
+  PAINEL --> HEADER
+  GALERIA --> HEADER
+  DOCS --> HEADER
+  HEADER --> NAV["lib/pages.ts · pageNav"]
   HEADER --> SEARCH["components/PageSearch.tsx"]
   HEADER --> THEME["lib/theme.ts · useTheme"]
   HEADER --> FROST["components/Frost.tsx"]
-
   HOME --> SURF["components/Surfaces.tsx<br/>GlassPanel · GlassCaption · Picture"]
-  SAMPLE --> SURF
   SURF --> FROST
 
-  SAMPLE --> PILL["components/GlassPill.tsx"]
-  SAMPLE --> HERO["Hero: lente no lugar"]
-  SAMPLE --> BAND["BandCard: refract + behind"]
-
-  PILL -->|"só Blink"| LIB[("@samasante/liquid-glass<br/>Glass · glassValue")]
-  PILL -->|"WebKit/Gecko"| FROST
-  HERO --> LIB
-  BAND --> LIB
+  SAMPLE --> LIB[("@samasante/liquid-glass<br/>chunk próprio")]
+  PAINEL --> LIB
+  PAINEL --> EX["components/examples<br/>GlassSwitch · GlassSlider"]
+  EX --> LIB
+  GALERIA --> LIB
+  PAINEL --> DEV["lib/device.ts"]
+  GALERIA --> DEV
+  DOCS --> DEV
+  DOCS -.->|"sob demanda"| MER[("mermaid")]
 
   THEME -->|"data-theme, color-scheme,<br/>meta theme-color"| DOC[("document.documentElement")]
   THEME -->|"lg-theme"| LS[("localStorage")]
@@ -154,19 +210,27 @@ flowchart TD
 
 ### 4.1 `SiteHeader` (menu flutuante)
 
-As props são `items: NavItem[]`, `label = "Principal"` e `searchScope = "conteudo"`. Cada página passa a própria lista `NAV`:
+As props são `items: NavItem[]`, `label = "Principal"` e `searchScope = "conteudo"`. Cada página monta a lista com `pageNav(página, seções)` (`src/lib/pages.ts`):
 
-| Página | Itens |
-|---|---|
-| Início | Início (`#topo`), Amostra (link de página), Menu, Busca, Gradiente, Cartões, Céu noturno, Créditos |
-| Amostra | ‹ Início (`back: true`, `aria-label="Voltar ao início"`), Lente (`#topo`), Componentes, Lugares, Suporte, Créditos |
+1. primeiro as **seções da própria página** (links `#…`, que rolam dentro dela e seguem o scroll-spy);
+2. depois os **links de saída**, com `spy: false`: "‹ Início" (`back: true`, `aria-label="Voltar ao início"`, em toda página menos no Início) e as outras páginas de `PAGES`, com `aria-label` "… (outra página)";
+3. o primeiro link de saída leva `sep: true`: a pílula desenha um ponto pequeno antes dele (`[data-sep]::before`).
+
+| Página | Seções | Depois do ponto |
+|---|---|---|
+| Início | Início (`#topo`), Páginas, Menu, Busca, Gradiente, Cartões, Céu noturno, Créditos | Amostra, Painel, Galeria, Contrato, Arquitetura |
+| Amostra | Lente (`#topo`), Componentes, Lugares, Suporte, Créditos | ‹ Início, Painel, Galeria, Contrato, Arquitetura |
+| Painel | Tela, Controles, Avisos, Widgets, Créditos | ‹ Início, Amostra, Galeria, Contrato, Arquitetura |
+| Galeria | Visor, Coleção, Como funciona, Créditos | ‹ Início, Amostra, Painel, Contrato, Arquitetura |
+| Contrato de design | Visão geral, Design, Tela cheia, Acessibilidade, Créditos | ‹ Início, Amostra, Painel, Galeria, Arquitetura |
+| Arquitetura e operação | Arquitetura, Desempenho, Deploy, Checklist, Histórico, Créditos | ‹ Início, Amostra, Painel, Galeria, Contrato |
 
 Estado interno:
 
 | Estado | Para quê |
 |---|---|
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
-| `active` | índice da seção atual (scroll-spy) → `aria-current="location"` |
+| `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
 | `indicator {x, w}` e `animate` | posição e largura da pílula de seleção; não anima na primeira colocação |
 | `fade {start, end}` | degradê só no lado em que há mais links |
 | `pinned` (ref) | depois de um toque em um link, pausa o scroll-spy por 700 ms. O prazo se renova por 220 ms enquanto a página rola, para a seleção não voltar no meio da rolagem |
@@ -175,7 +239,7 @@ Os detalhes de interação estão em [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILID
 
 ### 4.2 `PageSearch` (pesquisa)
 
-`PageSearch` fica sempre montado dentro da pílula e recebe `open`. Com `open = false`, ele fica `inert` e invisível. Ele procura nos nós de texto de `#conteudo` (o `<main>` das duas páginas).
+`PageSearch` fica sempre montado dentro da pílula e recebe `open`. Com `open = false`, ele fica `inert` e invisível. Ele procura nos nós de texto de `#conteudo` (o `<main>` de cada página). Blocos marcados com `data-search-skip` (barras de filtro e índices de seções) ficam de fora.
 
 - A busca começa a partir de 2 caracteres, com debounce de 160 ms.
 - As ocorrências são destacadas com a CSS Custom Highlight API. Onde ela não existe, caixas são desenhadas por cima do texto (portal em `body`).
@@ -189,13 +253,15 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 
 ### 4.4 Páginas
 
-- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`) e o rodapé em `GlassPanel`.
+- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, a seção `#paginas` ("Páginas do portal", um cartão-link `GlassPanel` para cada página de `PAGES`), seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`) e o rodapé em `GlassPanel`.
 - **`Sample`:**
   - um `Hero` com a lente no lugar e duas `GlassPill`;
   - a seção de componentes, com três `BandCard` sobre `.band` e três `GlassPill`;
   - a seção de lugares, com três `Place` (`Picture` + `GlassCaption`);
   - a seção de suporte, com quatro `Note` (`GlassPanel`);
   - o rodapé em `GlassPanel`.
+
+- **`Painel`** (§4.7), **`Galeria`** (§4.8) e **`DocsPage`** (§4.9) usam o mesmo esqueleto: link de pular, `SiteHeader`, `main#conteudo` e rodapé de créditos.
 
 ### 4.5 A lente do título (`Hero`)
 
@@ -223,6 +289,32 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 - A ótica é `PANEL_LENS` (`mapSize: 256`, `strength: 0.17`, `specular: 0`…) com `brightnessInFilter`.
 - O conteúdo nítido fica por cima, em `.gcard-body`.
 
+### 4.7 Painel (`pages/Painel.tsx`)
+
+- **Palco `#tela`:** um papel de parede (`Picture`) que muda com a hora do dia (manhã: Lençóis; tarde: Rio; noite: aurora), com brilho ajustável.
+- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`SEG_LENS`, `specular: 0`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
+- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `WIDGET_LENS` (receita do `examples/GlassNotification.tsx`, `specular: 0`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
+- **Central de controles `#controles`:** duas `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={{ specular: 0 }}` e `filterResolution` do aparelho.
+- **Avisos e widgets:** tudo fosco em CSS (`GlassPanel`): notificações com "Limpar avisos", calendário, baterias, tarefas e previsão de 5 dias.
+- **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com indicador deslizante e `useSectionSpy`. Ela repete as seções; a pílula do topo continua igual à das outras páginas.
+- **Montagem adiada (P6):** a lente do segmentado e os widgets montam um por vez depois da primeira pintura (`useDeferredMount`); as chaves e o controle deslizante montam quando a central chega perto da tela (`useNear`), sobre chaves planas do mesmo tamanho, que já funcionam (`role="switch"`).
+
+### 4.8 Galeria (`pages/Galeria.tsx`)
+
+- **Visor `#visor`:** uma apresentação de 9 fotos. O pôster é um `Picture`. Quando o visor está na tela, a aba visível, a apresentação tocando, a primeira foto decodificada **e o WebGL roda na GPU**, monta um `<Glass draw lenses maxDpr={1}>` (modo `draw` + `lenses` do README do fork): o `draw` pinta a foto com zoom lento e transição, e o WebGL desenha quatro lentes (voltar, tocar/pausar, avançar e a barra de progresso), com óticas do `GlassVideoControls` do fork e `specular: 0`. O canvas usa a mesma variante (largura e formato) que o pôster escolheu.
+- **Sem lentes:** pausado, fora da tela, com movimento reduzido ou com WebGL em software (`softwareGL()`), os controles são discos e barra `<Frost>`; sem GPU, a apresentação começa pausada e, ao tocar, troca as fotos com um temporizador simples.
+- **Coleção `#colecao`:** barra de chips fixa (`<Frost>`, `aria-pressed`) com Todas/Brasil/Mundo/À noite e uma grade de fotos com `GlassCaption`.
+- **Folha:** um `<dialog>` modal com a foto e uma **lupa** `<Glass refract>` sobre uma cópia ampliada 1,8× (`LOUPE_LENS`), movida por ponteiro ou setas. A folha tem tinta mais densa, porque o WebKit não desfoca atrás de um `<dialog>` na top layer.
+
+### 4.9 Páginas de contrato (`pages/Docs.tsx`)
+
+- `ContratoDesign.tsx` e `ContratoArquitetura.tsx` só escolhem os documentos, os rótulos da pílula e as fotos; `DocsPage` renderiza.
+- **Topo:** uma foto de skyline (`Picture` com `fetchpriority="high"`) com um `GlassPanel` escuro por cima (título, resumo e crédito).
+- **Cada documento** é um `GlassPanel` com o link "Fonte", o título (`h2`, id = prefixo, alvo da pílula), um índice de chips das seções e o corpo.
+- **O corpo** é dividido nas seções do documento; cada parte monta num intervalo ocioso, na ordem da página (`useDeferredMount`), com a altura estimada reservada até lá. Um link direto para uma seção (`#arquitetura-…`) rola até ela quando a parte monta.
+- **Entre documentos**, fotos de skylines com `GlassCaption` (autor e licença).
+- Nenhum `<Glass>`: a biblioteca não é baixada.
+
 ## 5. Como a biblioteca é consumida
 
 - **A8. A biblioteca DEVE vir do npm** (`"@samasante/liquid-glass": "0.1.1"`).
@@ -233,33 +325,52 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
   - O fork **não versiona `dist/`** (está no `.gitignore`) e não tem script `prepare`. Instalado via GitHub, o pacote viria vazio.
   - O `dist/` publicado no npm é **byte a byte idêntico** ao build do fork em `4e7b769`. Foi conferido no PR #4 e de novo ao escrever este documento: `cmp` de `dist/index.js` e `dist/index.d.ts` depois de `pnpm build` no fork. Ou seja, é o código do fork, com integridade fixada pelo lockfile.
   - O bundle vendorizado (PRs #1–#3) foi removido no PR #4.
-- **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue` e o tipo `GlassOptics`.
-  - Arquivos fora de `src/pages/Sample.tsx` e `src/components/GlassPill.tsx` **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
+- **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
+  - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
 
-  *Por quê:* `import type` é apagado na compilação, e isso mantém a biblioteca fora do chunk da página inicial (PR #9).
+  *Por quê:* `import type` é apagado na compilação. Assim a biblioteca fica num chunk próprio (`dist-*.js`), baixado só pela amostra, pelo painel e pela galeria; o Início e os contratos não o carregam (PRs #9 e #12).
 
 ### Modos da biblioteca usados
 
 | Modo (README do fork) | Como se ativa | Onde é usado aqui |
 |---|---|---|
 | **Material** (a caixa translúcida vira vidro) | `<Glass>` sem geometria | `GlassPill` **só no Blink** (5 botões na amostra) |
-| **No lugar** (a lente dobra os próprios filhos) | `size` + `center` + filhos | a lente do título da amostra |
-| **Cópia** (`refract` + `behind`) | `refract={nó}` e `behind={cor}` | os 3 cartões da faixa da amostra |
+| **No lugar** (a lente dobra os próprios filhos) | `size` + `center` + filhos | a lente do título da amostra; a seleção do segmentado do painel |
+| **Cópia** (`refract` + `behind`) | `refract={nó}` e `behind={cor}` | os 3 cartões da faixa da amostra; os 2 widgets do painel; a lupa da folha da galeria |
+| **Canvas + várias lentes** (WebGL) | `draw={fn}` + `lenses=[…]` | o visor da galeria (4 lentes num renderizador) |
+| **Receitas do `examples/`** | `GlassSwitch`, `GlassSlider` | a central de controles do painel |
 
 ## 6. Onde há `<Glass>` e onde há fosco em CSS
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu | `SiteHeader` | `<Frost>` + `.tint-bar` | `FROST`: `blur(6px) saturate(1.15)` | ambas |
-| Botões redondos do menu (tema, lupa) | `button.sh-pill` | CSS próprio | `backdrop-filter: blur(14px)` | ambas |
+| Pílula do menu | `SiteHeader` | `<Frost>` + `.tint-bar` | `FROST`: `blur(6px) saturate(1.15)` | todas |
+| Botões redondos do menu (tema, lupa) | `button.sh-pill` | CSS próprio | `backdrop-filter: blur(14px)` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
-| Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | ambas |
+| Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
 | Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `specular: 0` (`frost` 6, `saturate` 1.15) | Amostra |
 | Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
 | Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
+| Cartões do portal, documentos, avisos, widgets, notas e rodapés | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
+| Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
+| Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
+| Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |
+| Chaves (2) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: { specular: 0 }` | Painel |
+| Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `PLAYER_OPTICS`, `SCRUB_OPTICS` | Galeria |
+| Controles do visor sem lentes | `.vw-disc`, `.vw-bar` | `<Frost>` + `.tint-ink` | `FROST` | Galeria |
+| Lupa da folha | `SheetBody` | `<Glass refract>` | `LOUPE_LENS` | Galeria |
+| Topo das páginas de contrato | `GlassPanel` | `<Frost>` + `.tint-ink` | `PANEL` | Contratos |
 
-Contagem de componentes: a página inicial tem **0** `<Glass>`. A amostra tem **4** fixos (a lente e 3 cartões), mais **5** no Chromium (os botões).
+Contagem de `<Glass>` por página:
+
+| Página | `<Glass>` | Laço contínuo |
+|---|---|---|
+| Início | 0 | nenhum |
+| Amostra | 4 fixos (a lente e 3 cartões), mais 5 no Chromium (os botões) | a órbita da lente, só na tela |
+| Painel | 6 (seleção, 2 widgets, 2 chaves, 1 controle deslizante) | nenhum: só anima ao interagir |
+| Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta | o `draw` do visor, só nessas condições |
+| Contratos | 0 | nenhum |
 
 Medido no DOM do build atual, na amostra, com iPhone 15 emulado:
 

@@ -39,7 +39,7 @@
   transform:translateY(var(--vv-top, 0px));
   display:flex;justify-content:center;pointer-events:none;
   padding:0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
-  font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
+  font-family:system-ui,-apple-system,sans-serif;
 }
 .sh-anchor{position:relative;min-width:0;max-width:min(100%, 1040px);pointer-events:auto}
 .sh-bar{
@@ -70,6 +70,13 @@
   -webkit-tap-highlight-color:transparent;transition:color .2s ease;
 }
 .sh-nav a:has(svg){padding-left:9px}
+/* The gap between the page's sections and the links to other pages: a small
+   dot, not a line (the pill keeps one hairline, its own). */
+.sh-nav a[data-sep]{margin-left:12px}
+.sh-nav a[data-sep]::before{
+  content:"";position:absolute;left:-8px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;
+  background:currentColor;opacity:.45;pointer-events:none;
+}
 /* Selected: a soft glass pill behind the current link (one element that slides
    between links), no border of its own: the pill's only line is the uniform
    hairline of the menu itself (PR #6). */
