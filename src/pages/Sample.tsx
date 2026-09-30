@@ -7,7 +7,7 @@ import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
 import { pageNav } from "../lib/pages";
 import "./Sample.css";
 
-// Every section of the page, in order; then ‹ Início and the other pages.
+// Every section of the page, in order (the other pages are in the ☰ picker).
 const NAV: NavItem[] = pageNav("amostra", [
   { href: "#topo", label: "Lente" },
   { href: "#componentes", label: "Componentes" },
@@ -351,7 +351,7 @@ export const Sample: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <SiteHeader items={NAV} />
+      <SiteHeader items={NAV} current={"amostra"} />
       <main id="conteudo">
         <Hero />
 

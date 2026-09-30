@@ -1,31 +1,33 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { FROST } from "../lib/optics";
+import { FROST, PANEL } from "../lib/optics";
 import { Frost } from "./Frost";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
+import { PAGES, type PageKey } from "../lib/pages";
 import "./SiteHeader.css";
 
 export interface NavItem {
   href: string;
   label: string;
-  /** Leading "‹" chevron (the "‹ Início" item on every page but the home). */
-  back?: boolean;
-  /** First link that leaves the page: a small gap (a dot) before it separates
-   *  the page's own sections from the links to other pages (src/lib/pages.ts). */
-  sep?: boolean;
   ariaLabel?: string;
   /** Section items ("#id") follow the scroll (aria-current="location") and are
    *  the only ones that get the selected pill; set false for an item that
-   *  isn't a section. Links to other pages are never selected. */
+   *  isn't a section. Links to other pages live in the ☰ picker, not here. */
   spy?: boolean;
   onSelect?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const Chevron = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-    <path d="M15.4 4.8 8.2 12l7.2 7.2" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+// The page-picker (☰) glyph and its check mark, in the stroke style of the theme icons.
+const Burger = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+    <path d="M4.5 7h15M4.5 12h15M4.5 17h15" />
+  </svg>
+);
+const Check = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="m5 12.5 4.4 4.4L19 7.3" />
   </svg>
 );
 // Theme icons: exactly the fork site's (site/src/components/SiteHeader.tsx).
@@ -45,22 +47,26 @@ const Moon = () => (
 const pressDown = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(0.96)");
 const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(1)");
 
+// The picker sits over running text: the reading panels' heavier frost (PANEL)
+// and a denser tint than the pill, so its labels always read (no refraction).
+
 const EDGE = 12; // px kept clear around an item scrolled into view
 
 /**
  * The shared top menu (every page), the same at the top of the page and all
  * the way down: a floating glass pill inset under the safe area, holding the
  * fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
- * the wordmark: the page's section links first (the current one on a soft
+ * the wordmark: the ☰ page picker at the left end, the page's section links (the current one on a soft
  * selected pill that slides between them), then the links to the other pages and round 34px buttons for the light/dark mode
  * and the page search (magnifier). When the links don't fit they scroll
  * sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden and a soft
  * fade on the side with more. The magnifier turns the pill itself into the
  * search bar; the magnifier again, Esc or a tap outside turns it back.
  */
-export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScope?: string }> = ({
+export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: string; searchScope?: string }> = ({
   items,
-  label = "Principal",
+  current,
+  label = "Seções desta página",
   searchScope = "conteudo",
 }) => {
   const { theme, toggle } = useTheme();
@@ -70,6 +76,11 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
   const [searchOpen, setSearchOpen] = useState(false);
+  // The page picker (☰): a frosted popover under the pill listing every page.
+  const pickerId = `paginas-${useId().replace(/:/g, "")}`;
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerBtn = useRef<HTMLButtonElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(-1);
@@ -196,6 +207,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
   // Open synchronously inside the tap (flushSync) so focus() still counts as
   // user-initiated and iOS brings the keyboard up.
   const openSearch = () => {
+    setPickerOpen(false);
     flushSync(() => setSearchOpen(true));
     searchInput.current?.focus({ preventScroll: true });
   };
@@ -224,6 +236,56 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
     };
   }, [searchOpen, closeSearch]);
 
+  const closePicker = useCallback((refocus = true) => {
+    setPickerOpen(false);
+    if (refocus) pickerBtn.current?.focus({ preventScroll: true });
+  }, []);
+  // Open: focus moves to the current page's item. Esc (focus back on ☰), a tap
+  // outside the pill and picker, or focus leaving them closes it; ↑/↓, Home and
+  // End move between the items.
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const root = pickerRef.current;
+    const links = () => [...(root?.querySelectorAll<HTMLAnchorElement>("a") ?? [])];
+    (root?.querySelector<HTMLAnchorElement>('a[aria-current="page"]') ?? links()[0])?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closePicker();
+        return;
+      }
+      if (!root?.contains(document.activeElement)) return;
+      const all = links();
+      const i = all.indexOf(document.activeElement as HTMLAnchorElement);
+      const to =
+        e.key === "ArrowDown" ? (i + 1) % all.length
+        : e.key === "ArrowUp" ? (i - 1 + all.length) % all.length
+        : e.key === "Home" ? 0
+        : e.key === "End" ? all.length - 1
+        : -1;
+      if (to >= 0) {
+        e.preventDefault();
+        all[to].focus({ preventScroll: true });
+      }
+    };
+    const onClick = (e: MouseEvent) => {
+      if (!barRef.current?.contains(e.target as Node)) closePicker(false);
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      const to = e.relatedTarget as Node | null;
+      if (to && !barRef.current?.contains(to)) closePicker(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("click", onClick);
+    barRef.current?.addEventListener("focusout", onFocusOut);
+    const bar = barRef.current;
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onClick);
+      bar?.removeEventListener("focusout", onFocusOut);
+    };
+  }, [pickerOpen, closePicker]);
+
   // With the on-screen keyboard up, iOS can pan the visual viewport inside the
   // layout one; keep the menu (and the open field) pinned to what's visible.
   useEffect(() => {
@@ -251,6 +313,24 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
           style={{ display: "flex" }}
           data-mode={searchOpen ? "search" : "menu"}
         >
+          {/* The page picker (☰), at the LEFT end of the pill on every page: every
+              page of the portal, Início included, in a frosted popover. */}
+          <button
+            ref={pickerBtn}
+            type="button"
+            className="sh-pill sh-pages-btn"
+            onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
+            aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
+            aria-expanded={pickerOpen}
+            aria-controls={pickerId}
+            title="Páginas"
+            inert={searchOpen}
+            onPointerDown={pressDown}
+            onPointerUp={pressUp}
+            onPointerLeave={pressUp}
+          >
+            <Burger />
+          </button>
           {/* Menu mode. In search mode the links stay in the layout (hidden,
               inert) so the pill keeps exactly its size and place. */}
           <nav
@@ -275,7 +355,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
                   linkRefs.current[i] = el;
                 }}
                 href={it.href}
-                data-sep={it.sep || undefined}
                 aria-label={it.ariaLabel}
                 aria-current={i === active ? "location" : undefined}
                 onFocus={() => reveal(i, false)}
@@ -288,7 +367,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
                   }
                 }}
               >
-                {it.back && <Chevron />}
                 {/* data-text reserves the bold width: the pill never changes size
                     when the current link changes. */}
                 <span className="sh-label" data-text={it.label}>
@@ -332,6 +410,38 @@ export const SiteHeader: React.FC<{ items: NavItem[]; label?: string; searchScop
             </button>
           </div>
         </Frost>
+        {pickerOpen && (
+          <Frost ref={pickerRef} id={pickerId} className="glass sh-picker tint-bar" optics={PANEL} style={{ position: "absolute" }}>
+            <nav aria-label="Páginas do site">
+              <ul>
+                {PAGES.map((p) => {
+                  const here = p.key === current;
+                  return (
+                    <li key={p.key}>
+                      <a
+                        href={p.href}
+                        aria-current={here ? "page" : undefined}
+                        onClick={(e) => {
+                          if (here) {
+                            e.preventDefault();
+                            closePicker();
+                          } else setPickerOpen(false);
+                        }}
+                      >
+                        <span className="sh-pick-title">{p.pick}</span>
+                        {/* Not colour only: the current page is bold, on the selected
+                            pill, with a check (aria-current="page" for readers). */}
+                        {/* The check's slot is on every item, so the list keeps its width
+                            whichever page is current. */}
+                        <span className="sh-pick-here">{here && <Check />}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </Frost>
+        )}
       </div>
     </header>
   );

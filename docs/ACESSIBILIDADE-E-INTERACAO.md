@@ -16,14 +16,15 @@
 
 | Recurso | Implementação |
 |---|---|
-| Rótulo | `<nav aria-label="Principal">` |
+| Rótulo | `<nav aria-label="Seções desta página">` |
 | Item atual | `aria-current="location"` no link da seção atual. A pílula de seleção é `aria-hidden` |
 | Scroll-spy | o item atual é a última seção cujo topo passou da linha "base do menu + 32px". No fim da página, a última seção vence |
 | Toque num link de seção | seleciona na hora e pausa o spy por 700 ms. Enquanto a página rola, o prazo se renova por 220 ms |
 | Foco por teclado | `onFocus` rola o link para dentro da barra, com 12px de folga, sem rolar a página |
 | Rolagem lateral | toque e trackpad nativos. **Shift + roda** é tratado em JS (listener `passive: false`), porque WebKit e Gecko nem sempre fazem isso |
-| Ordem | primeiro as seções da página, depois um ponto (decorativo, `::before`) e os links de outras páginas (DESIGN D12) |
-| Link de outra página | "‹ Início" e as outras páginas têm `spy: false`: nunca recebem `aria-current` nem a pílula de seleção. O `aria-label` diz "… (outra página)" |
+| Conteúdo | só as seções da página (DESIGN D12). As outras páginas ficam na lista ☰ |
+| Botão ☰ | o primeiro item da pílula, em toda página: `<button aria-expanded aria-controls aria-label="Abrir lista de páginas">` ("Fechar lista de páginas" quando aberta). No modo pesquisa fica `inert` e oculto. Não há botão Início: o Início é um item da lista |
+| Lista de páginas | `<nav aria-label="Páginas do site">` com uma `<ul>` de links. A página atual tem `aria-current="page"` e um ✓ (não só cor). Ao abrir, o foco vai para ela; ↑/↓, Home e End andam entre os itens; Esc fecha e devolve o foco ao ☰; um toque fora, a escolha de uma página, o ☰ de novo ou o foco saindo dela também fecham. Anel de foco neutro, nunca azul |
 
 - **I4. O item atual DEVE ser comunicado por `aria-current`, e não só pela cor ou pela pílula.**
 - **I5. O item com foco ou selecionado DEVE ficar sempre visível dentro da barra.**

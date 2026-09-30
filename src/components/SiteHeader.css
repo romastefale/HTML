@@ -20,6 +20,7 @@
   --sel-bg:rgba(255,255,255,.9);
   --sel-shadow:0 1px 2px rgba(20,16,60,.1),0 3px 10px rgba(20,16,60,.1);
   --hover-bg:rgba(0,0,0,.05);
+  --picker-bg:rgba(242,243,247,.9);
 }
 :root[data-theme="dark"]{
   --bar-bg:rgba(6,6,7,.72);
@@ -32,6 +33,7 @@
   --sel-bg:rgba(255,255,255,.16);
   --sel-shadow:0 2px 10px rgba(0,0,0,.3);
   --hover-bg:rgba(255,255,255,.07);
+  --picker-bg:rgba(22,22,26,.88);
 }
 .site-header{
   position:fixed;z-index:70;left:0;right:0;
@@ -41,6 +43,18 @@
   padding:0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
   font-family:system-ui,-apple-system,sans-serif;
 }
+/* Scroll-edge softening (iOS 26's "scroll edge effect", in CSS): a band
+   around the pill blurs the content scrolling under and around it, fading
+   out above and below, so text never reads crisply half-behind the pill. It
+   starts 2px under the safe area and never touches the viewport edge (T11), and
+   it has no colour of its own: only a mask-faded backdrop blur. */
+.site-header::before{
+  content:"";position:absolute;z-index:-1;left:0;right:0;top:-10px;height:calc(100% + 30px);pointer-events:none;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
+}
+@media (prefers-reduced-transparency:reduce){.site-header::before{display:none}}
 .sh-anchor{position:relative;min-width:0;max-width:min(100%, 1040px);pointer-events:auto}
 .sh-bar{
   align-items:center;gap:14px;min-width:0;max-width:100%;height:52px;
@@ -50,6 +64,7 @@
 @media (prefers-reduced-transparency:reduce){
   .tint-bar{background:#eef0f5}
   :root[data-theme="dark"] .tint-bar{background:#060607}
+  .sh-picker.tint-bar{background:var(--bar-bg-solid)}
 }
 .sh-nav{
   position:relative;flex:0 1 auto;min-width:0;
@@ -69,14 +84,9 @@
   color:var(--bar-sub);text-decoration:none;font-size:13.5px;font-weight:500;line-height:1;white-space:nowrap;
   -webkit-tap-highlight-color:transparent;transition:color .2s ease;
 }
-.sh-nav a:has(svg){padding-left:9px}
-/* The gap between the page's sections and the links to other pages: a small
-   dot, not a line (the pill keeps one hairline, its own). */
-.sh-nav a[data-sep]{margin-left:12px}
-.sh-nav a[data-sep]::before{
-  content:"";position:absolute;left:-8px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;
-  background:currentColor;opacity:.45;pointer-events:none;
-}
+/* The pill's links are only this page's sections (D12); every page, Início
+   included, is in the ☰ picker, whose button is the pill's left end. */
+.sh-pages-btn{margin-right:-6px}
 /* Selected: a soft glass pill behind the current link (one element that slides
    between links), no border of its own: the pill's only line is the uniform
    hairline of the menu itself (PR #6). */
@@ -104,24 +114,51 @@
 /* Search mode: the pill becomes the search bar (PageSearch.css). The
    links and theme button fade out but keep their room, so nothing moves or
    resizes; the magnifier stays in place, shown active, and closes it. */
-.sh-nav,.sh-theme{transition:opacity .2s ease, transform .34s var(--glass-ease), visibility 0s}
-.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme){
+.sh-nav,.sh-theme,.sh-pages-btn{transition:opacity .2s ease, transform .34s var(--glass-ease), visibility 0s}
+.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){
   opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity .16s ease, transform .3s var(--glass-ease), visibility 0s linear .16s;
 }
 .sh-bar[data-mode="search"] .sh-nav{transform:translateX(-12px)}
-.sh-bar[data-mode="search"] .sh-theme{transform:scale(.7)}
+.sh-bar[data-mode="search"] :is(.sh-theme,.sh-pages-btn){transform:scale(.7)}
 .sh-search-btn{transition:transform .12s ease, background-color .2s ease, color .2s ease}
 .sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
 /* No focus ring on the pill or the field in search mode: the caret shows
    where you type, and the pill keeps only its uniform hairline. */
 .sh-bar[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
+/* The page picker (☰): a frosted popover anchored under the pill's left end,
+   the pill's own tint, radius family and single hairline (.glass::after). Not
+   a full-page takeover: the page stays visible around it. */
+.sh-picker{
+  position:absolute;z-index:2;top:calc(100% + 8px);left:0;
+  width:max-content;max-width:100%;min-width:180px;max-height:calc(100svh - 96px - env(safe-area-inset-top, 0px));overflow:auto;
+  padding:6px;border-radius:22px;box-sizing:border-box;
+  animation:sh-pick-in .26s var(--glass-ease) both;transform-origin:26px 0;
+}
+@keyframes sh-pick-in{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+.sh-picker.tint-bar{background:var(--picker-bg)}
+.sh-picker ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+/* Shrink-to-fit: as wide as the longest name plus the check's slot (15px),
+   so the check sits just after the text, not at the far end of a wide box. */
+.sh-picker a{
+  display:grid;grid-template-columns:auto 15px;align-items:center;justify-content:space-between;gap:14px;
+  min-height:44px;padding:0 14px 0 16px;border-radius:16px;white-space:nowrap;
+  color:var(--bar-text);text-decoration:none;font-size:15px;font-weight:500;line-height:1.2;
+  -webkit-tap-highlight-color:transparent;transition:background-color .15s ease;
+}
+.sh-picker a:hover{background:var(--hover-bg)}
+.sh-picker a[aria-current="page"]{background:var(--sel-bg);box-shadow:var(--sel-shadow);font-weight:600}
+/* Keyboard focus: a neutral ring in the text colour, never the blue one. */
+.site-header .sh-picker a:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
+.site-header .sh-picker a[aria-current="page"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
+.sh-pick-here{display:inline-flex;align-items:center;width:15px;height:15px;color:var(--bar-sub)}
 @media (max-width:760px){
   .sh-anchor{flex:1 1 auto}
   .sh-bar{width:100%;gap:8px;padding:0 8px}
   .sh-nav a{padding:0 12px}
 }
 @media (prefers-reduced-motion:reduce){
-  .sh-pill,.sh-nav,.sh-theme,.sh-indicator[data-animate],.sh-nav a,.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme){transition:none}
-  .sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme){transform:none}
+  .sh-pill,.sh-nav,.sh-theme,.sh-pages-btn,.sh-indicator[data-animate],.sh-nav a,.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transition:none}
+  .sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transform:none}
+  .sh-picker{animation:none}
 }

@@ -8,7 +8,7 @@ Esta pasta descreve **como o projeto foi construído e por quê**. Ela é escrit
 | **Páginas** | [Amostra](https://romastefale.github.io/HTML/liquid-glass-sample.html) · [Painel](https://romastefale.github.io/HTML/painel.html) · [Galeria](https://romastefale.github.io/HTML/galeria.html) · [Contrato de design](https://romastefale.github.io/HTML/contrato-design.html) · [Arquitetura e operação](https://romastefale.github.io/HTML/contrato-arquitetura.html) |
 | **Repositório** | [`romastefale/HTML`](https://github.com/romastefale/HTML) |
 | **Biblioteca de vidro** | [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, idêntica ao fork [`romastefale/liquid-glass`](https://github.com/romastefale/liquid-glass) no commit `4e7b769` |
-| **Estado descrito** | `main` depois do PR #12 (`novas-paginas-e-contrato`), que parte de `5838a71` (merge do PR #11) |
+| **Estado descrito** | `main` depois do PR #13 (`testes-pos-pr12`), que parte de `9280565` (merge do PR #12) |
 
 ## Resumo do projeto
 
@@ -32,7 +32,7 @@ Um site estático de seis páginas, em pt-BR, feito como app **React 19 + Vite +
   - uma folha (`<dialog>`) com lupa de vidro.
 - **`contrato-design.html` e `contrato-arquitetura.html` (Contrato):** estes documentos como páginas do site, com fotos de skylines de livre acesso.
 - **Em comum a todas as páginas:**
-  - um menu flutuante em forma de pílula de vidro, com rolagem lateral: primeiro as seções da página (a atual fica selecionada), depois um ponto e os links para as outras páginas;
+  - um menu flutuante em forma de pílula de vidro, com rolagem lateral só pelas seções da página (a atual fica selecionada), e um botão ☰ na ponta esquerda que abre a lista de todas as páginas (o Início também);
   - um botão de modo claro/escuro;
   - uma lupa que transforma a própria pílula na barra de pesquisa da página.
 
@@ -63,8 +63,8 @@ Um site estático de seis páginas, em pt-BR, feito como app **React 19 + Vite +
 | [DEPLOY.md](DEPLOY.md) | GitHub Pages via Actions, passos do workflow, cache, como verificar um deploy e como regenerar as imagens |
 | [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILIDADE-E-INTERACAO.md) | Teclado, ARIA, Esc e toque fora, movimento e transparência reduzidos, anéis de foco e o algoritmo da pesquisa |
 | [CHECKLIST-VERIFICACAO.md](CHECKLIST-VERIFICACAO.md) | Checklist antes do merge, matriz de testes e comandos |
-| [HISTORICO.md](HISTORICO.md) | Linha do tempo dos PRs #1 a #12, com a decisão e o motivo de cada um |
+| [HISTORICO.md](HISTORICO.md) | Linha do tempo dos PRs #1 a #13, com a decisão e o motivo de cada um |
 
 ## Textos do site
 
-Os textos das páginas, os comentários do CSS e o `public/img/CREDITS.md` foram conferidos contra o código no PR #12 e não há pendências conhecidas. Os documentos desta pasta são a fonte única do conteúdo das páginas de contrato: edite o `.md`, e o build atualiza o site. Se a implementação mudar, o texto DEVE mudar no mesmo PR (regra D28 em [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md)).
+Os textos das páginas, os comentários do CSS e o `public/img/CREDITS.md` foram conferidos contra o código no PR #13 e não há pendências conhecidas. Os documentos desta pasta são a fonte única do conteúdo das páginas de contrato: edite o `.md`, e o build atualiza o site. Se a implementação mudar, o texto DEVE mudar no mesmo PR (regra D28 em [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md)).

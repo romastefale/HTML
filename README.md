@@ -15,7 +15,7 @@ App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/l
 
 Todas compartilham:
 
-- um menu flutuante em forma de pílula de vidro: primeiro as seções da página e, depois de um ponto, "‹ Início" e as outras páginas;
+- um menu flutuante em forma de pílula de vidro: o botão ☰ na ponta esquerda, que abre a lista de todas as páginas (o Início também), e depois só as seções da página;
 - a pesquisa na página, que abre pela lupa;
 - o modo claro/escuro.
 
@@ -35,8 +35,8 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 ## Estrutura
 
 - `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
-- `src/lib/pages.ts`: a lista de páginas do portal e `pageNav()`, que monta o menu de cada página.
-- `src/components/SiteHeader.tsx`: o menu compartilhado (links com rolagem lateral, seção atual selecionada, tema e lupa).
+- `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰) e `pageNav()`, que monta as seções do menu de cada página.
+- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa).
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).

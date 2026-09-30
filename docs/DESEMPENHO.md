@@ -168,6 +168,21 @@ Antes das regras P5 a P7, na mesma máquina: painel 80 (TBT 760 ms), galeria 55 
 
 Quem estourar um item DEVE justificar no PR ou compensar em outro ponto.
 
+### 3.2 Medições do PR #13
+
+Mesmo método da seção 3.1 (Lighthouse 12 mobile, 3 execuções, mediana, `dist/` local), depois da lista de páginas no ☰, dos contratos em cartões e da quebra de linha:
+
+| Página | Nota | TBT | FCP | LCP | TTI | CLS | Peso | JS (transferido) |
+|---|---|---|---|---|---|---|---|---|
+| Início | 97 (era 99) | 150 ms (era 80) | 1,5 s | 2,0 s | 2,2 s | 0 | 185 KiB | 76 KiB |
+| Amostra | 93 | 230 ms (era 250) | 1,7 s | 2,4 s | 2,7 s | 0 | 276 KiB | 95 KiB |
+| Painel | 97 | 140 ms | 1,7 s | 2,0 s | 2,1 s | 0 | 150 KiB | 103 KiB |
+| Galeria | 96 | 70 ms (era 60) | 1,7 s | 2,6 s | 2,6 s | 0 | 311 KiB | 99 KiB |
+| Contrato de design | 98 | 100 ms (era 110) | 1,7 s | 2,0 s | 2,0 s | 0 | 155 KiB | 101 KiB |
+| Arquitetura e operação | 98 | 100 ms | 1,7 s | 2,0 s | 2,0 s | 0 | 150 KiB | 112 KiB |
+
+Os ~90 e ~110 cartões com `backdrop-filter` dos contratos não aumentaram o TBT: as partes abaixo da dobra continuam montadas depois (regra P6). No Início, o TBT mediano subiu 70 ms (execuções de 130 a 160 ms). A causa não foi isolada: as outras páginas têm a mesma barra (☰, lista de páginas e faixa de rolagem) e não subiram. Todas as páginas continuam dentro do orçamento.
+
 ## 4. Limites conhecidos (custo do próprio design)
 
 - **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 19 primitivas SVG sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.

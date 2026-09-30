@@ -4,7 +4,7 @@ import { GlassCaption, GlassPanel, Picture, CREDITS_URL, SAMPLE_URL } from "../c
 import { PAGES, pageNav } from "../lib/pages";
 import "./Home.css";
 
-// Every section of the page, in order; then the other pages (src/lib/pages.ts).
+// Every section of the page, in order (the other pages are in the ☰ picker).
 const NAV: NavItem[] = pageNav("inicio", [
   { href: "#topo", label: "Início" },
   { href: "#paginas", label: "Páginas" },
@@ -73,15 +73,15 @@ export const Home: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <SiteHeader items={NAV} />
+      <SiteHeader items={NAV} current={"inicio"} />
       <main className="feed" id="conteudo">
         <GlassPanel className="card-glass">
           <section className="intro" id="topo" aria-labelledby="home-title">
             <h1 id="home-title">Interface de vidro</h1>
             <p>
-              O menu de vidro flutuante no topo reúne primeiro as seções desta página e, no fim, as outras páginas do
-              portal: deslize-o para o lado para ver o resto. A lupa transforma o menu na pesquisa da página e o botão
-              ao lado troca o modo claro e escuro.
+              O menu de vidro flutuante no topo traz as seções desta página (deslize-o para o lado para ver o
+              resto). O botão <span aria-hidden="true">☰</span> abre a lista de todas as páginas do portal, a lupa
+              transforma o menu na pesquisa da página e o botão da lua ou do sol troca o modo claro e escuro.
             </p>
           </section>
         </GlassPanel>
@@ -110,8 +110,9 @@ export const Home: React.FC = () => {
         <Card id="menu" title="Menu com rolagem lateral" subtitle="Navegação">
           <p className="card-body">
             O menu é uma pílula de vidro que flutua no topo, igual do início ao fim da página e em todas as páginas.
-            Primeiro vêm as seções da página; depois de um pontinho, os links que levam a outras páginas. Quando os links não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
-            do mouse). A seção que você está lendo (ou a que você tocou) fica selecionada, com uma pílula clara atrás, e sempre visível no menu. O botão com a lua ou o sol
+            Nele ficam só as seções da página; quando não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
+            do mouse). Todas as páginas, o Início também, estão no botão <span aria-hidden="true">☰</span> na ponta esquerda da pílula,
+            que abre uma lista de vidro fosco com a página atual marcada. A seção que você está lendo (ou a que você tocou) fica selecionada, com uma pílula clara atrás, e sempre visível no menu. O botão com a lua ou o sol
             troca o modo claro e escuro, e a escolha fica salva.
           </p>
           <Photo

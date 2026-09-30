@@ -38,8 +38,9 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 
 ### Menu
 - [ ] A pílula flutua: 12px abaixo da safe area e 12px das laterais, sem encostar no topo. Ela é igual no topo e rolando, em todas as páginas.
-- [ ] O menu não tem marca. Em toda página, as seções vêm primeiro; depois um ponto (`[data-sep]` em um link só) e os links de saída: "‹ Início" (menos no Início) e as outras cinco páginas.
-- [ ] `aria-current` nunca aparece num link de outra página, em nenhuma posição de rolagem.
+- [ ] O menu não tem marca. Os links da pílula são só seções (`href="#…"`), sem separador. Em toda página (inclusive no Início), o primeiro item da pílula é o ☰; não há botão Início.
+- [ ] ☰ abre a lista de páginas (6 itens, dentro da tela, com `.glass`), com `aria-expanded="true"`, o foco na página atual e só ela com `aria-current="page"`. ↓ move o foco; Esc fecha e devolve o foco ao ☰; ☰ de novo fecha; um toque fora fecha; escolher outra página navega.
+- [ ] No modo pesquisa, o ☰ e o tema ficam ocultos e `inert`.
 - [ ] Todo `href="#…"` da página tem um alvo com esse id (inclui os índices de chips dos documentos).
 - [ ] Os links rolam para o lado, e o degradê só aparece no lado em que há mais itens. Shift + roda funciona no Chromium e no WebKit.
 - [ ] A seleção inicial é a primeira seção da página ("Início" no Início, "Lente" na amostra, "Tela" no painel, "Visor" na galeria, "Visão geral" e "Arquitetura" nos contratos).
@@ -50,7 +51,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Pesquisa
 - [ ] A lupa abre a pesquisa na própria pílula, que mantém a mesma posição e o mesmo tamanho (compare o `getBoundingClientRect` da pílula antes e depois).
 - [ ] O campo fica em foco, e a lupa fica no mesmo ponto com `aria-expanded="true"`.
-- [ ] "vidro" encontra resultados em todas as páginas (no PR #12: **1 de 10** no Início, **1 de 7** na amostra, **1 de 5** no painel, **1 de 4** na galeria; nos contratos o número segue o texto de `docs/`). Enter leva a 2 de N.
+- [ ] "vidro" encontra resultados em todas as páginas (no PR #13: **1 de 11** no Início, **1 de 7** na amostra, **1 de 5** no painel, **1 de 4** na galeria, **1 de 24** no contrato de design e **1 de 13** em arquitetura; nos contratos o número segue o texto de `docs/`). Enter leva a 2 de N.
 - [ ] "acucar" e "Açúcar" dão 1 de 1; "liquido" e "LÍQUIDO" dão 1 de 1.
 - [ ] Fechar pela lupa, por Esc ou por um toque fora deixa o campo vazio, zera os destaques (`CSS.highlights.get("page-search")` vazio) e traz o menu de volta. Com Esc, o foco volta à lupa.
 - [ ] Rolar a página com a pesquisa aberta não a fecha.
@@ -85,7 +86,11 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Os chips filtram (Brasil = 4 fotos); a folha abre com a lupa, as setas movem a lupa, e Esc fecha.
 
 ### Contratos
-- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#historico-…`) rola até ela.
+- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 84px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.
+- [ ] O corpo é uma coluna de cartões (D29): nenhum parágrafo, lista, código ou tabela fora de um `.md-card`; toda tabela dentro de um cartão; um raio só; nenhum cartão passa da largura da tela.
+
+### Quebra de linha (todas as páginas)
+- [ ] Em 320px, 393px e paisagem (852×393), no WebKit e no Chromium, nenhum `pre`, `code`, `p`, `li`, `td`, `th`, `dd`, `dt`, título, legenda ou `small` tem conteúdo mais largo que ele mesmo (`scrollWidth ≤ clientWidth`) nem passa do seu cartão ou da tela; a página não rola para o lado (D30). Ficam de fora só os contêineres que podem rolar: tabela larga (`.md-table`), desenho em texto (`pre[data-lang="text"]`) e os links do menu.
 - [ ] "Desenhar diagrama" desenha o mermaid; trocar o tema redesenha.
 - [ ] Depois de mexer num diagrama de `docs/`, desenhar esse diagrama na página e conferir que não há erro no console.
 

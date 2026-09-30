@@ -596,7 +596,7 @@ export const Painel: React.FC = () => {
       <a className="skip" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <SiteHeader items={NAV} />
+      <SiteHeader items={NAV} current={"painel"} />
       <main id="conteudo" className="pn">
         <section id="tela" className="pn-section pn-first" aria-labelledby="pn-title">
           <div className="pn-intro">
