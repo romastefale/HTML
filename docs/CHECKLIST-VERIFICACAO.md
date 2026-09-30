@@ -68,7 +68,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Fundo e bordas (todas as páginas, claro e escuro)
 - [ ] O fundo são campos de cor orgânicos e desfocados, sem bordas nítidas nem círculos (`html::before`, fixo, `z-index: -1`, sem animação).
 - [ ] A primeira e a última linha da viewport são `--page-edge` sólido (`#8b82e6` / `#1b1646`, iguais ao `theme-color`) no topo, no meio e no fim da página, em retrato e em paisagem.
-- [ ] Ao rolar, o conteúdo se dissolve nessa cor sob a status bar e perto da barra de baixo (`body::before` e `body::after`, fixos, `z-index: 50`, `pointer-events: none`, sem `background-color` e sem `backdrop-filter`).
+- [ ] Ao rolar, o conteúdo se dissolve nessa cor sob a status bar (`body::before`, fixo, `z-index: 50`, `pointer-events: none`, sem `background-color` e sem `backdrop-filter`). Embaixo, no meio da página, o conteúdo vai até a borda sem esmaecer; só no fim da página o `body::after` (no fluxo) leva a página até `--page-edge` sólido.
 - [ ] O menu e a barra de abas do painel ficam acima das camadas de borda e continuam nítidos. Teste: pinte as camadas de vermelho opaco; o vermelho só pode aparecer através do vidro, e nunca por cima dele.
 - [ ] Sem o conteúdo, o fundo sozinho começa e termina na cor de borda, e o canvas (o que o overscroll mostra) é essa cor.
 - [ ] Nenhuma sombra alcança a borda. Por exemplo, a barra de abas do painel usa `0 2px 8px` a 12px da borda.
