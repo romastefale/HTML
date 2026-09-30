@@ -8,12 +8,12 @@
      it holds before this file loads). Whether the browser shows live page
      pixels behind its bars or its fallback tint from body/html
      background-color, it's the same colour: the bars read as the page.
-   • Top: the fixed full-width bar (SiteHeader.css) touches the top edge on
-     purpose, like the fork's demo site: Safari 26 samples it into its top bar,
-     so the status bar and our bar read as one. theme-color (Android Chrome)
-     is that bar's colour per mode (src/lib/theme.ts › BAR_COLOR).
-   • Bottom: the fixed search wrapper is transparent and inset; the glass is on
-     its children, so the bottom bar keeps the page colour. */
+   • No fixed/sticky element with background-color or backdrop-filter touches
+     a viewport edge (Safari 26 samples those into its bars): the floating
+     menu's fixed wrapper (SiteHeader.css) is transparent and inset 12px under
+     the safe area; the glass is on its child, and the search panel drops from it.
+   • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
+     toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
 :root{
   --page-edge:#8b82e6;
   --page-bg:
@@ -69,7 +69,7 @@
 html{
   background-color:var(--page-edge);
   scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
-  scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
 }
 body{
   margin:0;
