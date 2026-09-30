@@ -87,6 +87,8 @@ body{
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
 }
 a{color:inherit}
+/* <picture> is only a source picker: the <img> inside is what gets laid out. */
+picture{display:contents}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:10px}
 code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size:.9em}

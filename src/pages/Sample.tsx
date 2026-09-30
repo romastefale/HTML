@@ -1,7 +1,8 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { GlassCaption, GlassPanel, GlassPill, asset, CREDITS_URL, HOME_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture, CREDITS_URL, HOME_URL } from "../components/Surfaces";
+import { GlassPill } from "../components/GlassPill";
 import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
 import "./Sample.css";
 
@@ -47,7 +48,13 @@ const Hero: React.FC = () => {
   // BROWSERS.md: Chromium "opt into filterResolution={2} for crisper edges"
   // (the library forces 1 in WebKit). Only on 1x screens, where the stair-steps
   // show; on 2x/3x screens the filter already rasterizes at device pixels.
+  // Not on weaker machines either (≤4 cores or ≤4 GB): 2× is 4× the filter
+  // pixels for a lens that moves every frame.
   const lowDpi = useMediaQuery("(max-resolution: 1.5dppx)");
+  const strong = useMemo(() => {
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    return (nav.hardwareConcurrency ?? 8) > 4 && (nav.deviceMemory ?? 8) > 4;
+  }, []);
   const [box, setBox] = useState({ w: 0, h: 0 });
 
   useLayoutEffect(() => {
@@ -110,8 +117,18 @@ const Hero: React.FC = () => {
     let raf = 0;
     let visible = true;
     const start = performance.now();
+    // Weaker devices (≤4 cores or ≤4 GB) run the idle orbit at 30 fps: every
+    // orbit frame re-rasterises the lens filter over the whole headline block.
+    // The easing step is doubled to match (1 − (1 − e)²), so the path is the
+    // same; a pointer/touch still drives it at full rate.
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const weak = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+    let lastStep = 0;
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
+      const orbiting = !target.current;
+      if (weak && orbiting && now - lastStep < 30) return;
+      lastStep = now;
       const c = bounds.current;
       let tx = REST.x;
       let ty = REST.y;
@@ -123,7 +140,7 @@ const Hero: React.FC = () => {
       }
       tx = clamp(tx, c.xlo, c.xhi);
       ty = clamp(ty, c.ylo, c.yhi);
-      const e = target.current ? 0.28 : 0.12;
+      const e = target.current ? 0.28 : weak ? 1 - (1 - 0.12) ** 2 : 0.12;
       const dx = tx - x.get();
       const dy = ty - y.get();
       if (Math.abs(dx) > 3e-4) x.set(x.get() + dx * e);
@@ -197,7 +214,7 @@ const Hero: React.FC = () => {
           center={{ x, y }}
           size={size}
           radius={size / 2}
-          filterResolution={lowDpi ? 2 : 1}
+          filterResolution={lowDpi && strong ? 2 : 1}
           style={{ position: "absolute", inset: 0 }}
         >
           {/* Sized inner box: gives the absolute scene a flow height. */}
@@ -298,11 +315,15 @@ const BandCard: React.FC<{ band: React.RefObject<HTMLDivElement | null>; childre
   );
 };
 
-const Place: React.FC<{ src: string; alt: string; w: number; h: number; title: string; children: React.ReactNode }> = ({
-  src, alt, w, h, title, children,
+// object-fit: cover fills a 4:5 box (3 columns) or a 4:3 box (≤860px), so a
+// landscape photo is drawn wider than its box: ~1.875× the column on desktop,
+// ~1.125× the full width on phones. `sizes` says so, so 2x/3x screens get enough pixels.
+const PLACE_SIZES = "(max-width: 860px) calc(112.5vw - 45px), 650px";
+const Place: React.FC<{ name: string; alt: string; w: number; h: number; title: string; children: React.ReactNode }> = ({
+  name, alt, w, h, title, children,
 }) => (
   <figure className="place">
-    <img src={asset(src)} alt={alt} width={w} height={h} loading="lazy" decoding="async" />
+    <Picture name={name} alt={alt} w={w} h={h} lazy sizes={PLACE_SIZES} />
     <figcaption>
       <GlassCaption>
         <span className="cap">
@@ -382,14 +403,14 @@ export const Sample: React.FC = () => {
               da legenda; no Safari e no Firefox ela fica fosca.
             </p>
             <div className="places">
-              <Place src="img/santorini-oia.jpg" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" w={1600} h={1067} title="Oia, Santorini">
+              <Place name="santorini-oia" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" w={1600} h={1067} title="Oia, Santorini">
                 Foto: <a href="https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg">Giles Laurent</a>,{" "}
                 <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
               </Place>
-              <Place src="img/cataratas-do-iguacu.jpg" alt="Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde" w={1600} h={1200} title="Cataratas do Iguaçu">
+              <Place name="cataratas-do-iguacu" alt="Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde" w={1600} h={1200} title="Cataratas do Iguaçu">
                 Foto: <a href="https://commons.wikimedia.org/wiki/File:Iguazu_Falls_with_Rainbow.JPG">Tabetabe</a>, domínio público
               </Place>
-              <Place src="img/lencois-maranhenses.jpg" alt="Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul" w={1600} h={1200} title="Lençóis Maranhenses">
+              <Place name="lencois-maranhenses" alt="Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul" w={1600} h={1200} title="Lençóis Maranhenses">
                 Foto: <a href="https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg">Gerda Arendt</a>, CC0
               </Place>
             </div>

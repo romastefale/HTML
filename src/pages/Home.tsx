@@ -1,6 +1,6 @@
 import React from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { GlassCaption, GlassPanel, asset, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
 import "./Home.css";
 
 // Every section of the page, in order (plus the sample page).
@@ -15,8 +15,8 @@ const NAV: NavItem[] = [
   { href: "#creditos", label: "Créditos" },
 ];
 
-const Photo: React.FC<{ src: string; alt: string; w: number; h: number; lazy?: boolean; children: React.ReactNode }> = ({
-  src,
+const Photo: React.FC<{ name: string; alt: string; w: number; h: number; lazy?: boolean; children: React.ReactNode }> = ({
+  name,
   alt,
   w,
   h,
@@ -24,7 +24,8 @@ const Photo: React.FC<{ src: string; alt: string; w: number; h: number; lazy?: b
   children,
 }) => (
   <figure className="photo">
-    <img src={asset(src)} alt={alt} width={w} height={h} loading={lazy ? "lazy" : undefined} decoding="async" />
+    {/* Drawn at the card's inner width (column ≤ 564px − 2 × 18px padding). */}
+    <Picture name={name} alt={alt} w={w} h={h} lazy={lazy} sizes="(min-width: 600px) 528px, calc(100vw - 72px)" />
     <figcaption>
       <GlassCaption>
         <span className="cap">{children}</span>
@@ -89,7 +90,7 @@ export const Home: React.FC = () => {
             troca o modo claro e escuro, e a escolha fica salva.
           </p>
           <Photo
-            src="img/hong-kong-victoria-harbour.jpg"
+            name="hong-kong-victoria-harbour"
             alt="Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer"
             w={1600}
             h={1063}
@@ -114,7 +115,7 @@ export const Home: React.FC = () => {
             usada pelo navegador atrás das barras, então o topo da tela parece continuar a página.
           </p>
           <Photo
-            src="img/rio-pao-de-acucar.jpg"
+            name="rio-pao-de-acucar"
             alt="Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul"
             w={1600}
             h={990}
@@ -138,7 +139,7 @@ export const Home: React.FC = () => {
             enquanto a página rola.
           </p>
           <Photo
-            src="img/aurora-boreal-alasca.jpg"
+            name="aurora-boreal-alasca"
             alt="Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca"
             w={1600}
             h={1043}
