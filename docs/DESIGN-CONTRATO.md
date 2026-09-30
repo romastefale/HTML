@@ -23,8 +23,8 @@ Este documento fixa a linguagem visual do projeto. Os valores foram copiados de 
   - Uma máscara vertical tira os campos dos 14% de cima e dos 14% de baixo, então as duas bordas são a cor sólida exata.
   - `html` NÃO tem fundo. O `background-color` do `body` é `--page-edge` e vira a cor do canvas, que também preenche o overscroll (o "elástico" do iOS) e aparece antes de o CSS carregar (inline no `<head>`).
   *Por quê:* a barra de status, a barra de baixo do Safari e o overscroll mostram essa cor. Se o fundo terminar nela, a borda da página não aparece. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
-- **D2.1. O conteúdo que rola DEVE se dissolver em `--page-edge` no topo e embaixo da viewport.**
-  - Duas camadas fixas fazem isso: `body::before` no topo (altura `safe-area-inset-top + 64px`) e `body::after` embaixo (`safe-area-inset-bottom + 56px`).
+- **D2.1. O conteúdo que rola DEVE se dissolver em `--page-edge` no topo da viewport e no fim da página.**
+  - No topo, uma camada fixa faz isso: `body::before` (altura `safe-area-inset-top + 64px`). Embaixo, desde o PR #18, NÃO há camada fixa: o `body::after` fica no fluxo, no fim da página (`88px + safe-area-inset-bottom`, de transparente a `--page-edge` sólido). O esmaecido só aparece quando se rola até o fim.
   - Cada uma é sólida em `--page-edge` na área segura e depois desce até transparente, com paradas em 72% e 30%.
   - Elas usam `z-index: 50` e `pointer-events: none`, e são só `background-image`: nada de `background-color` nem `backdrop-filter`.
   - O menu (`.site-header`, z 70) e a barra de abas do painel (`.tabbar-wrap`, z 60) ficam **acima** das camadas e continuam nítidos. Os ancestrais deles não criam contexto de empilhamento. A folha da galeria é um `<dialog>` modal, que fica na camada do topo.
