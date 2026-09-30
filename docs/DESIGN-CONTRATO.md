@@ -182,7 +182,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 ## 9. Texto e idioma
 
 - **D27. `lang="pt-BR"` DEVE estar em todo HTML, e todo texto visível DEVE estar em pt-BR:** rótulos, `aria-label`, `title`, placeholder, contador ("N de M", "Nenhum resultado") e `noscript`.
-- **D28. Os textos DEVEM descrever o que a página realmente faz.** Se a implementação mudar, o texto muda no mesmo PR. As pendências atuais estão em [README.md](README.md#pendências-conhecidas-textos-do-próprio-site).
+- **D28. Os textos DEVEM descrever o que a página realmente faz.** Se a implementação mudar, o texto muda no mesmo PR. Exemplo: quando os cartões e as legendas passaram a ser `<Frost>` (PR #9), os textos que diziam "usa o `<Glass>`" e "a foto se curva atrás da legenda" tiveram de ser corrigidos logo depois do PR #10.
 
 ## 10. O que NÃO fazer (lições das iterações)
 

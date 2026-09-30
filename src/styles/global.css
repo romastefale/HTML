@@ -11,7 +11,8 @@
    • No fixed/sticky element with background-color or backdrop-filter touches
      a viewport edge (Safari 26 samples those into its bars): the floating
      menu's fixed wrapper (SiteHeader.css) is transparent and inset 12px under
-     the safe area; the glass is on its child, and the search panel drops from it.
+     the safe area; the glass is on its child, the pill (which is also the
+     search bar: the magnifier turns it into the field, no separate panel).
    • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
      toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
 :root{
@@ -105,15 +106,17 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
 
 @media (min-resolution:2dppx){:root{--rim-w:.5px}}
 
-/* ── Glass materials (<Glass> from @samasante/liquid-glass) ────────────────
-   The library's edge layer is `specular`-driven and always pairs a brighter
+/* ── Glass surfaces: <Frost> (CSS frost) and <Glass> (@samasante/liquid-glass) ─
+   Every surface carries .glass. The library's edge layer is `specular`-driven and always pairs a brighter
    1px top highlight with the all-round rim (src/GlassMaterial.tsx: .55·g on
    top, .12·g all round), and `specular` is its only knob. So our optics set
    specular: 0 (src/lib/optics.ts) and the hairline is drawn here, uniform, on
    its OWN layer (::after, above the content, below nothing), the same way the
    library keeps its edge "as its own inset layer so it never fights a
-   box-shadow": the float shadow stays on the element's box-shadow. A box that
-   clips its overflow (the nav pill) keeps the same line on the inside. */
+   box-shadow": the float shadow stays on the element's box-shadow. The line
+   sits just OUTSIDE the edge; the one inset exception is the lens ring
+   (.hero-ring in Sample.css), since a box that clips its overflow would cut
+   an outside line. */
 .glass{box-shadow:var(--glass-float)}
 .glass::after{
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
@@ -144,7 +147,8 @@ code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;font-size
   :root[data-theme="dark"] :is(.tint-soft,.tint-frost,.tint-control){background:rgba(28,24,60,.96);color:#f5f5f7}
 }
 
-/* Pills (buttons/links inside a material <Glass>). */
+/* Pills (buttons/links inside a GlassPill: a material <Glass> in Blink,
+   the same look as <Frost> elsewhere). */
 .pill{border-radius:999px}
 .pill .btn{
   display:inline-flex;align-items:center;gap:8px;padding:12px 22px;min-height:44px;

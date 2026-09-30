@@ -399,8 +399,8 @@ export const Sample: React.FC = () => {
           <div className="wrap">
             <h2 id="lug-title">Vidro sobre fotos</h2>
             <p className="sub">
-              Legendas de vidro no modo material sobre fotos de lugares famosos. No Chrome e no Edge a foto se curva atrás
-              da legenda; no Safari e no Firefox ela fica fosca.
+              Legendas de vidro fosco sobre fotos de lugares famosos: atrás da legenda, a foto fica desfocada e
+              tonalizada, igual em todos os navegadores. Como uma legenda pode ser larga, ela usa só o fosco, sem curvatura.
             </p>
             <div className="places">
               <Place name="santorini-oia" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" w={1600} h={1067} title="Oia, Santorini">
@@ -437,7 +437,7 @@ export const Sample: React.FC = () => {
                 </ul>
               </Note>
               <Note title="Arquitetura">
-                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca: cada superfície é um componente que usa o <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code>.</p>
+                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca. O <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code> fica onde há refração: a lente do título, os cartões com <code>refract</code> e, no Chrome e no Edge, os botões. Menu, legendas, notas e rodapé são vidro fosco em CSS.</p>
               </Note>
             </div>
           </div>
