@@ -256,7 +256,7 @@ Medido com Playwright: Chromium headless, iPhone 15 emulado, WebGL por software 
 
 **Main thread** (soma das tarefas longas até ~1,5 s depois de o vidro ficar pronto; entre parênteses, a maior):
 
-| Página | `main` | `main-alt` | Até o vidro ficar pronto (`data-glass="on"`) | Troca de tema (novo `init`, rolado 700px) |
+| Página | `main` | `main-alt` | Até o vidro ficar pronto | Troca de tema (novo `init`, rolado 700px) |
 |---|---|---|---|---|
 | Início | 67 ms (67) | 855 ms (329) | ~1,3 s | ~0,8 s |
 | Amostra | 210 ms (210) | 1198 ms (389) | ~2,3 s | ~1,1 s |
@@ -266,7 +266,6 @@ Medido com Playwright: Chromium headless, iPhone 15 emulado, WebGL por software 
 | Arquitetura e operação | 0 ms | 5120 ms (1396) | ~3,0–5,0 s | **~25,9 s** |
 
 - A causa é o método da biblioteca: ela rasteriza com `html-to-image` cada filho da raiz que encosta no vidro, **inteiro**. O `<main>` das páginas de contrato tem de ~13.500 a ~39.000 px de altura, e é clonado com os estilos de cada elemento e desenhado num canvas desse tamanho.
-- Enquanto o vidro não fica pronto, a pílula tem o fundo sólido (`--bar-bg-solid`) e funciona normalmente.
 - Quem decidir levar a `main-alt` para a `main` DEVE justificar o estouro do orçamento no PR (regra do §3).
 
 ## 4. Limites conhecidos (custo do próprio design)

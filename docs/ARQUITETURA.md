@@ -14,7 +14,7 @@
 | UI | `react` | `^19.2.0` | **19.3.0** |
 | UI | `react-dom` | `^19.2.0` | **19.3.0** |
 | Vidro | `@samasante/liquid-glass` | `0.1.1` (exato) | **0.1.1** |
-| Vidro do menu | `@ybouane/liquidglass` | `1.0.3` (exato) | **1.0.3** (o fork `romastefale/liquid-glass2`; o `postinstall` dele fica desligado em `pnpm.ignoredBuiltDependencies`, A8.1) |
+| Vidro do menu | `@ybouane/liquidglass` | `1.0.3` (exato) | **1.0.3** (o fork `romastefale/liquid-glass2`; `postinstall` em `pnpm.ignoredBuiltDependencies`, A8.1) |
 | Build | `vite` | `^8.0.0` | **8.3.1** |
 | Build | `@vitejs/plugin-react` | `^6.0.0` | **6.1.1** |
 | Tipos | `typescript` | `^5.7.0` | **5.9.3** |
@@ -227,19 +227,17 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 2. as **seções da própria página**, montadas com `pageNav(página, seções)` (`src/lib/pages.ts`): links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
 3. o botão de tema e a lupa.
 
-O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Frost>` com `PANEL`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`. Ela só é montada enquanto está aberta.
+O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liquid-glass2`, filho direto da raiz, sempre no DOM e mostrado com `data-open`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro da pílula** (branch `main-alt`, DESIGN-CONTRATO D9.1) é o `LiquidGlass` de `@ybouane/liquidglass`. O `SiteHeader` devolve três filhos da raiz do React (`#root`), nesta ordem: `<img class="page-bg">` (o fundo), `<div class="page-fade-top">` (a faixa de cima) e `<header class="site-header">` (a pílula, que é o elemento de vidro). Num `useEffect`:
+**O vidro** da pílula e da lista ☰ é o `LiquidGlass` de `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve quatro filhos da raiz do React (`#root`), nesta ordem: `<img class="page-bg">`, `<div class="page-fade-top">`, `<header class="site-header">` (a pílula) e `<div class="sh-picker">` (a lista). Num `useEffect`:
 
 ```ts
-LiquidGlass.init({ root: pílula.parentElement, glassElements: [pílula] })
-  .then((g) => { pílula.dataset.glass = "on"; ... });   // cleanup: g.destroy()
+LiquidGlass.init({ root: pílula.parentElement, glassElements: [pílula, lista] });   // cleanup: destroy()
 ```
 
-- A configuração é o `data-config` da pílula: `BAR_GLASS.light` = "Frosted Panel" `{ blurAmount: 0.25, cornerRadius: 30 }`, `BAR_GLASS.dark` = "Dark Glass" `{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`.
-- O efeito depende do tema: a biblioteca rasteriza os outros filhos da raiz uma vez e não percebe uma troca de cores, então cada troca de tema destrói e cria a instância de novo.
-- Com `prefers-reduced-transparency: reduce` o `init` não roda; se ele falhar (sem WebGL), a pílula fica sem `data-glass` e com o fundo sólido do CSS.
-- A biblioteca injeta um `<canvas>` como primeiro filho da pílula e põe `overflow: visible` nela; os seletores da pílula não usam `:first-child`.
+- `data-config`: `BAR_GLASS.light` = "Frosted Panel" `{ blurAmount: 0.25, cornerRadius: 30 }`, `BAR_GLASS.dark` = "Dark Glass" `{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`.
+- Troca de tema: `destroy()` e `init()` de novo.
+- A biblioteca injeta um `<canvas>` como primeiro filho de cada elemento de vidro e põe `overflow: visible` neles.
 
 | Página | Seções na pílula |
 |---|---|
@@ -255,7 +253,7 @@ Estado interno:
 | Estado | Para quê |
 |---|---|
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
-| `pickerOpen` | monta a lista de páginas. Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
+| `pickerOpen` | mostra a lista de páginas (`data-open`, `inert` quando fechada). Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
 | `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
 | `indicator {x, w}` e `animate` | posição e largura da pílula de seleção; não anima na primeira colocação |
 | `fade {start, end}` | degradê só no lado em que há mais links |
@@ -355,7 +353,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
   - O `dist/` publicado no npm é **byte a byte idêntico** ao build do fork em `4e7b769`. Foi conferido no PR #4 e de novo ao escrever este documento: `cmp` de `dist/index.js` e `dist/index.d.ts` depois de `pnpm build` no fork. Ou seja, é o código do fork, com integridade fixada pelo lockfile.
   - O bundle vendorizado (PRs #1–#3) foi removido no PR #4.
 - **A8.1. O vidro do menu DEVE vir do npm** (`"@ybouane/liquidglass": "1.0.3"`, exato), não do GitHub.
-  *Por quê:* o fork `romastefale/liquid-glass2` também não versiona `dist/` (`.gitignore`). Conferido na `main-alt`: os 6 arquivos de `src/` do pacote npm são iguais aos do fork em `59af227`, e o `dist/index.js` e o `dist/index.d.ts` do npm são idênticos (`cmp`) ao `npm ci && npm run build` do fork (com o patch do `html-to-image` aplicado pelo `patch-package`). O pacote declara `"postinstall": "patch-package"`, que no projeto que instala não tem o que aplicar (o `html-to-image` já vem embutido no `dist`); por isso ele fica em `pnpm.ignoredBuiltDependencies` e o pnpm não o roda.
+  O fork não versiona `dist/`. O pacote npm é idêntico ao fork em `59af227`: os 6 arquivos de `src/` são iguais, e `dist/index.js` e `dist/index.d.ts` são iguais (`cmp`) ao `npm ci && npm run build` do fork. O `postinstall` do pacote (`patch-package`) não tem o que aplicar no projeto que instala (o `html-to-image` já vem no `dist`) e fica em `pnpm.ignoredBuiltDependencies`.
 - **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
   - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
 

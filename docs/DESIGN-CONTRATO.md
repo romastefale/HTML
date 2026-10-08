@@ -15,7 +15,7 @@ Este documento fixa a linguagem visual do projeto. Os valores foram copiados de 
 ## 2. Fundo
 
 - **D1. O fundo da página DEVE ser uma imagem SVG estática de campos de cor orgânicos e muito desfocados** (`src/assets/fundo-claro.svg` e `fundo-escuro.svg`, embutidas como data URL pelo Vite). Ela é um `<img class="page-bg">` fixo, filho da raiz do React (o `SiteHeader` o renderiza e escolhe o arquivo pelo modo), da altura da viewport grande (`100lvh`, `object-fit: fill`), com `z-index: -1` e `pointer-events: none`.
-  - É um `<img>`, e não um pseudo-elemento, por causa do vidro do menu (D9.1): ele só enxerga os filhos da raiz e desenha um `<img>` direto dos pixels, como no exemplo do README do `liquid-glass2`.
+  - O vidro do menu (D9.1) refrata os filhos da raiz do React; o fundo é um deles, como no exemplo do README do `liquid-glass2`.
   - Os campos são curvas fechadas irregulares (7 pontos em raios e ângulos sorteados, com semente fixa), nunca círculos nem elipses limpas. Eles se sobrepõem, e o `feGaussianBlur` (`stdDeviation` 70 numa caixa de 1000×1600) tira qualquer borda.
   - Quem muda o desenho edita e roda `scripts/make-organic-bg.py` e faz commit dos dois SVGs. O build não gera nada.
   *Por quê:* pedido de design no PR #14, que substitui o "fundo sem formas" do PR #3. O que o PR #3 proibia eram formas de **borda nítida**: sob o vidro, elas viram manchas distorcidas. Campos desfocados passam pelo fosco só como variação de cor, e esse era o motivo da regra.
@@ -60,7 +60,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 ```
 
 - **D3. Todo vidro DEVE ter exatamente uma hairline, com uma cor só em volta toda,** desenhada em camada própria (`::after`). O `box-shadow` do elemento fica reservado para a sombra de flutuação.
-  - **Exceção: o menu.** A borda, o brilho e a sombra dele são os do shader do `liquid-glass2` (D9.1), sem `.glass` nem `::after`. D3 a D6 não valem para ele.
+  - **Exceção: o menu e a lista ☰.** A borda, o brilho e a sombra são os do vidro do `liquid-glass2` (D9.1).
   *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
 - **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
 - **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
@@ -125,7 +125,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
    ↑ 12px ou a safe area lateral (o maior)                       ↑
    (≡) = ☰, lista de páginas (em toda página) · depois, só as seções
  ┌──────────────────────┐
- │ Início               │ ← lista de páginas (☰): vidro fosco em CSS
+ │ Início               │ ← lista de páginas (☰): vidro do liquid-glass2
  │ Amostra              │   ancorado sob a ponta esquerda da pílula
  │ [Painel]       atual │
  │ Galeria ...          │
@@ -134,14 +134,13 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 | Propriedade | Valor |
 |---|---|
-| Pílula | `<header class="site-header">`, filho direto da raiz do React (exigência da biblioteca, D9.1): `position: fixed; z-index: 70`, `top: calc(12px + env(safe-area-inset-top))`, `left`/`right` `max(12px, env(safe-area-inset-*))`, `width: fit-content` com `margin: 0 auto` (centrada), `max-width: 1040px`; `height: 52px`, `border-radius: 26px`, `padding: 0 9px`, `gap: var(--pill-gap)` (6px, D11.1). Em telas ≤ 760px, `width: auto` (de uma margem à outra) e `padding: 0 8px` |
-| Vidro | o `<canvas>` que `LiquidGlass.init` injeta como primeiro filho da pílula (D9.1). Claro: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`); escuro: "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`), em `data-config` |
-| Sem vidro | enquanto o `init` não termina, com `prefers-reduced-transparency: reduce` ou sem WebGL: fundo sólido `--bar-bg-solid` (`#eef0f5` / `#060607`). Com o vidro rodando (`data-glass="on"`), `background: none` |
+| Pílula | `<header class="site-header">`, filho direto da raiz do React (D9.1): `position: fixed; z-index: 70`, `top: calc(12px + env(safe-area-inset-top))`, `left`/`right` `max(12px, env(safe-area-inset-*))`, `width: fit-content` com `margin: 0 auto` (centrada), `max-width: 1040px`; `height: 52px`, `border-radius: 26px`, `padding: 0 9px`, `gap: var(--pill-gap)` (6px, D11.1). Em telas ≤ 760px, `width: auto` e `padding: 0 8px` |
+| Vidro | o `<canvas>` que `LiquidGlass.init` injeta como primeiro filho da pílula e da lista ☰ (D9.1). Claro: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`); escuro: "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`), em `data-config` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões redondos | 34×34, `border: 1px solid var(--chip-border)`, `background: var(--chip-bg)`, sem `backdrop-filter`, `scale(.96)` ao tocar |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
 | Pílula de seleção | `.sh-indicator`: 34px, raio 17px, `--sel-bg` e `--sel-shadow`, **sem borda**. Transição de 0,45s em `--glass-ease` = `cubic-bezier(.34,1.36,.42,1)` (a mola da biblioteca) |
-| Lista de páginas | `.sh-picker`: vidro fosco (`<Frost>` com `PANEL`, 22px de blur) com tinta mais densa (`--picker-bg`: `rgba(242,243,247,.9)` / `rgba(22,22,26,.88)`), raio 22px, `padding: 6px`, a mesma hairline `.glass::after`; `top: 100% + 8px`, alinhada à esquerda da pílula (sob o ☰), largura pelo conteúdo (`width: max-content`, no máximo a largura da pílula, no mínimo 180px): o nome mais longo, "Arquitetura e operação", mais o padding e o lugar do ✓. Itens de 44px de altura, raio 16px, em grade `auto 15px` com `gap: 14px`, então o ✓ fica logo depois do texto; a página atual fica na pílula de seleção (`--sel-bg`), em 600 e com um ✓ |
+| Lista de páginas | `.sh-picker`: elemento de vidro do `liquid-glass2` (D9.1), filho direto da raiz, sempre no DOM e mostrado com `data-open` (`visibility`); `position: fixed`, `z-index: 71`, 8px abaixo da pílula, alinhada à esquerda dela (sob o ☰), raio 22px, `padding: 6px`, largura pelo conteúdo (`width: max-content`, mínimo 180px). Itens de 44px de altura, raio 16px, em grade `auto 15px` com `gap: 14px`; a página atual fica na pílula de seleção (`--sel-bg`), em 600 e com um ✓ |
 | Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
 
 Paleta do menu (a mesma do `site/src/theme.ts` do fork):
@@ -149,7 +148,6 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 | Token | Claro | Escuro |
 |---|---|---|
 | `--bar-bg` (`.tint-bar`) | `rgba(238,240,245,.72)` | `rgba(6,6,7,.72)` |
-| `--bar-bg-solid` (pílula sem vidro) | `#eef0f5` | `#060607` |
 | `--bar-text` / `--bar-sub` | `#0a0b0d` / `rgba(0,0,0,.6)` | `#fff` / `rgba(255,255,255,.6)` |
 | `--chip-bg` / `--chip-border` | `rgba(255,255,255,.66)` / `rgba(0,0,0,.12)` | `rgba(255,255,255,.05)` / `rgba(255,255,255,.14)` |
 | `--sel-bg` | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
@@ -158,13 +156,11 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
-- **D9.1. O vidro do menu DEVE ser o `LiquidGlass` de `@ybouane/liquidglass` (o fork `romastefale/liquid-glass2`), com os presets "Frosted Panel" (claro) e "Dark Glass" (escuro) da demo do fork, sem mudança** (`BAR_GLASS` em `SiteHeader.tsx`; a demo acrescenta `floating: true` só para arrastar a prévia, e um menu não é arrastável). NÃO DEVE haver fosco em CSS (`<Frost>`, `backdrop-filter`), `.tint-bar` nem hairline `.glass::after` na pílula. O método é o do README do fork:
-  - `LiquidGlass.init({ root, glassElements: [pílula] })`, com `root` = a raiz do React (`#root`) e a pílula como **filho direto** dela;
-  - a configuração vai em `data-config` (JSON);
-  - o fundo que o vidro refrata é um irmão dentro da raiz ("Put backgrounds in a sibling element inside the root"): o `<img class="page-bg">` (D1) e a `.page-fade-top` (D2.1);
-  - a biblioteca rasteriza os outros filhos da raiz uma vez (`html-to-image`) e só refaz quando o tamanho deles muda; por isso uma troca de tema faz `destroy()` e um `init()` novo;
-  - com `prefers-reduced-transparency: reduce`, o vidro não é iniciado (fundo sólido, tabela acima); se o `init` falhar (sem WebGL), também não.
-  *Por quê:* pedido de design (branch `main-alt`). Três ajustes de CSS o tornam possível, e cada um corrige um efeito medido: (1) o fundo virou `<img>`, porque rasterizado pelo `html-to-image` o SVG perdia o degradê de base, a máscara e o desfoque (só os campos crus apareciam); (2) a `.page-fade-top` começa em `top: 0`, porque o `html-to-image` reaplica o `top` negativo dentro da captura e o degradê saía de baixo da pílula; (3) `#root > :is(main, footer)` tem `position: relative`, porque a biblioteca pinta todo filho não posicionado antes de todo posicionado, e o `<main>` estático ficaria atrás do fundo (`z-index: -1`) na cena do vidro.
+- **D9.1. O vidro do menu e da lista ☰ DEVE ser o `LiquidGlass` de `@ybouane/liquidglass` (o fork `romastefale/liquid-glass2`), usado como o README do fork documenta,** com os presets "Frosted Panel" (claro) e "Dark Glass" (escuro) da demo (`BAR_GLASS` em `SiteHeader.tsx`):
+  - `LiquidGlass.init({ root, glassElements: [pílula, lista] })`, com `root` = a raiz do React (`#root`) e os dois como filhos diretos dela;
+  - a configuração vai em `data-config`;
+  - o fundo que o vidro refrata é um irmão dentro da raiz: o `<img class="page-bg">` (D1) e a `.page-fade-top` (D2.1);
+  - na troca de tema, `destroy()` e um `init()` novo: `markChanged()` redesenha, mas não refaz a captura de um filho da raiz cujas cores mudaram (testado).
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
@@ -295,4 +291,4 @@ O azul que continua no site é preenchimento, não foco: o trilho ligado do swit
 | N28 | Fundo animado, gerado por JS ou do tamanho do documento (`background-attachment: fixed`, imagem esticada na página inteira) | Custa pintura a cada quadro ou rasteriza uma imagem de milhares de pixels; o iOS ignora o `fixed`. Use a camada fixa `.page-bg` de `100lvh` (D1, D2.2) | PR #14 |
 | N29 | Sombra, faixa ou fundo que escureça a primeira ou a última linha da viewport | A borda deixa de ser a cor da barra e a emenda aparece (D2.3) | PR #14 |
 | N30 | Lente de lupa que re-renderiza o React a cada movimento do dedo, ou `transform` no elemento filtrado | Um render por evento travava o arrasto no WebKit, e o Safari descarta o `filter: url()` de um elemento filtrado com `transform`. Guarde a posição num ref, escreva uma vez por quadro (`requestAnimationFrame`) e mova o invólucro | PR #15 |
-| N31 | Fosco em CSS (`<Frost>`, `backdrop-filter`) ou hairline `.glass::after` na pílula do menu, ou o fundo da página como pseudo-elemento | O vidro do menu é o do `liquid-glass2` (D9.1), e ele não enxerga pseudo-elementos nem o que fica fora da raiz do React | `main-alt` |
+| N31 | Fosco em CSS (`<Frost>`, `backdrop-filter`), `.tint-bar` ou hairline `.glass::after` na pílula do menu ou na lista ☰ | O vidro deles é o do `liquid-glass2` (D9.1) | `main-alt` |

@@ -1,44 +1,26 @@
-/* The shared top menu: a FLOATING pill, inset from the edges and 12px under
-   the safe area, never touching the top edge, and the same while the page
-   scrolls. Its glass (refraction, blur, rim, shadow) is the canvas that
-   @ybouane/liquidglass injects as its first child: the liquid-glass2 fork's
-   "Frosted Panel" in light mode, "Dark Glass" in dark mode (SiteHeader.tsx
-   › BAR_GLASS). Inside it, the fork demo-site header's parts and values
-   (site/src/components/SiteHeader.tsx + the palette in site/src/theme.ts),
-   without the wordmark: the section links (the current one on a soft
-   selected pill) and round 34px buttons (light/dark, search). The magnifier
-   turns the pill itself into the search bar and back (see "Search mode"
-   below). */
+/* The top menu pill and the page picker. Their glass is the canvas
+   @ybouane/liquidglass injects as their first child (SiteHeader.tsx). */
 :root{
-  --bar-bg:rgba(238,240,245,.72);
   --bar-text:#0a0b0d;
   --bar-sub:rgba(0,0,0,.6);
-  --bar-edge:rgba(0,0,0,.1);
   --chip-bg:rgba(255,255,255,.66);
   --chip-border:rgba(0,0,0,.12);
   --bar-bg-solid:#eef0f5;
   --sel-bg:rgba(255,255,255,.9);
   --sel-shadow:0 1px 2px rgba(20,16,60,.08),0 2px 6px rgba(20,16,60,.08);
   --hover-bg:rgba(0,0,0,.05);
-  --picker-bg:rgba(242,243,247,.9);
 }
 :root[data-theme="dark"]{
-  --bar-bg:rgba(6,6,7,.72);
   --bar-text:#fff;
   --bar-sub:rgba(255,255,255,.6);
-  --bar-edge:rgba(255,255,255,.1);
   --chip-bg:rgba(255,255,255,.05);
   --chip-border:rgba(255,255,255,.14);
   --bar-bg-solid:#060607;
   --sel-bg:rgba(255,255,255,.16);
   --sel-shadow:0 1px 6px rgba(0,0,0,.28);
   --hover-bg:rgba(255,255,255,.07);
-  --picker-bg:rgba(22,22,26,.88);
 }
-/* The pill IS the fixed element (a glass element must be a direct child of
-   the library's root, the React #root): centred between the side insets,
-   as wide as its content up to 1040px. The library sets overflow:visible on
-   it (the shadow halo overflows the box). */
+/* Fixed, centred between the side insets, as wide as its content up to 1040px. */
 .site-header{
   /* One gap for the whole pill (D11.1): the theme↔search gap, 6px, also sits
      between ☰ and the first link, between the links and before the theme
@@ -53,16 +35,6 @@
   display:flex;align-items:center;gap:var(--pill-gap);min-width:0;height:52px;
   padding:0 9px;border-radius:26px;
   color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
-  /* Until the glass is running (init is async), and wherever it doesn't run
-     (reduced transparency, no WebGL): a solid fill, so the links always read. */
-  background:var(--bar-bg-solid);
-}
-.site-header[data-glass="on"]{background:none}
-.tint-bar{background:var(--bar-bg);color:var(--bar-text)}
-@media (prefers-reduced-transparency:reduce){
-  .tint-bar{background:#eef0f5}
-  :root[data-theme="dark"] .tint-bar{background:#060607}
-  .sh-picker.tint-bar{background:var(--bar-bg-solid)}
 }
 .sh-nav{
   position:relative;flex:0 1 auto;min-width:0;
@@ -89,9 +61,8 @@
 }
 /* The pill's links are only this page's sections (D12); every page, Início
    included, is in the ☰ picker, whose button is the pill's left end. */
-/* Selected: a soft glass pill behind the current link (one element that slides
-   between links), no border of its own: the pill's only line is the uniform
-   hairline of the menu itself (PR #6). */
+/* Selected: a soft pill behind the current link (one element that slides
+   between links). */
 .sh-indicator{
   position:absolute;z-index:0;left:0;top:9px;height:34px;border-radius:17px;pointer-events:none;
   background:var(--sel-bg);box-shadow:var(--sel-shadow);
@@ -125,20 +96,19 @@
 .site-header[data-mode="search"] :is(.sh-theme,.sh-pages-btn){transform:scale(.7)}
 .sh-search-btn{transition:transform .12s ease, background-color .2s ease, color .2s ease}
 .sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
-/* No focus ring on the pill or the field in search mode: the caret shows
-   where you type, and the pill keeps only the glass's own rim. */
+/* No focus ring on the pill or the field in search mode. */
 .site-header[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
-/* The page picker (☰): a frosted popover anchored under the pill's left end
-   (frost in CSS, .tint-bar, one hairline from .glass::after). Not a
-   full-page takeover: the page stays visible around it. */
+/* The page picker (☰): under the pill's left end (left set by SiteHeader),
+   always in the DOM (a glass element), shown with data-open. */
 .sh-picker{
-  position:absolute;z-index:2;top:calc(100% + 8px);left:0;
-  width:max-content;max-width:100%;min-width:180px;max-height:calc(100svh - 96px - env(safe-area-inset-top, 0px));overflow:auto;
+  position:fixed;z-index:71;top:calc(72px + env(safe-area-inset-top, 0px));
+  width:max-content;max-width:calc(100% - 24px);min-width:180px;
   padding:6px;border-radius:22px;box-sizing:border-box;
-  animation:sh-pick-in .26s var(--glass-ease) both;transform-origin:26px 0;
+  color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
+  visibility:hidden;
 }
+.sh-picker[data-open]{visibility:visible;animation:sh-pick-in .26s var(--glass-ease) both;transform-origin:26px 0}
 @keyframes sh-pick-in{from{opacity:0;transform:translateY(-6px) scale(.97)}}
-.sh-picker.tint-bar{background:var(--picker-bg)}
 .sh-picker ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
 /* Shrink-to-fit: as wide as the longest name plus the check's slot (15px),
    so the check sits just after the text, not at the far end of a wide box. */
@@ -151,8 +121,8 @@
 .sh-picker a:hover{background:var(--hover-bg)}
 .sh-picker a[aria-current="page"]{background:var(--sel-bg);box-shadow:var(--sel-shadow);font-weight:600}
 /* Keyboard focus: a neutral ring in the text colour, never the blue one. */
-.site-header .sh-picker a:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
-.site-header .sh-picker a[aria-current="page"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
+.sh-picker a:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
+.sh-picker a[aria-current="page"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
 .sh-pick-here{display:inline-flex;align-items:center;width:15px;height:15px;color:var(--bar-sub)}
 @media (max-width:760px){
   .site-header{width:auto;padding:0 8px}
@@ -161,5 +131,5 @@
 @media (prefers-reduced-motion:reduce){
   .sh-pill,.sh-nav,.sh-theme,.sh-pages-btn,.sh-indicator[data-animate],.sh-nav a,.site-header[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transition:none}
   .site-header[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transform:none}
-  .sh-picker{animation:none}
+  .sh-picker[data-open]{animation:none}
 }

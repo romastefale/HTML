@@ -22,9 +22,8 @@
      menu (SiteHeader.css) is inset 12px under the safe area and from the
      sides (it is also the search bar: the magnifier turns it into the field,
      no separate panel).
-   • .page-bg and .page-fade-top are elements, not pseudo-elements: the top
-     bar's glass (@ybouane/liquidglass) samples only the children of the React
-     root, so they are rendered there, by SiteHeader.
+   • .page-bg and .page-fade-top are children of the React root (rendered by
+     SiteHeader), where the top bar's glass samples them.
    • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
      toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
 :root{
@@ -96,21 +95,13 @@ body{
   line-height:1.5;
   touch-action:manipulation; /* pan + pinch-zoom stay allowed */
 }
-/* The page background: static, no animation. An <img> of the mode's SVG
-   (src/assets/fundo-{claro,escuro}.svg, picked by SiteHeader), because the
-   top bar's glass draws an <img> sibling straight from its pixels (the
-   liquid-glass2 README's background pattern); rasterised through
-   html-to-image, the SVG lost its gradient, mask and blur. Fixed and one
-   large viewport tall (100lvh), so it's rasterised once and never resized
-   when the iPhone toolbars collapse; scrolling only moves the content over it. */
+/* The page background: an <img> of the mode's SVG (src/assets/fundo-*.svg),
+   fixed, one large viewport tall (100lvh). */
 .page-bg{
   position:fixed;z-index:-1;left:0;top:0;width:100%;height:100vh;height:100lvh;
   pointer-events:none;object-fit:fill;
 }
-/* The top bar's glass rebuilds the page under it from the root's children,
-   painting every non-positioned child before every positioned one, so a
-   static <main> would go under .page-bg (z-index -1) in its scene. Positioned
-   (with no z-index) they paint above .page-bg there, as they do on the page. */
+/* Positioned, so the top bar's glass paints them above .page-bg. */
 #root > :is(main, footer){position:relative}
 /* Edge fades over the scrolling content (see the header note). Solid through
    the safe area, then an eased ramp to transparent.
@@ -122,10 +113,8 @@ body{
    at least the toolbar's height (100lvh - 100svh) and never less than 120px. */
 :root{--fade-under:120px}
 @supports (height:100lvh){:root{--fade-under:max(120px, 100lvh - 100svh)}}
-/* The fade starts at the viewport's top edge and its solid part above the
-   edge (--fade-under) is a ::before: the top bar's glass captures this
-   element at its own box, and html-to-image re-applies a negative top inside
-   the capture, which shifted the gradient off the bar. */
+/* Top fade from the viewport's top edge; the solid part above the edge
+   (--fade-under) is its ::before. */
 .page-fade-top{
   position:fixed;z-index:50;left:0;right:0;top:0;pointer-events:none;
   height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
@@ -205,13 +194,17 @@ code,kbd{overflow-wrap:anywhere}
 .tint-soft{background:rgba(255,255,255,.42);color:#1c1c1e}
 .tint-frost{background:rgba(255,255,255,.52);color:#1c1c1e}
 .tint-control{background:rgba(255,255,255,.5);color:#111}
+.tint-bar{background:rgba(238,240,245,.72);color:var(--bar-text)}
 :root[data-theme="dark"] .tint-soft{background:rgba(255,255,255,.12);color:#f5f5f7}
 :root[data-theme="dark"] .tint-frost{background:rgba(28,24,60,.5);color:#f5f5f7}
 :root[data-theme="dark"] .tint-control{background:rgba(44,40,80,.55);color:#f5f5f7}
+:root[data-theme="dark"] .tint-bar{background:rgba(6,6,7,.72)}
 @media (prefers-reduced-transparency:reduce){
   .tint-ink{background:rgba(24,20,56,.94)}
   .tint-blue{background:rgba(10,110,230,.96)}
   .tint-red,.tint-green,.tint-white,.tint-soft,.tint-frost,.tint-control{background:rgba(255,255,255,.95);color:#1c1c1e}
+  .tint-bar{background:#eef0f5}
+  :root[data-theme="dark"] .tint-bar{background:#060607}
 }
 @media (prefers-reduced-transparency:reduce){
   :root[data-theme="dark"] :is(.tint-soft,.tint-frost,.tint-control){background:rgba(28,24,60,.96);color:#f5f5f7}
