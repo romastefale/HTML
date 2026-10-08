@@ -16,7 +16,7 @@ export const NO_SHINE: Partial<GlassOptics> = { specular: 0, sheen: 0, glow: 0 }
  *  default material look (bends the live page in Chrome/Edge). */
 export const CONTROL: Partial<GlassOptics> = { ...NO_SHINE };
 
-/** Wide bars (the menu pill) + caption pills: frost only. BROWSERS.md: "Very
+/** Wide bars (the Painel tab bar, the Galeria chips) + caption pills: frost only. BROWSERS.md: "Very
  *  wide panels shouldn't use a single stretched displacement lens … use a
  *  frost-only treatment". Rendered by <Frost> (plain CSS, same look) rather
  *  than a material <Glass>: see src/components/Frost.tsx. */

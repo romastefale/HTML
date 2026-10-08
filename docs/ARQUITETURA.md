@@ -1,6 +1,6 @@
 # Arquitetura
 
-> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11), atualizado até o PR #15 (`lentes-e-foco`, a partir de `4748463`, merge do PR #14). As versões vêm de `package.json` e `pnpm-lock.yaml`.
+> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11), atualizado até o PR #15 (`lentes-e-foco`, a partir de `4748463`, merge do PR #14) e, na branch `main-alt`, com o vidro do menu do `liquid-glass2` (§4.1, A8.1). As versões vêm de `package.json` e `pnpm-lock.yaml`.
 
 **Prioridade do projeto (decisão do usuário, PR #15): a translucidez e o vídeo são o foco.**
 
@@ -14,6 +14,7 @@
 | UI | `react` | `^19.2.0` | **19.3.0** |
 | UI | `react-dom` | `^19.2.0` | **19.3.0** |
 | Vidro | `@samasante/liquid-glass` | `0.1.1` (exato) | **0.1.1** |
+| Vidro do menu | `@ybouane/liquidglass` | `1.0.3` (exato) | **1.0.3** (o fork `romastefale/liquid-glass2`; o `postinstall` dele fica desligado em `pnpm.ignoredBuiltDependencies`, A8.1) |
 | Build | `vite` | `^8.0.0` | **8.3.1** |
 | Build | `@vitejs/plugin-react` | `^6.0.0` | **6.1.1** |
 | Tipos | `typescript` | `^5.7.0` | **5.9.3** |
@@ -65,9 +66,9 @@ HTML/
     ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
     ├── docs.d.ts                 # tipo do import *.md?doc
     ├── assets/
-    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada, vira data URL no CSS)
+    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no <img class="page-bg"> do SiteHeader)
     ├── components/
-    │   ├── SiteHeader.tsx/.css   # menu flutuante (seções, ponto, páginas, tema, lupa)
+    │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), vidro do liquid-glass2; também o fundo e a faixa de cima
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
     │   ├── Frost.tsx             # superfície fosca em CSS puro (blur + saturate)
     │   ├── GlassPill.tsx         # botão de vidro: <Glass> no Blink, <Frost> nos demais
@@ -139,7 +140,7 @@ Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` i
 
 | Arquivo | Bruto | gzip | Conteúdo | Carregado por |
 |---|---|---|---|---|
-| `assets/pages-*.js` | 235,33 kB | 74,21 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces, `pages.ts` e tema | todas |
+| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,14 kB | 91,13 kB | compartilhado: React, react-dom, SiteHeader, **`@ybouane/liquidglass`** (vidro do menu, com o `html-to-image` embutido), PageSearch, Frost, Surfaces, `pages.ts` e tema. Medido na `main-alt`; antes dela, 237,35 kB / 74,68 kB | todas |
 | `assets/index-*.js` | 7,13 kB | 2,73 kB | portal | Início |
 | `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`** | Amostra, Painel e Galeria |
 | `assets/sample-*.js` | 14,40 kB | 5,35 kB | amostra | Amostra |
@@ -199,6 +200,7 @@ flowchart TD
   HEADER --> SEARCH["components/PageSearch.tsx"]
   HEADER --> THEME["lib/theme.ts · useTheme"]
   HEADER --> FROST["components/Frost.tsx"]
+  HEADER --> LG2[("@ybouane/liquidglass<br/>vidro da pílula")]
   HOME --> SURF["components/Surfaces.tsx<br/>GlassPanel · GlassCaption · Picture"]
   SURF --> FROST
 
@@ -226,6 +228,18 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 3. o botão de tema e a lupa.
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Frost>` com `PANEL`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`. Ela só é montada enquanto está aberta.
+
+**O vidro da pílula** (branch `main-alt`, DESIGN-CONTRATO D9.1) é o `LiquidGlass` de `@ybouane/liquidglass`. O `SiteHeader` devolve três filhos da raiz do React (`#root`), nesta ordem: `<img class="page-bg">` (o fundo), `<div class="page-fade-top">` (a faixa de cima) e `<header class="site-header">` (a pílula, que é o elemento de vidro). Num `useEffect`:
+
+```ts
+LiquidGlass.init({ root: pílula.parentElement, glassElements: [pílula] })
+  .then((g) => { pílula.dataset.glass = "on"; ... });   // cleanup: g.destroy()
+```
+
+- A configuração é o `data-config` da pílula: `BAR_GLASS.light` = "Frosted Panel" `{ blurAmount: 0.25, cornerRadius: 30 }`, `BAR_GLASS.dark` = "Dark Glass" `{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`.
+- O efeito depende do tema: a biblioteca rasteriza os outros filhos da raiz uma vez e não percebe uma troca de cores, então cada troca de tema destrói e cria a instância de novo.
+- Com `prefers-reduced-transparency: reduce` o `init` não roda; se ele falhar (sem WebGL), a pílula fica sem `data-glass` e com o fundo sólido do CSS.
+- A biblioteca injeta um `<canvas>` como primeiro filho da pílula e põe `overflow: visible` nela; os seletores da pílula não usam `:first-child`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -340,6 +354,8 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
   - O fork **não versiona `dist/`** (está no `.gitignore`) e não tem script `prepare`. Instalado via GitHub, o pacote viria vazio.
   - O `dist/` publicado no npm é **byte a byte idêntico** ao build do fork em `4e7b769`. Foi conferido no PR #4 e de novo ao escrever este documento: `cmp` de `dist/index.js` e `dist/index.d.ts` depois de `pnpm build` no fork. Ou seja, é o código do fork, com integridade fixada pelo lockfile.
   - O bundle vendorizado (PRs #1–#3) foi removido no PR #4.
+- **A8.1. O vidro do menu DEVE vir do npm** (`"@ybouane/liquidglass": "1.0.3"`, exato), não do GitHub.
+  *Por quê:* o fork `romastefale/liquid-glass2` também não versiona `dist/` (`.gitignore`). Conferido na `main-alt`: os 6 arquivos de `src/` do pacote npm são iguais aos do fork em `59af227`, e o `dist/index.js` e o `dist/index.d.ts` do npm são idênticos (`cmp`) ao `npm ci && npm run build` do fork (com o patch do `html-to-image` aplicado pelo `patch-package`). O pacote declara `"postinstall": "patch-package"`, que no projeto que instala não tem o que aplicar (o `html-to-image` já vem embutido no `dist`); por isso ele fica em `pnpm.ignoredBuiltDependencies` e o pnpm não o roda.
 - **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
   - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
 
@@ -359,8 +375,8 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu | `SiteHeader` | `<Frost>` + `.tint-bar` | `FROST`: `blur(6px) saturate(1.15)` | todas |
-| Botões redondos do menu (tema, lupa) | `button.sh-pill` | CSS próprio | `backdrop-filter: blur(14px)` | todas |
+| Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | "Frosted Panel" (claro) / "Dark Glass" (escuro) | todas |
+| Botões redondos do menu (tema, lupa) | `button.sh-pill` | CSS próprio, sem `backdrop-filter` | tinta `--chip-bg` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
@@ -387,7 +403,7 @@ Contagem de `<Glass>` por página:
 | Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta | o `draw` do visor, só nessas condições |
 | Contratos | 0 | nenhum |
 
-Medido no DOM do build atual, na amostra, com iPhone 15 emulado:
+Medido no DOM do build do PR #15, na amostra, com iPhone 15 emulado (na `main-alt` a pílula do menu deixou de ser `[data-frost]`: uma superfície a menos em cada motor):
 
 | Motor | Superfícies `[data-frost]` | `backdrop-filter: url()` | `filter: url()` | `<filter>` SVG | mapas `data:` em `feImage` |
 |---|---|---|---|---|---|

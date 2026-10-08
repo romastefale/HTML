@@ -1,14 +1,14 @@
-/* The shared top menu: a FLOATING glass pill (as before PR #7), inset from
-   the edges and 12px under the safe area, never touching the top edge, and
-   the same while the page scrolls. Inside it, the fork demo-site header's
-   parts and values (site/src/components/SiteHeader.tsx + the palette in
-   site/src/theme.ts), without the wordmark: the section links (the current
-   one on a soft selected pill) and round 34px buttons (light/dark, search).
-   The magnifier turns the pill itself into the search bar and back (see
-   "Search mode" below). Frost only (BROWSERS.md: wide bars), one uniform
-   hairline from .glass::after (PR #6).
-   The fixed wrapper is transparent (the glass is on its child), so Safari 26
-   has nothing solid at the edge to sample: its bar shows the page colour. */
+/* The shared top menu: a FLOATING pill, inset from the edges and 12px under
+   the safe area, never touching the top edge, and the same while the page
+   scrolls. Its glass (refraction, blur, rim, shadow) is the canvas that
+   @ybouane/liquidglass injects as its first child: the liquid-glass2 fork's
+   "Frosted Panel" in light mode, "Dark Glass" in dark mode (SiteHeader.tsx
+   › BAR_GLASS). Inside it, the fork demo-site header's parts and values
+   (site/src/components/SiteHeader.tsx + the palette in site/src/theme.ts),
+   without the wordmark: the section links (the current one on a soft
+   selected pill) and round 34px buttons (light/dark, search). The magnifier
+   turns the pill itself into the search bar and back (see "Search mode"
+   below). */
 :root{
   --bar-bg:rgba(238,240,245,.72);
   --bar-text:#0a0b0d;
@@ -35,35 +35,29 @@
   --hover-bg:rgba(255,255,255,.07);
   --picker-bg:rgba(22,22,26,.88);
 }
+/* The pill IS the fixed element (a glass element must be a direct child of
+   the library's root, the React #root): centred between the side insets,
+   as wide as its content up to 1040px. The library sets overflow:visible on
+   it (the shadow halo overflows the box). */
 .site-header{
-  position:fixed;z-index:70;left:0;right:0;
-  top:calc(12px + env(safe-area-inset-top, 0px));
-  transform:translateY(var(--vv-top, 0px));
-  display:flex;justify-content:center;pointer-events:none;
-  padding:0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
-  font-family:system-ui,-apple-system,sans-serif;
-}
-/* Scroll-edge softening (iOS 26's "scroll edge effect", in CSS): a band
-   around the pill blurs the content scrolling under and around it, fading
-   out above and below, so text never reads crisply half-behind the pill. It
-   starts 2px under the safe area and never touches the viewport edge (T11), and
-   it has no colour of its own: only a mask-faded backdrop blur. */
-.site-header::before{
-  content:"";position:absolute;z-index:-1;left:0;right:0;top:-10px;height:calc(100% + 30px);pointer-events:none;
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
-  mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
-}
-@media (prefers-reduced-transparency:reduce){.site-header::before{display:none}}
-.sh-anchor{position:relative;min-width:0;max-width:min(100%, 1040px);pointer-events:auto}
-.sh-bar{
   /* One gap for the whole pill (D11.1): the theme↔search gap, 6px, also sits
      between ☰ and the first link, between the links and before the theme
      button. The links keep their own 13px padding for the selection pill. */
   --pill-gap:6px;
-  align-items:center;gap:var(--pill-gap);min-width:0;max-width:100%;height:52px;
+  position:fixed;z-index:70;
+  top:calc(12px + env(safe-area-inset-top, 0px));
+  left:max(12px, env(safe-area-inset-left, 0px));
+  right:max(12px, env(safe-area-inset-right, 0px));
+  width:fit-content;max-width:1040px;margin:0 auto;
+  transform:translateY(var(--vv-top, 0px));
+  display:flex;align-items:center;gap:var(--pill-gap);min-width:0;height:52px;
   padding:0 9px;border-radius:26px;
+  color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
+  /* Until the glass is running (init is async), and wherever it doesn't run
+     (reduced transparency, no WebGL): a solid fill, so the links always read. */
+  background:var(--bar-bg-solid);
 }
+.site-header[data-glass="on"]{background:none}
 .tint-bar{background:var(--bar-bg);color:var(--bar-text)}
 @media (prefers-reduced-transparency:reduce){
   .tint-bar{background:#eef0f5}
@@ -113,7 +107,6 @@
   flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
   width:34px;height:34px;padding:0;border-radius:999px;box-sizing:border-box;
   border:1px solid var(--chip-border);background:var(--chip-bg);color:var(--bar-text);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   cursor:pointer;transition:transform .12s ease;-webkit-tap-highlight-color:transparent;
 }
 /* Keyboard focus: the same neutral ring as the page list below (never blue,
@@ -124,20 +117,20 @@
    links and theme button fade out but keep their room, so nothing moves or
    resizes; the magnifier stays in place, shown active, and closes it. */
 .sh-nav,.sh-theme,.sh-pages-btn{transition:opacity .2s ease, transform .34s var(--glass-ease), visibility 0s}
-.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){
+.site-header[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){
   opacity:0;visibility:hidden;pointer-events:none;
   transition:opacity .16s ease, transform .3s var(--glass-ease), visibility 0s linear .16s;
 }
-.sh-bar[data-mode="search"] .sh-nav{transform:translateX(-12px)}
-.sh-bar[data-mode="search"] :is(.sh-theme,.sh-pages-btn){transform:scale(.7)}
+.site-header[data-mode="search"] .sh-nav{transform:translateX(-12px)}
+.site-header[data-mode="search"] :is(.sh-theme,.sh-pages-btn){transform:scale(.7)}
 .sh-search-btn{transition:transform .12s ease, background-color .2s ease, color .2s ease}
 .sh-pill[aria-expanded="true"]{background:var(--bar-text);color:var(--bar-bg-solid);border-color:transparent}
 /* No focus ring on the pill or the field in search mode: the caret shows
-   where you type, and the pill keeps only its uniform hairline. */
-.sh-bar[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
-/* The page picker (☰): a frosted popover anchored under the pill's left end,
-   the pill's own tint, radius family and single hairline (.glass::after). Not
-   a full-page takeover: the page stays visible around it. */
+   where you type, and the pill keeps only the glass's own rim. */
+.site-header[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
+/* The page picker (☰): a frosted popover anchored under the pill's left end
+   (frost in CSS, .tint-bar, one hairline from .glass::after). Not a
+   full-page takeover: the page stays visible around it. */
 .sh-picker{
   position:absolute;z-index:2;top:calc(100% + 8px);left:0;
   width:max-content;max-width:100%;min-width:180px;max-height:calc(100svh - 96px - env(safe-area-inset-top, 0px));overflow:auto;
@@ -162,12 +155,11 @@
 .site-header .sh-picker a[aria-current="page"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
 .sh-pick-here{display:inline-flex;align-items:center;width:15px;height:15px;color:var(--bar-sub)}
 @media (max-width:760px){
-  .sh-anchor{flex:1 1 auto}
-  .sh-bar{width:100%;padding:0 8px}
+  .site-header{width:auto;padding:0 8px}
   .sh-nav a{padding:0 12px}
 }
 @media (prefers-reduced-motion:reduce){
-  .sh-pill,.sh-nav,.sh-theme,.sh-pages-btn,.sh-indicator[data-animate],.sh-nav a,.sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transition:none}
-  .sh-bar[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transform:none}
+  .sh-pill,.sh-nav,.sh-theme,.sh-pages-btn,.sh-indicator[data-animate],.sh-nav a,.site-header[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transition:none}
+  .site-header[data-mode="search"] :is(.sh-nav,.sh-theme,.sh-pages-btn){transform:none}
   .sh-picker{animation:none}
 }

@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { FROST, PANEL } from "../lib/optics";
+import { LiquidGlass, type GlassConfig } from "@ybouane/liquidglass";
+import { PANEL } from "../lib/optics";
 import { Frost } from "./Frost";
-import { useReducedMotion } from "../lib/useMedia";
-import { useTheme } from "../lib/theme";
+import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
+import { useTheme, type ThemeName } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
+import fundoClaro from "../assets/fundo-claro.svg";
+import fundoEscuro from "../assets/fundo-escuro.svg";
 import { PAGES, type PageKey } from "../lib/pages";
 import "./SiteHeader.css";
 
@@ -43,6 +46,16 @@ const Moon = () => (
   </svg>
 );
 
+/** The top bar's glass: the two presets of the liquid-glass2 fork's demo
+ *  (romastefale/liquid-glass2, site/index.html › "Frosted Panel" and
+ *  "Dark Glass"), unchanged. Light mode is the Frosted Panel, dark mode the
+ *  Dark Glass. The demo adds `floating: true` only to make its preview
+ *  draggable; a top bar isn't, so the documented snippet is used as is. */
+const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
+  light: { blurAmount: 0.25, cornerRadius: 30 },
+  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
+};
+
 // The site's press feedback on its round pills.
 const pressDown = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(0.96)");
 const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(1)");
@@ -54,8 +67,11 @@ const EDGE = 12; // px kept clear around an item scrolled into view
 
 /**
  * The shared top menu (every page), the same at the top of the page and all
- * the way down: a floating glass pill inset under the safe area, holding the
- * fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
+ * the way down: a floating pill inset under the safe area whose glass is
+ * drawn by @ybouane/liquidglass (LiquidGlass.init: the pill is a glass
+ * element, a direct child of the React root, and the shader refracts the
+ * root's other children: the page background, the edge fade and the page).
+ * It holds the fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
  * the wordmark: the ☰ page picker at the left end, the page's section links (the current one on a soft
  * selected pill that slides between them), then the links to the other pages and round 34px buttons for the light/dark mode
  * and the page search (magnifier). When the links don't fit they scroll
@@ -70,8 +86,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   searchScope = "conteudo",
 }) => {
   const { theme, toggle } = useTheme();
-  const headerRef = useRef<HTMLElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLElement>(null);
+  const reduceTransparency = useMediaQuery("(prefers-reduced-transparency: reduce)");
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
@@ -290,7 +306,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   // layout one; keep the menu (and the open field) pinned to what's visible.
   useEffect(() => {
     const vv = window.visualViewport;
-    const el = headerRef.current;
+    const el = barRef.current;
     if (!vv || !el || !searchOpen) return;
     const update = () => el.style.setProperty("--vv-top", `${Math.max(0, vv.offsetTop)}px`);
     update();
@@ -303,113 +319,143 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [searchOpen]);
 
+  // The bar's glass (LiquidGlass.init on the React root, the bar as its
+  // glass element). The library rasterises the root's other children once,
+  // so a theme change (new background and text colours) starts a fresh
+  // instance. With reduced transparency, or if WebGL is missing, it isn't
+  // started and the bar keeps its solid fill (SiteHeader.css).
+  useEffect(() => {
+    const bar = barRef.current;
+    const root = bar?.parentElement;
+    if (!bar || !root || reduceTransparency) return;
+    let alive = true;
+    let glass: LiquidGlass | null = null;
+    LiquidGlass.init({ root, glassElements: [bar] }).then(
+      (g) => {
+        if (!alive) return g.destroy();
+        glass = g;
+        bar.dataset.glass = "on";
+      },
+      () => {},
+    );
+    return () => {
+      alive = false;
+      glass?.destroy();
+      delete bar.dataset.glass;
+    };
+  }, [theme, reduceTransparency]);
+
   const dark = theme === "dark";
   return (
-    <header ref={headerRef} className="site-header">
-      <div ref={barRef} className="sh-anchor">
-        <Frost
-          className="glass sh-bar tint-bar"
-          optics={FROST}
-          style={{ display: "flex" }}
-          data-mode={searchOpen ? "search" : "menu"}
+    <>
+      {/* The page background and the top edge fade, as children of the React
+          root: the glass samples only the root's children (the library
+          README: "Put backgrounds in a sibling element inside the root";
+          its example background is an <img>, drawn from its pixels). */}
+      <img className="page-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
+      <div className="page-fade-top" aria-hidden="true" />
+      <header
+        ref={barRef}
+        className="site-header"
+        data-mode={searchOpen ? "search" : "menu"}
+        data-config={JSON.stringify(BAR_GLASS[theme])}
+      >
+        {/* The page picker (☰), at the LEFT end of the pill on every page: every
+            page of the portal, Início included, in a frosted popover. */}
+        <button
+          ref={pickerBtn}
+          type="button"
+          className="sh-pill sh-pages-btn"
+          onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
+          aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
+          aria-expanded={pickerOpen}
+          aria-controls={pickerId}
+          title="Páginas"
+          inert={searchOpen}
+          onPointerDown={pressDown}
+          onPointerUp={pressUp}
+          onPointerLeave={pressUp}
         >
-          {/* The page picker (☰), at the LEFT end of the pill on every page: every
-              page of the portal, Início included, in a frosted popover. */}
+          <Burger />
+        </button>
+        {/* Menu mode. In search mode the links stay in the layout (hidden,
+            inert) so the pill keeps exactly its size and place. */}
+        <nav
+          ref={navRef}
+          className="sh-nav"
+          aria-label={label}
+          data-fade-start={fade.start || undefined}
+          data-fade-end={fade.end || undefined}
+          onScroll={syncFade}
+          inert={searchOpen}
+        >
+          <span
+            className="sh-indicator"
+            aria-hidden="true"
+            data-animate={animate || undefined}
+            style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
+          />
+          {items.map((it, i) => (
+            <a
+              key={it.href + it.label}
+              ref={(el) => {
+                linkRefs.current[i] = el;
+              }}
+              href={it.href}
+              aria-label={it.ariaLabel}
+              aria-current={i === active ? "location" : undefined}
+              onFocus={() => reveal(i, false)}
+              onClick={(e) => {
+                it.onSelect?.(e);
+                // A section link is selected at once, before the page scrolls.
+                if (it.spy !== false && it.href.startsWith("#")) {
+                  pin(700);
+                  setActive(i);
+                }
+              }}
+            >
+              {/* data-text reserves the bold width: the pill never changes size
+                  when the current link changes. */}
+              <span className="sh-label" data-text={it.label}>
+                {it.label}
+              </span>
+            </a>
+          ))}
+        </nav>
+        {/* Search mode: the field takes the pill, up to the magnifier. */}
+        <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
+        <div className="sh-actions">
+          {/* Hidden during search (the field needs the room at 393px). */}
           <button
-            ref={pickerBtn}
             type="button"
-            className="sh-pill sh-pages-btn"
-            onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
-            aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
-            aria-expanded={pickerOpen}
-            aria-controls={pickerId}
-            title="Páginas"
+            className="sh-pill sh-theme"
+            onClick={toggle}
+            aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
+            title="Alternar modo claro / escuro"
             inert={searchOpen}
             onPointerDown={pressDown}
             onPointerUp={pressUp}
             onPointerLeave={pressUp}
           >
-            <Burger />
+            {dark ? <Sun /> : <Moon />}
           </button>
-          {/* Menu mode. In search mode the links stay in the layout (hidden,
-              inert) so the pill keeps exactly its size and place. */}
-          <nav
-            ref={navRef}
-            className="sh-nav"
-            aria-label={label}
-            data-fade-start={fade.start || undefined}
-            data-fade-end={fade.end || undefined}
-            onScroll={syncFade}
-            inert={searchOpen}
+          {/* The toggle: opens the search in the pill, closes it again. */}
+          <button
+            ref={searchBtn}
+            type="button"
+            className="sh-pill sh-search-btn"
+            onClick={() => (searchOpen ? closeSearch() : openSearch())}
+            aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+            aria-expanded={searchOpen}
+            aria-controls={searchId}
+            title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+            onPointerDown={pressDown}
+            onPointerUp={pressUp}
+            onPointerLeave={pressUp}
           >
-            <span
-              className="sh-indicator"
-              aria-hidden="true"
-              data-animate={animate || undefined}
-              style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
-            />
-            {items.map((it, i) => (
-              <a
-                key={it.href + it.label}
-                ref={(el) => {
-                  linkRefs.current[i] = el;
-                }}
-                href={it.href}
-                aria-label={it.ariaLabel}
-                aria-current={i === active ? "location" : undefined}
-                onFocus={() => reveal(i, false)}
-                onClick={(e) => {
-                  it.onSelect?.(e);
-                  // A section link is selected at once, before the page scrolls.
-                  if (it.spy !== false && it.href.startsWith("#")) {
-                    pin(700);
-                    setActive(i);
-                  }
-                }}
-              >
-                {/* data-text reserves the bold width: the pill never changes size
-                    when the current link changes. */}
-                <span className="sh-label" data-text={it.label}>
-                  {it.label}
-                </span>
-              </a>
-            ))}
-          </nav>
-          {/* Search mode: the field takes the pill, up to the magnifier. */}
-          <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
-          <div className="sh-actions">
-            {/* Hidden during search (the field needs the room at 393px). */}
-            <button
-              type="button"
-              className="sh-pill sh-theme"
-              onClick={toggle}
-              aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-              title="Alternar modo claro / escuro"
-              inert={searchOpen}
-              onPointerDown={pressDown}
-              onPointerUp={pressUp}
-              onPointerLeave={pressUp}
-            >
-              {dark ? <Sun /> : <Moon />}
-            </button>
-            {/* The toggle: opens the search in the pill, closes it again. */}
-            <button
-              ref={searchBtn}
-              type="button"
-              className="sh-pill sh-search-btn"
-              onClick={() => (searchOpen ? closeSearch() : openSearch())}
-              aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-              aria-expanded={searchOpen}
-              aria-controls={searchId}
-              title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-              onPointerDown={pressDown}
-              onPointerUp={pressUp}
-              onPointerLeave={pressUp}
-            >
-              <Magnifier />
-            </button>
-          </div>
-        </Frost>
+            <Magnifier />
+          </button>
+        </div>
         {pickerOpen && (
           <Frost ref={pickerRef} id={pickerId} className="glass sh-picker tint-bar" optics={PANEL} style={{ position: "absolute" }}>
             <nav aria-label="Páginas do site">
@@ -442,7 +488,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             </nav>
           </Frost>
         )}
-      </div>
-    </header>
+      </header>
+    </>
   );
 };
