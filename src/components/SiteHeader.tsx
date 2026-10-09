@@ -303,6 +303,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   const tint = (v: Vidro) => ({ background: dark ? v.tintEscuro : v.tintClaro });
   return (
     <>
+      <div className="sh-band" aria-hidden="true" />
       <Glass
         className="sh-glass sh-glass-pages"
         optics={vidro.botoes.optics}
