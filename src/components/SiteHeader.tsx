@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { LiquidGlass, type GlassConfig } from "@ybouane/liquidglass";
+import { LiquidGlass } from "@ybouane/liquidglass";
+import vidroIni from "../../vidro.ini?raw";
 import { useReducedMotion } from "../lib/useMedia";
-import { useTheme, type ThemeName } from "../lib/theme";
+import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
 import fundoClaro from "../assets/fundo-claro.svg";
 import fundoEscuro from "../assets/fundo-escuro.svg";
@@ -36,12 +37,14 @@ const Moon = () => (
   </svg>
 );
 
-const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
-  light: { blurAmount: 0.25, cornerRadius: 30 },
-  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
-};
-const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 24 };
-const INDICATOR_GLASS: Partial<GlassConfig> = { cornerRadius: 16, zRadius: 16, blurAmount: 0 };
+const vidro: Record<string, Record<string, number | boolean>> = {};
+let secao = "";
+for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
+  const s = linha.match(/^\[(.+)\]$/);
+  if (s) vidro[(secao = s[1])] = {};
+  const kv = linha.match(/^(\w+)\s*=\s*(.+)$/);
+  if (kv) vidro[secao][kv[1]] = kv[2] === "true" ? true : kv[2] === "false" ? false : Number(kv[2].replace(",", "."));
+}
 
 const EDGE = 12;
 
@@ -52,6 +55,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   searchScope = "conteudo",
 }) => {
   const { theme, toggle } = useTheme();
+  const dark = theme === "dark";
   const barRef = useRef<HTMLElement>(null);
   const indRef = useRef<HTMLDivElement>(null);
   const themeBtn = useRef<HTMLButtonElement>(null);
@@ -185,6 +189,22 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       placed.current = true;
     }
   }, [active, searchOpen]);
+  const alignBg = useCallback(() => {
+    const vw = `${document.documentElement.clientWidth}px`;
+    for (const root of [barRootRef.current, pickerRootRef.current]) {
+      if (!root) continue;
+      const cs = getComputedStyle(root);
+      root.style.setProperty("--root-x", cs.left);
+      root.style.setProperty("--root-y", cs.top);
+      root.style.setProperty("--vw", vw);
+    }
+  }, []);
+  useLayoutEffect(() => {
+    alignBg();
+    addEventListener("resize", alignBg);
+    return () => removeEventListener("resize", alignBg);
+  }, [alignBg]);
+
   useLayoutEffect(() => {
     layout();
     const bar = barRef.current;
@@ -302,7 +322,10 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     if (!barRoot || !pickerRoot || !pickerRef.current || barEls.some((e) => !e)) return;
     let alive = true;
     (async () => {
-      await document.fonts?.ready;
+      await Promise.all([
+        document.fonts?.ready,
+        ...[barRoot, pickerRoot].map((r) => r.querySelector<HTMLImageElement>(".sh-bg")!.decode()),
+      ]);
       if (!alive) return;
       layout();
       const all = await Promise.all([
@@ -317,17 +340,13 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       glass.current.forEach((g) => g.destroy());
       glass.current = [];
     };
-  }, []);
+  }, [dark]);
 
-  useEffect(() => {
-    glass.current.forEach((g) => g.markChanged());
-  }, [theme]);
-
-  const dark = theme === "dark";
   return (
     <>
       <div ref={barRootRef} className="sh-root">
         <img className="sh-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
+        <div className="sh-fade" aria-hidden="true" />
         <button
           ref={pickerBtn}
           type="button"
@@ -339,7 +358,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           title="Páginas"
           inert={searchOpen}
           data-hidden={searchOpen || undefined}
-          data-config={JSON.stringify(BUTTON_GLASS)}
+          data-config={JSON.stringify(vidro.botoes)}
         >
           <span className="label">
             <Burger />
@@ -349,7 +368,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           ref={barRef}
           className="site-header"
           data-mode={searchOpen ? "search" : "menu"}
-          data-config={JSON.stringify(BAR_GLASS[theme])}
+          data-config={JSON.stringify(vidro.pilula)}
         >
           <span className="sh-slot" />
           <nav
@@ -389,7 +408,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             <span className="sh-slot" />
           </div>
         </header>
-        <div ref={indRef} className="sh-indicator" aria-hidden="true" data-config={JSON.stringify(INDICATOR_GLASS)} />
+        <div ref={indRef} className="sh-indicator" aria-hidden="true" data-config={JSON.stringify(vidro.selecao)} />
         <button
           ref={themeBtn}
           type="button"
@@ -399,7 +418,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           title="Alternar modo claro / escuro"
           inert={searchOpen}
           data-hidden={searchOpen || undefined}
-          data-config={JSON.stringify(BUTTON_GLASS)}
+          data-config={JSON.stringify(vidro.botoes)}
         >
           <span className="label">{dark ? <Sun /> : <Moon />}</span>
         </button>
@@ -412,7 +431,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           aria-expanded={searchOpen}
           aria-controls={searchId}
           title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-          data-config={JSON.stringify(BUTTON_GLASS)}
+          data-config={JSON.stringify(vidro.botoes)}
         >
           <span className="label">
             <Magnifier />
@@ -425,7 +444,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           ref={pickerRef}
           id={pickerId}
           className="sh-picker"
-          data-config={JSON.stringify(BAR_GLASS[theme])}
+          data-config={JSON.stringify(vidro.lista)}
         >
           <nav aria-label="Páginas do site">
             <ul>

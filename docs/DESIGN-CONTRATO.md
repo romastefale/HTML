@@ -133,8 +133,8 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 | Propriedade | Valor |
 |---|---|
-| Pílula | `.sh-root` (a raiz do vidro da barra, como o `.preview-container` do fork): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `padding: var(--box-pad)` (6px), `border-radius: 16px`, `overflow: hidden`, com a imagem de fundo do modo (`.sh-bg`, `object-fit: cover`) preenchendo a caixa. Dentro dela, `<header class="site-header">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px); os botões ocupam `.sh-slot` de 34px |
-| Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 24 }` (o exemplo "Button Mode" do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` |
+| Pílula | `.sh-root` (a raiz do vidro da barra, como o `.preview-container` do fork): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `padding: var(--box-pad)` (6px), `border-radius: 16px`, `overflow: hidden`, com a imagem de fundo do modo (`.sh-bg`) no tamanho e na posição da viewport, igual ao `html::before`, e o degradê do topo (`.sh-fade`, `--top-fade`) igual ao `body::before`. Dentro dela, `<header class="site-header">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px); os botões ocupam `.sh-slot` de 34px |
+| Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Os valores de cada vidro ficam em `vidro.ini`, na raiz do repositório (seções `[pilula]`, `[botoes]`, `[selecao]`, `[lista]`, um parâmetro por linha). Os valores entregues são os da demo do fork: pílula e lista ☰ = `.hero-title`; botões = `#glass-btn-1`/`#glass-btn-2`; seleção = `#glass-tab-indicator`; o resto, os padrões de `src/defaults.ts` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-btn`: elementos de vidro dentro de `.sh-root`, 34×34, `position: absolute`, `top: calc(var(--box-pad) + 9px)`, sobre os `.sh-slot` |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
@@ -153,11 +153,11 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
-- **D9.1. O vidro do menu e da lista ☰ DEVE ser o `LiquidGlass` de `@ybouane/liquidglass` (o fork `romastefale/liquid-glass2`), usado como o README do fork documenta,** com os presets "Frosted Panel" (claro) e "Dark Glass" (escuro) da demo (`BAR_GLASS` em `SiteHeader.tsx`):
+- **D9.1. O vidro do menu e da lista ☰ DEVE ser o `LiquidGlass` de `@ybouane/liquidglass` (o fork `romastefale/liquid-glass2`), usado como o README do fork documenta,** com os valores de `vidro.ini` (os da demo do fork):
   - duas raízes, como o README indica para vidro dentro de um container: `LiquidGlass.init({ root: .sh-root, glassElements: [☰, pílula, seleção, tema, lupa] })` e `LiquidGlass.init({ root: .sh-picker-root, glassElements: [lista] })`, depois de `document.fonts.ready`. Cada raiz tem a imagem de fundo do modo (`.sh-bg`) como irmã dos elementos de vidro, como o `#hero-root` do fork;
   - a configuração vai em `data-config`;
   - o vidro refrata essa imagem de fundo;
-  - na troca de tema, a imagem troca de `src` e as duas instâncias recebem `markChanged()`.
+  - na troca de tema, as duas instâncias são destruídas e criadas de novo, depois de `decode()` da imagem do modo.
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
