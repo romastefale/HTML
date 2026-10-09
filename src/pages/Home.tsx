@@ -110,6 +110,7 @@ export const Home: React.FC = () => {
         <Card id="menu" title="Menu com rolagem lateral" subtitle="Navegação">
           <p className="card-body">
             O menu é uma pílula de vidro que flutua no topo, igual do início ao fim da página e em todas as páginas.
+            O vidro dela é desenhado em WebGL e curva o fundo e o texto que passam por baixo; no modo escuro ele fica escuro.
             Nele ficam só as seções da página; quando não cabem, deslize-o para o lado (no computador, use o trackpad ou <kbd>Shift</kbd> + roda
             do mouse). Todas as páginas, o Início também, estão no botão <span aria-hidden="true">☰</span> na ponta esquerda da pílula,
             que abre uma lista de vidro fosco com a página atual marcada. A seção que você está lendo (ou a que você tocou) fica selecionada, com uma pílula clara atrás, e sempre visível no menu. O botão com a lua ou o sol
@@ -187,7 +188,9 @@ export const Home: React.FC = () => {
             Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Vidro: o fosco
             desta página segue os valores do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT ©
             Sam Asante), e o <code>&lt;Glass&gt;</code> do pacote <code>@samasante/liquid-glass</code> é usado na{" "}
-            <a href={SAMPLE_URL}>amostra</a>, no painel e na galeria.
+            <a href={SAMPLE_URL}>amostra</a>, no painel e na galeria. O vidro do menu do topo é o do{" "}
+            <a href="https://github.com/romastefale/liquid-glass2">liquid-glass2</a> (MIT, @ybouane), pacote{" "}
+            <code>@ybouane/liquidglass</code>.
           </footer>
         </GlassPanel>
       </main>

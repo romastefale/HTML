@@ -115,7 +115,7 @@ stateDiagram-v2
 | Preferência | Efeito |
 |---|---|
 | `prefers-reduced-motion: reduce` | Sem órbita da lente (fica em `REST`). Sem transições no menu, no indicador e na pesquisa (a troca é instantânea). `scroll-behavior: auto`. A rolagem da pesquisa e do menu usa `behavior: "auto"` |
-| `prefers-reduced-transparency: reduce` | Tintas quase opacas (`.95`–`.96`), menu sólido (`#eef0f5` / `#060607`), `.gcard-body` com `rgba(255,255,255,.94)` |
+| `prefers-reduced-transparency: reduce` | Tintas quase opacas (`.95`–`.96`), `.gcard-body` com `rgba(255,255,255,.94)`. O vidro do menu e da lista ☰ (`liquid-glass2`) não muda |
 | `prefers-color-scheme` | Tema padrão enquanto o usuário não escolhe. As mudanças do sistema são seguidas até haver escolha salva |
 | `(hover: none)` | A dica do hero diz "Toque no título para guiar a lente." (senão, "Mova o cursor…") |
 

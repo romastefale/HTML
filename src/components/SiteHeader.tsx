@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { FROST, PANEL } from "../lib/optics";
-import { Frost } from "./Frost";
+import { LiquidGlass, type GlassConfig } from "@ybouane/liquidglass";
 import { useReducedMotion } from "../lib/useMedia";
-import { useTheme } from "../lib/theme";
+import { useTheme, type ThemeName } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
+import fundoClaro from "../assets/fundo-claro.svg";
+import fundoEscuro from "../assets/fundo-escuro.svg";
 import { PAGES, type PageKey } from "../lib/pages";
 import "./SiteHeader.css";
 
@@ -43,25 +44,25 @@ const Moon = () => (
   </svg>
 );
 
+/** Glass presets of romastefale/liquid-glass2 (site/index.html): "Frosted
+ *  Panel" in light mode, "Dark Glass" in dark mode. */
+const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
+  light: { blurAmount: 0.25, cornerRadius: 30 },
+  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
+};
+
 // The site's press feedback on its round pills.
 const pressDown = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(0.96)");
 const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(1)");
 
-// The picker sits over running text: the reading panels' heavier frost (PANEL)
-// and a denser tint than the pill, so its labels always read (no refraction).
-
 const EDGE = 12; // px kept clear around an item scrolled into view
 
 /**
- * The shared top menu (every page), the same at the top of the page and all
- * the way down: a floating glass pill inset under the safe area, holding the
- * fork demo-site header's parts (site/src/components/SiteHeader.tsx) minus
- * the wordmark: the ☰ page picker at the left end, the page's section links (the current one on a soft
- * selected pill that slides between them), then the links to the other pages and round 34px buttons for the light/dark mode
- * and the page search (magnifier). When the links don't fit they scroll
- * sideways (swipe, trackpad, Shift + wheel), the scrollbar hidden and a soft
- * fade on the side with more. The magnifier turns the pill itself into the
- * search bar; the magnifier again, Esc or a tap outside turns it back.
+ * The shared top menu (every page): a fixed pill with the ☰ page picker, the
+ * page's section links (scrolling sideways when they don't fit; the current
+ * one on a selected pill), the light/dark button and the magnifier, which
+ * turns the pill into the page search. The pill and the picker are
+ * @ybouane/liquidglass glass elements.
  */
 export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: string; searchScope?: string }> = ({
   items,
@@ -70,17 +71,17 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   searchScope = "conteudo",
 }) => {
   const { theme, toggle } = useTheme();
-  const headerRef = useRef<HTMLElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLElement>(null);
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
   const [searchOpen, setSearchOpen] = useState(false);
-  // The page picker (☰): a frosted popover under the pill listing every page.
+  // The page picker (☰): a glass popover under the pill listing every page.
   const pickerId = `paginas-${useId().replace(/:/g, "")}`;
   const [pickerOpen, setPickerOpen] = useState(false);
   const pickerBtn = useRef<HTMLButtonElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const [pickerLeft, setPickerLeft] = useState(12);
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(-1);
@@ -268,21 +269,29 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         all[to].focus({ preventScroll: true });
       }
     };
+    const inside = (n: Node | null) => !!n && (!!barRef.current?.contains(n) || !!root?.contains(n));
     const onClick = (e: MouseEvent) => {
-      if (!barRef.current?.contains(e.target as Node)) closePicker(false);
+      if (!inside(e.target as Node)) closePicker(false);
     };
     const onFocusOut = (e: FocusEvent) => {
       const to = e.relatedTarget as Node | null;
-      if (to && !barRef.current?.contains(to)) closePicker(false);
+      if (to && !inside(to)) closePicker(false);
     };
+    // The picker sits under the pill's left end.
+    const place = () => setPickerLeft(barRef.current?.getBoundingClientRect().left ?? 12);
+    place();
+    const bar = barRef.current;
     document.addEventListener("keydown", onKey);
     document.addEventListener("click", onClick);
-    barRef.current?.addEventListener("focusout", onFocusOut);
-    const bar = barRef.current;
+    addEventListener("resize", place);
+    bar?.addEventListener("focusout", onFocusOut);
+    root?.addEventListener("focusout", onFocusOut);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("click", onClick);
+      removeEventListener("resize", place);
       bar?.removeEventListener("focusout", onFocusOut);
+      root?.removeEventListener("focusout", onFocusOut);
     };
   }, [pickerOpen, closePicker]);
 
@@ -290,7 +299,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   // layout one; keep the menu (and the open field) pinned to what's visible.
   useEffect(() => {
     const vv = window.visualViewport;
-    const el = headerRef.current;
+    const el = barRef.current;
     if (!vv || !el || !searchOpen) return;
     const update = () => el.style.setProperty("--vv-top", `${Math.max(0, vv.offsetTop)}px`);
     update();
@@ -303,146 +312,177 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [searchOpen]);
 
+  // LiquidGlass.init (README of romastefale/liquid-glass2): the pill and the
+  // page picker are glass elements, direct children of the React root. A
+  // theme change runs destroy() + init(): markChanged() redraws but doesn't
+  // re-capture a root child whose colours changed.
+  useEffect(() => {
+    const bar = barRef.current;
+    const picker = pickerRef.current;
+    const root = bar?.parentElement;
+    if (!bar || !picker || !root) return;
+    let alive = true;
+    let glass: LiquidGlass | null = null;
+    LiquidGlass.init({ root, glassElements: [bar, picker] }).then((g) => {
+      if (alive) glass = g;
+      else g.destroy();
+    });
+    return () => {
+      alive = false;
+      glass?.destroy();
+    };
+  }, [theme]);
+
   const dark = theme === "dark";
   return (
-    <header ref={headerRef} className="site-header">
-      <div ref={barRef} className="sh-anchor">
-        <Frost
-          className="glass sh-bar tint-bar"
-          optics={FROST}
-          style={{ display: "flex" }}
-          data-mode={searchOpen ? "search" : "menu"}
+    <>
+      {/* The page background and the top edge fade, as children of the React
+          root: the glass samples only the root's children (the library
+          README: "Put backgrounds in a sibling element inside the root";
+          its example background is an <img>, drawn from its pixels). */}
+      <img className="page-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
+      <div className="page-fade-top" aria-hidden="true" />
+      <header
+        ref={barRef}
+        className="site-header"
+        data-mode={searchOpen ? "search" : "menu"}
+        data-config={JSON.stringify(BAR_GLASS[theme])}
+      >
+        {/* The page picker (☰), at the LEFT end of the pill on every page: every
+            page of the portal, Início included, in a glass popover. */}
+        <button
+          ref={pickerBtn}
+          type="button"
+          className="sh-pill sh-pages-btn"
+          onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
+          aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
+          aria-expanded={pickerOpen}
+          aria-controls={pickerId}
+          title="Páginas"
+          inert={searchOpen}
+          onPointerDown={pressDown}
+          onPointerUp={pressUp}
+          onPointerLeave={pressUp}
         >
-          {/* The page picker (☰), at the LEFT end of the pill on every page: every
-              page of the portal, Início included, in a frosted popover. */}
+          <Burger />
+        </button>
+        {/* Menu mode. In search mode the links stay in the layout (hidden,
+            inert) so the pill keeps exactly its size and place. */}
+        <nav
+          ref={navRef}
+          className="sh-nav"
+          aria-label={label}
+          data-fade-start={fade.start || undefined}
+          data-fade-end={fade.end || undefined}
+          onScroll={syncFade}
+          inert={searchOpen}
+        >
+          <span
+            className="sh-indicator"
+            aria-hidden="true"
+            data-animate={animate || undefined}
+            style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
+          />
+          {items.map((it, i) => (
+            <a
+              key={it.href + it.label}
+              ref={(el) => {
+                linkRefs.current[i] = el;
+              }}
+              href={it.href}
+              aria-label={it.ariaLabel}
+              aria-current={i === active ? "location" : undefined}
+              onFocus={() => reveal(i, false)}
+              onClick={(e) => {
+                it.onSelect?.(e);
+                // A section link is selected at once, before the page scrolls.
+                if (it.spy !== false && it.href.startsWith("#")) {
+                  pin(700);
+                  setActive(i);
+                }
+              }}
+            >
+              {/* data-text reserves the bold width: the pill never changes size
+                  when the current link changes. */}
+              <span className="sh-label" data-text={it.label}>
+                {it.label}
+              </span>
+            </a>
+          ))}
+        </nav>
+        {/* Search mode: the field takes the pill, up to the magnifier. */}
+        <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
+        <div className="sh-actions">
+          {/* Hidden during search (the field needs the room at 393px). */}
           <button
-            ref={pickerBtn}
             type="button"
-            className="sh-pill sh-pages-btn"
-            onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
-            aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
-            aria-expanded={pickerOpen}
-            aria-controls={pickerId}
-            title="Páginas"
+            className="sh-pill sh-theme"
+            onClick={toggle}
+            aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
+            title="Alternar modo claro / escuro"
             inert={searchOpen}
             onPointerDown={pressDown}
             onPointerUp={pressUp}
             onPointerLeave={pressUp}
           >
-            <Burger />
+            {dark ? <Sun /> : <Moon />}
           </button>
-          {/* Menu mode. In search mode the links stay in the layout (hidden,
-              inert) so the pill keeps exactly its size and place. */}
-          <nav
-            ref={navRef}
-            className="sh-nav"
-            aria-label={label}
-            data-fade-start={fade.start || undefined}
-            data-fade-end={fade.end || undefined}
-            onScroll={syncFade}
-            inert={searchOpen}
+          {/* The toggle: opens the search in the pill, closes it again. */}
+          <button
+            ref={searchBtn}
+            type="button"
+            className="sh-pill sh-search-btn"
+            onClick={() => (searchOpen ? closeSearch() : openSearch())}
+            aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+            aria-expanded={searchOpen}
+            aria-controls={searchId}
+            title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+            onPointerDown={pressDown}
+            onPointerUp={pressUp}
+            onPointerLeave={pressUp}
           >
-            <span
-              className="sh-indicator"
-              aria-hidden="true"
-              data-animate={animate || undefined}
-              style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
-            />
-            {items.map((it, i) => (
-              <a
-                key={it.href + it.label}
-                ref={(el) => {
-                  linkRefs.current[i] = el;
-                }}
-                href={it.href}
-                aria-label={it.ariaLabel}
-                aria-current={i === active ? "location" : undefined}
-                onFocus={() => reveal(i, false)}
-                onClick={(e) => {
-                  it.onSelect?.(e);
-                  // A section link is selected at once, before the page scrolls.
-                  if (it.spy !== false && it.href.startsWith("#")) {
-                    pin(700);
-                    setActive(i);
-                  }
-                }}
-              >
-                {/* data-text reserves the bold width: the pill never changes size
-                    when the current link changes. */}
-                <span className="sh-label" data-text={it.label}>
-                  {it.label}
-                </span>
-              </a>
-            ))}
-          </nav>
-          {/* Search mode: the field takes the pill, up to the magnifier. */}
-          <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
-          <div className="sh-actions">
-            {/* Hidden during search (the field needs the room at 393px). */}
-            <button
-              type="button"
-              className="sh-pill sh-theme"
-              onClick={toggle}
-              aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-              title="Alternar modo claro / escuro"
-              inert={searchOpen}
-              onPointerDown={pressDown}
-              onPointerUp={pressUp}
-              onPointerLeave={pressUp}
-            >
-              {dark ? <Sun /> : <Moon />}
-            </button>
-            {/* The toggle: opens the search in the pill, closes it again. */}
-            <button
-              ref={searchBtn}
-              type="button"
-              className="sh-pill sh-search-btn"
-              onClick={() => (searchOpen ? closeSearch() : openSearch())}
-              aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-              aria-expanded={searchOpen}
-              aria-controls={searchId}
-              title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-              onPointerDown={pressDown}
-              onPointerUp={pressUp}
-              onPointerLeave={pressUp}
-            >
-              <Magnifier />
-            </button>
-          </div>
-        </Frost>
-        {pickerOpen && (
-          <Frost ref={pickerRef} id={pickerId} className="glass sh-picker tint-bar" optics={PANEL} style={{ position: "absolute" }}>
-            <nav aria-label="Páginas do site">
-              <ul>
-                {PAGES.map((p) => {
-                  const here = p.key === current;
-                  return (
-                    <li key={p.key}>
-                      <a
-                        href={p.href}
-                        aria-current={here ? "page" : undefined}
-                        onClick={(e) => {
-                          if (here) {
-                            e.preventDefault();
-                            closePicker();
-                          } else setPickerOpen(false);
-                        }}
-                      >
-                        <span className="sh-pick-title">{p.pick}</span>
-                        {/* Not colour only: the current page is bold, on the selected
-                            pill, with a check (aria-current="page" for readers). */}
-                        {/* The check's slot is on every item, so the list keeps its width
-                            whichever page is current. */}
-                        <span className="sh-pick-here">{here && <Check />}</span>
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </Frost>
-        )}
+            <Magnifier />
+          </button>
+        </div>
+      </header>
+      <div
+        ref={pickerRef}
+        id={pickerId}
+        className="sh-picker"
+        data-open={pickerOpen || undefined}
+        inert={!pickerOpen}
+        style={{ left: pickerLeft }}
+        data-config={JSON.stringify(BAR_GLASS[theme])}
+      >
+        <nav aria-label="Páginas do site">
+          <ul>
+            {PAGES.map((p) => {
+              const here = p.key === current;
+              return (
+                <li key={p.key}>
+                  <a
+                    href={p.href}
+                    aria-current={here ? "page" : undefined}
+                    onClick={(e) => {
+                      if (here) {
+                        e.preventDefault();
+                        closePicker();
+                      } else setPickerOpen(false);
+                    }}
+                  >
+                    <span className="sh-pick-title">{p.pick}</span>
+                    {/* Not colour only: the current page is bold, on the selected
+                        pill, with a check (aria-current="page" for readers). */}
+                    {/* The check's slot is on every item, so the list keeps its width
+                        whichever page is current. */}
+                    <span className="sh-pick-here">{here && <Check />}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
-    </header>
+    </>
   );
 };
