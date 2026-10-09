@@ -6,7 +6,7 @@ import type { GlassOptics } from "@samasante/liquid-glass";
 const MATERIAL_FROST = 6;
 const MATERIAL_SATURATE = 1.15;
 
-export const frostFilter = (optics: Partial<GlassOptics>) => {
+const frostFilter = (optics: Partial<GlassOptics>) => {
   const blur = Math.max(0, optics.frost ?? MATERIAL_FROST);
   const sat = optics.saturate ?? MATERIAL_SATURATE;
   return [blur > 0 ? `blur(${blur}px)` : "", sat !== 1 ? `saturate(${sat})` : ""].filter(Boolean).join(" ") || "none";

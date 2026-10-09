@@ -264,7 +264,7 @@ Os detalhes de interação estão em [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILID
 
 ### 4.3 Tema
 
-`lib/theme.ts` exporta `useTheme()`, que devolve `{ theme, toggle }`, e também `applyTheme(t)`, `THEME_KEY = "lg-theme"` e `PAGE_EDGE = { light: "#8b82e6", dark: "#1b1646" }`.
+`lib/theme.ts` exporta `useTheme()`, que devolve `{ theme, toggle }`, e `useThemeName()`. Internos ao arquivo: `applyTheme(t)`, `THEME_KEY = "lg-theme"` e `PAGE_EDGE = { light: "#8b82e6", dark: "#1b1646" }`.
 
 O estado inicial vem de `<html data-theme>`, já definido pelo script inline. Enquanto não há escolha salva, o tema acompanha `prefers-color-scheme`. O `toggle` salva a escolha em `localStorage` e aplica `data-theme`, `style.colorScheme` e `meta[name=theme-color]`.
 

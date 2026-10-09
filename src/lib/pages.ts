@@ -2,7 +2,7 @@ const BASE = import.meta.env.BASE_URL;
 
 /** Every page of the portal (Vite entries in vite.config.ts), in menu order. */
 export type PageKey = "inicio" | "amostra" | "painel" | "galeria" | "contrato" | "arquitetura";
-export interface PageInfo {
+interface PageInfo {
   key: PageKey;
   href: string;
   /** Short label (home cards and titles). */
