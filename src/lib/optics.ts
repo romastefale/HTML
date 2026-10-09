@@ -1,7 +1,5 @@
 import type { GlassOptics } from "@samasante/liquid-glass";
-import { vidro } from "./vidro";
-
-const frost = vidro.paginas.optics.frost;
+import { frost } from "./vidro";
 
 /** No library light at all, for every <Glass> on the site.
  *  • `specular: 0` turns the edge layer off: the material <Glass> always draws a

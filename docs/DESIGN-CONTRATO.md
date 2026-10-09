@@ -81,7 +81,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 ## 4. Fosco e tintas
 
-O desfoque de todo vidro das páginas é o `frost` da seção `[paginas]` do `vidro.ini` (ele vira `--vidro-frost` e o `frost` de `FROST`, `PANEL` e `CONTROL`, em `src/lib/vidro.ts` e `src/lib/optics.ts`). As lentes de refração (`<Glass>` com cópia) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px.
+O desfoque de todo vidro das páginas é o `frost` da seção `[vidro]` do `vidro.ini` (ele vira `--vidro-frost` e o `frost` de `FROST`, `PANEL` e `CONTROL`, em `src/lib/vidro.ts` e `src/lib/optics.ts`). As lentes de refração (`<Glass>` com cópia) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px.
 
 | Uso | Ótica / CSS | `backdrop-filter` resultante |
 |---|---|---|
@@ -94,7 +94,7 @@ O desfoque de todo vidro das páginas é o `frost` da seção `[paginas]` do `vi
 
 | Classe | Claro | Escuro | Transparência reduzida |
 |---|---|---|---|
-| `.tint-bar` (barra de abas, chips), `.tint-frost` (painéis), `.tint-control`, `.tint-soft`, `.tint-white` | `tintClaro` de `[paginas]` no `vidro.ini` (`--vidro-tint`) | `tintEscuro` de `[paginas]` | `.tint-bar`: `#eef0f5` / `#060607`; os outros: `rgba(255,255,255,.95)` / `rgba(28,24,60,.96)` |
+| `.tint-bar` (barra de abas, chips), `.tint-frost` (painéis), `.tint-control`, `.tint-soft`, `.tint-white` | `tintClaro` de `[vidro]` no `vidro.ini` (`--vidro-tint`) | `tintEscuro` de `[vidro]` | `.tint-bar`: `#eef0f5` / `#060607`; os outros: `rgba(255,255,255,.95)` / `rgba(28,24,60,.96)` |
 | `.tint-ink` (legendas) | `rgba(24,20,56,.46)`, texto `#fff` | igual | `rgba(24,20,56,.94)` |
 | `.tint-blue` | `rgba(10,132,255,.52)`, texto `#fff` | igual | `rgba(10,110,230,.96)` |
 | `.tint-red` / `.tint-green` | `rgba(248,113,113,.40)` / `rgba(48,209,88,.36)` | igual | `rgba(255,255,255,.95)` |
@@ -136,12 +136,12 @@ As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm
 | Propriedade | Valor |
 |---|---|
 | Pílula | `.site-header`, um `<Glass>` material: `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `height: 52px`, `border-radius: 26px`. Dentro dele, `<header class="sh-bar">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px). Os botões ocupam `.sh-slot` de 34px |
-| Vidro | `<Glass>` material de `@samasante/liquid-glass` (D9.1). Os valores ficam só em `vidro.ini`, na raiz do repositório: seções `[pilula]`, `[botoes]`, `[lista]` (as optics da biblioteca, um parâmetro por linha, e a tinta `tintClaro` / `tintEscuro`) e `[selecao]` (só a tinta) |
+| Vidro | `<Glass>` material de `@samasante/liquid-glass` (D9.1). Os valores ficam só em `vidro.ini`, cada um uma vez: `[vidro]` (`frost`, `tintClaro`, `tintEscuro`, os mesmos do vidro das páginas) e `[menu]` (as outras optics da biblioteca, um parâmetro por linha) |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-glass`: um `<Glass>` material por botão, 34×34, raio 17px, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`); o `<button class="sh-btn">` preenche o vidro |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
 | Rolagem de borda | `.sh-band`: uma faixa fixa sem cor, só `backdrop-filter: blur(var(--vidro-frost))` com máscara em degradê, de 10px acima a 20px abaixo da pílula (nunca encosta na borda de cima, T11) |
-| Seleção | `.sh-indicator`: pílula de cor (a tinta de `[selecao]`), dentro do `<nav>` e atrás dos links (`position: absolute; z-index: 0`), por isso rola junto com eles; do tamanho do link atual (`offsetLeft`, `offsetTop`, `offsetWidth`, `offsetHeight`) e movida por `transform` só quando a seção ativa muda (`transition: transform .45s cubic-bezier(.65,0,.35,1)`). Não é um `<Glass>`: um `backdrop-filter` dentro de outro só enxerga o conteúdo do pai |
+| Seleção | `.sh-indicator`: pílula de cor (a tinta de `[vidro]`, `--vidro-tint`), dentro do `<nav>` e atrás dos links (`position: absolute; z-index: 0`), por isso rola junto com eles; do tamanho do link atual (`offsetLeft`, `offsetTop`, `offsetWidth`, `offsetHeight`) e movida por `transform` só quando a seção ativa muda (`transition: transform .45s cubic-bezier(.65,0,.35,1)`). Não é um `<Glass>`: um `backdrop-filter` dentro de outro só enxerga o conteúdo do pai |
 | Lista de páginas | `.sh-picker`: um `<Glass>` material, mostrado com `data-open` (`visibility`); `position: fixed`, `z-index: 73`, `top: calc(var(--bar-top) + 60px)`, `left: var(--bar-l)`, raio 22px, `padding: 6px` (no `<nav>` de dentro), `width: max-content` (mínimo 180px). Itens de 44px de altura, em grade `auto 15px` com `gap: 14px`; a página atual em 600 e com um ✓ |
 | Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
 
@@ -149,7 +149,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 | Token | Claro | Escuro |
 |---|---|---|
-| `--bar-bg` (`.tint-bar`) | `tintClaro` de `[paginas]` | `tintEscuro` de `[paginas]` |
+| `--bar-bg` (`.tint-bar`) | `tintClaro` de `[vidro]` | `tintEscuro` de `[vidro]` |
 | `--bar-text` / `--bar-sub` | `#0a0b0d` / `rgba(0,0,0,.6)` | `#fff` / `rgba(255,255,255,.6)` |
 | `--sel-bg` (barra de abas do Painel, chips da Galeria) | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
 | `--sel-shadow` | `0 1px 2px rgba(20,16,60,.1), 0 3px 10px rgba(20,16,60,.1)` | `0 2px 10px rgba(0,0,0,.3)` |

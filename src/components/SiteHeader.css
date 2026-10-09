@@ -10,6 +10,7 @@
   --bar-text:#fff;
   --bar-sub:rgba(255,255,255,.6);
 }
+.site-header,.sh-glass,.sh-picker,.sh-indicator{background:var(--vidro-tint)}
 .sh-band{
   position:fixed;z-index:69;left:0;right:0;top:calc(var(--bar-top) - 10px);height:82px;pointer-events:none;
   transform:translateY(var(--vv-top));

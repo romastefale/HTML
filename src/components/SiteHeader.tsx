@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Glass } from "@samasante/liquid-glass";
-import { vidro, type Vidro } from "../lib/vidro";
+import { menuOptics } from "../lib/vidro";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
@@ -279,14 +279,12 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [searchOpen, layout]);
 
-  const tint = (v: Vidro) => ({ background: dark ? v.tintEscuro : v.tintClaro });
   return (
     <>
       <div className="sh-band" aria-hidden="true" />
       <Glass
         className="sh-glass sh-glass-pages"
-        optics={vidro.botoes.optics}
-        style={tint(vidro.botoes)}
+        optics={menuOptics}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -305,8 +303,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Glass>
       <Glass
         className="site-header"
-        optics={vidro.pilula.optics}
-        style={tint(vidro.pilula)}
+        optics={menuOptics}
         data-mode={searchOpen ? "search" : "menu"}
       >
         <header ref={barRef} className="sh-bar">
@@ -320,7 +317,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             onScroll={syncFade}
             inert={searchOpen}
           >
-            <div ref={indRef} className="sh-indicator" aria-hidden="true" style={tint(vidro.selecao)} />
+            <div ref={indRef} className="sh-indicator" aria-hidden="true" />
             {items.map((it, i) => (
               <a
                 key={it.href + it.label}
@@ -352,8 +349,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Glass>
       <Glass
         className="sh-glass sh-glass-theme"
-        optics={vidro.botoes.optics}
-        style={tint(vidro.botoes)}
+        optics={menuOptics}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -368,7 +364,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           {dark ? <Sun /> : <Moon />}
         </button>
       </Glass>
-      <Glass className="sh-glass sh-glass-search" optics={vidro.botoes.optics} style={tint(vidro.botoes)}>
+      <Glass className="sh-glass sh-glass-search" optics={menuOptics}>
         <button
           ref={searchBtn}
           type="button"
@@ -384,8 +380,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Glass>
       <Glass
         className="sh-picker"
-        optics={vidro.lista.optics}
-        style={tint(vidro.lista)}
+        optics={menuOptics}
         data-open={pickerOpen || undefined}
         inert={!pickerOpen}
       >

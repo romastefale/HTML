@@ -1,23 +1,23 @@
 import type { GlassOptics } from "@samasante/liquid-glass";
 import vidroIni from "../../vidro.ini?raw";
 
-export type Vidro = { optics: Partial<GlassOptics>; tintClaro: string; tintEscuro: string };
-
-export const vidro: Record<string, Vidro> = {};
+const secoes: Record<string, Record<string, string>> = {};
 let secao = "";
 for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
   const s = linha.match(/^\[(.+)\]$/);
-  if (s) vidro[(secao = s[1])] = { optics: {} } as Vidro;
+  if (s) secoes[(secao = s[1])] = {};
   const kv = linha.match(/^(\w+)\s*=\s*(.+)$/);
-  if (!kv) continue;
-  const [, chave, valor] = kv;
-  if (chave === "tintClaro" || chave === "tintEscuro") vidro[secao][chave] = valor;
-  else
-    (vidro[secao].optics as Record<string, number | boolean>)[chave] =
-      valor === "true" ? true : valor === "false" ? false : Number(valor);
+  if (kv) secoes[secao][kv[1]] = kv[2];
 }
 
+export const frost = Number(secoes.vidro.frost);
+
+export const menuOptics: Partial<GlassOptics> = {
+  ...Object.fromEntries(Object.entries(secoes.menu).map(([k, v]) => [k, Number(v)])),
+  frost,
+};
+
 const raiz = document.documentElement.style;
-raiz.setProperty("--vidro-frost", `${vidro.paginas.optics.frost}px`);
-raiz.setProperty("--vidro-tint-claro", vidro.paginas.tintClaro);
-raiz.setProperty("--vidro-tint-escuro", vidro.paginas.tintEscuro);
+raiz.setProperty("--vidro-frost", `${frost}px`);
+raiz.setProperty("--vidro-tint-claro", secoes.vidro.tintClaro);
+raiz.setProperty("--vidro-tint-escuro", secoes.vidro.tintEscuro);

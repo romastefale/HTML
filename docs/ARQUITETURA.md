@@ -78,7 +78,7 @@ HTML/
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
     │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL (frost do vidro.ini)
-    │   ├── vidro.ts              # lê o vidro.ini; grava --vidro-frost e as tintas de [paginas] no :root
+    │   ├── vidro.ts              # lê o vidro.ini; grava --vidro-frost e as tintas de [vidro] no :root; monta as optics do menu
     │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
     ├── pages/
@@ -231,7 +231,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre
 
 **O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`). Cada seção (`[pilula]`, `[botoes]`, `[lista]`) tem as optics da biblioteca, um parâmetro por linha, e `tintClaro` / `tintEscuro` (o `background` translúcido do `<Glass>` em cada modo); `[selecao]` tem só a tinta. O código não tem valor de vidro próprio: tudo vem do arquivo.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca, usadas pelos cinco `<Glass>` do menu. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -365,8 +365,8 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[pilula]`, `[lista]` | todas |
-| Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[botoes]` | todas |
+| Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
+| Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
@@ -422,7 +422,7 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 ```ts
 export const NO_SHINE = { specular: 0, sheen: 0, glow: 0 };
 export const CONTROL = { ...NO_SHINE, frost };                                            // material padrão, sem aro nem brilho
-export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 }; // frost = vidro.paginas.optics.frost
+export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 }; // frost = [vidro] frost
 export const PANEL   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.4 };
 ```
 
