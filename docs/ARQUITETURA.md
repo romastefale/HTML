@@ -237,7 +237,8 @@ LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
 ```
 
 - `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 24 }` (o exemplo "Button Mode" do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }`.
-- Troca de tema: a imagem de fundo troca de `src` e as duas instâncias recebem `markChanged()`.
+- Fundo das raízes: `.sh-bg` tem o tamanho da viewport e fica na posição dela (`--root-x`, `--root-y`, `--vw`, gravadas por `alignBg`), como o `html::before`; na raiz da barra, `.sh-fade` repete o `body::before` (`--top-fade`).
+- Troca de tema: as duas instâncias são destruídas e criadas de novo (o `init` recaptura o texto com as cores do modo), depois de `decode()` da imagem nova.
 
 | Página | Seções na pílula |
 |---|---|

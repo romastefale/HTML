@@ -52,6 +52,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   searchScope = "conteudo",
 }) => {
   const { theme, toggle } = useTheme();
+  const dark = theme === "dark";
   const barRef = useRef<HTMLElement>(null);
   const indRef = useRef<HTMLDivElement>(null);
   const themeBtn = useRef<HTMLButtonElement>(null);
@@ -185,6 +186,22 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       placed.current = true;
     }
   }, [active, searchOpen]);
+  const alignBg = useCallback(() => {
+    const vw = `${document.documentElement.clientWidth}px`;
+    for (const root of [barRootRef.current, pickerRootRef.current]) {
+      if (!root) continue;
+      const cs = getComputedStyle(root);
+      root.style.setProperty("--root-x", cs.left);
+      root.style.setProperty("--root-y", cs.top);
+      root.style.setProperty("--vw", vw);
+    }
+  }, []);
+  useLayoutEffect(() => {
+    alignBg();
+    addEventListener("resize", alignBg);
+    return () => removeEventListener("resize", alignBg);
+  }, [alignBg]);
+
   useLayoutEffect(() => {
     layout();
     const bar = barRef.current;
@@ -302,7 +319,10 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     if (!barRoot || !pickerRoot || !pickerRef.current || barEls.some((e) => !e)) return;
     let alive = true;
     (async () => {
-      await document.fonts?.ready;
+      await Promise.all([
+        document.fonts?.ready,
+        ...[barRoot, pickerRoot].map((r) => r.querySelector<HTMLImageElement>(".sh-bg")!.decode()),
+      ]);
       if (!alive) return;
       layout();
       const all = await Promise.all([
@@ -317,17 +337,13 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       glass.current.forEach((g) => g.destroy());
       glass.current = [];
     };
-  }, []);
+  }, [dark]);
 
-  useEffect(() => {
-    glass.current.forEach((g) => g.markChanged());
-  }, [theme]);
-
-  const dark = theme === "dark";
   return (
     <>
       <div ref={barRootRef} className="sh-root">
         <img className="sh-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
+        <div className="sh-fade" aria-hidden="true" />
         <button
           ref={pickerBtn}
           type="button"

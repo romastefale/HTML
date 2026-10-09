@@ -133,7 +133,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 | Propriedade | Valor |
 |---|---|
-| Pílula | `.sh-root` (a raiz do vidro da barra, como o `.preview-container` do fork): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `padding: var(--box-pad)` (6px), `border-radius: 16px`, `overflow: hidden`, com a imagem de fundo do modo (`.sh-bg`, `object-fit: cover`) preenchendo a caixa. Dentro dela, `<header class="site-header">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px); os botões ocupam `.sh-slot` de 34px |
+| Pílula | `.sh-root` (a raiz do vidro da barra, como o `.preview-container` do fork): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `padding: var(--box-pad)` (6px), `border-radius: 16px`, `overflow: hidden`, com a imagem de fundo do modo (`.sh-bg`) no tamanho e na posição da viewport, igual ao `html::before`, e o degradê do topo (`.sh-fade`, `--top-fade`) igual ao `body::before`. Dentro dela, `<header class="site-header">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px); os botões ocupam `.sh-slot` de 34px |
 | Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 24 }` (o exemplo "Button Mode" do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-btn`: elementos de vidro dentro de `.sh-root`, 34×34, `position: absolute`, `top: calc(var(--box-pad) + 9px)`, sobre os `.sh-slot` |
@@ -157,7 +157,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - duas raízes, como o README indica para vidro dentro de um container: `LiquidGlass.init({ root: .sh-root, glassElements: [☰, pílula, seleção, tema, lupa] })` e `LiquidGlass.init({ root: .sh-picker-root, glassElements: [lista] })`, depois de `document.fonts.ready`. Cada raiz tem a imagem de fundo do modo (`.sh-bg`) como irmã dos elementos de vidro, como o `#hero-root` do fork;
   - a configuração vai em `data-config`;
   - o vidro refrata essa imagem de fundo;
-  - na troca de tema, a imagem troca de `src` e as duas instâncias recebem `markChanged()`.
+  - na troca de tema, as duas instâncias são destruídas e criadas de novo, depois de `decode()` da imagem do modo.
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
