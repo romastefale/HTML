@@ -11,7 +11,7 @@ html{scroll-behavior:smooth}
    leaves it (BROWSERS.md: keep lenses content-sized). */
 .hero-stage{
   position:absolute;
-  top:calc(88px + env(safe-area-inset-top,0px));
+  top:calc(76px + env(safe-area-inset-top,0px));
   bottom:calc(132px + env(safe-area-inset-bottom,0px));
   left:max(var(--gutter-l), calc((100% - 1100px) / 2));
   right:max(var(--gutter-r), calc((100% - 1100px) / 2));

@@ -67,9 +67,9 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Sem escolha salva, mudar o tema do sistema muda a página.
 
 ### Fundo e bordas (todas as páginas, claro e escuro)
-- [ ] O fundo são campos de cor orgânicos e desfocados, sem bordas nítidas nem círculos (`html::before`, fixo, `z-index: -1`, sem animação).
+- [ ] O fundo são campos de cor orgânicos e desfocados, sem bordas nítidas nem círculos (`<img class="page-bg">`, fixo, `z-index: -1`, sem animação).
 - [ ] A primeira e a última linha da viewport são `--page-edge` sólido (`#8b82e6` / `#1b1646`, iguais ao `theme-color`) no topo, no meio e no fim da página, em retrato e em paisagem.
-- [ ] Ao rolar, o conteúdo se dissolve nessa cor sob a status bar (`body::before`, fixo, `z-index: 50`, `pointer-events: none`, sem `background-color` e sem `backdrop-filter`). Embaixo, no meio da página, o conteúdo vai até a borda sem esmaecer; só no fim da página o `body::after` (no fluxo) leva a página até `--page-edge` sólido.
+- [ ] Ao rolar, o conteúdo se dissolve nessa cor sob a status bar (`.page-fade-top`, fixo, `z-index: 50`, `pointer-events: none`, sem `background-color` e sem `backdrop-filter`). Embaixo, no meio da página, o conteúdo vai até a borda sem esmaecer; só no fim da página o `body::after` (no fluxo) leva a página até `--page-edge` sólido.
 - [ ] O menu e a barra de abas do painel ficam acima das camadas de borda e continuam nítidos. Teste: pinte as camadas de vermelho opaco; o vermelho só pode aparecer através do vidro, e nunca por cima dele.
 - [ ] Sem o conteúdo, o fundo sozinho começa e termina na cor de borda, e o canvas (o que o overscroll mostra) é essa cor.
 - [ ] Nenhuma sombra alcança a borda. Por exemplo, a barra de abas do painel usa `0 2px 8px` a 12px da borda.
@@ -99,7 +99,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Sem WebGL 2 (`getContext("webgl2")` devolvendo `null` num init script, com `?webgl=forcar`), o visor usa os controles foscos, sem o texto "WebGL unavailable" e sem erro, e "Reproduzir" troca a foto.
 
 ### Contratos
-- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 96px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.
+- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 84px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.
 - [ ] O corpo é uma coluna de cartões (D29): nenhum parágrafo, lista, código ou tabela fora de um `.md-card`; toda tabela dentro de um cartão; um raio só; nenhum cartão passa da largura da tela.
 
 ### Quebra de linha (todas as páginas)
