@@ -235,7 +235,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liqu
 LiquidGlass.init({ root: pílula.parentElement, glassElements: [☰, pílula, seleção, tema, lupa, lista] });
 ```
 
-- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25 }` (`#glass-tab-indicator`).
+- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` (`#glass-tab-indicator`). Em todos: `edgeHighlight: 0`, `fresnel: 0`, `shadowOpacity: 0` (sem borda com brilho e sem sombra).
 - Troca de tema: `markChanged()` no fundo e na faixa de cima do modo novo.
 
 | Página | Seções na pílula |

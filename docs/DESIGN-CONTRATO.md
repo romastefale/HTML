@@ -60,7 +60,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 ```
 
 - **D3. Todo vidro DEVE ter exatamente uma hairline, com uma cor só em volta toda,** desenhada em camada própria (`::after`). O `box-shadow` do elemento fica reservado para a sombra de flutuação.
-  - **Exceção: o menu e a lista ☰.** A borda, o brilho e a sombra são os do vidro do `liquid-glass2` (D9.1).
+  - **Exceção: o menu e a lista ☰.** O vidro é o do `liquid-glass2` (D9.1), sem borda com brilho e sem sombra.
   *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
 - **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
 - **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
@@ -135,7 +135,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 | Propriedade | Valor |
 |---|---|
 | Pílula | `<header class="site-header">`, filho direto da raiz do React: `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `height: 52px`, `border-radius: 26px`, `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px). Os botões ocupam `.sh-slot` de 34px |
-| Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25 }` (`#glass-tab-indicator`) |
+| Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` (`#glass-tab-indicator`). Em todos: `edgeHighlight: 0`, `fresnel: 0`, `shadowOpacity: 0` (sem borda com brilho e sem sombra) |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-btn`: elementos de vidro, filhos diretos da raiz, 34×34, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`) |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
