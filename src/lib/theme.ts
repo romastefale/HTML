@@ -7,14 +7,14 @@ import { useCallback, useEffect, useState } from "react";
  * applied before first paint by the inline script in each HTML <head>, so
  * there's no flash. The CSS keys off <html data-theme>.
  */
-export type ThemeName = "light" | "dark";
-export const THEME_KEY = "lg-theme";
+type ThemeName = "light" | "dark";
+const THEME_KEY = "lg-theme";
 
 /** Browser-bar colour per mode = the page's top/bottom edge (--page-edge in
  *  src/styles/global.css), also html/body background-color: the menu floats,
  *  nothing solid touches the edge, so the browser bars read as the page.
  *  Keep in sync with the inline <head> script in index.html / liquid-glass-sample.html. */
-export const PAGE_EDGE: Record<ThemeName, string> = { light: "#8b82e6", dark: "#1b1646" };
+const PAGE_EDGE: Record<ThemeName, string> = { light: "#8b82e6", dark: "#1b1646" };
 
 const stored = (): ThemeName | null => {
   try {
@@ -26,7 +26,7 @@ const stored = (): ThemeName | null => {
 };
 const system = (): ThemeName => (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
-export const applyTheme = (t: ThemeName) => {
+const applyTheme = (t: ThemeName) => {
   const d = document.documentElement;
   d.dataset.theme = t;
   d.style.colorScheme = t;

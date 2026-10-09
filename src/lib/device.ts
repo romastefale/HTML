@@ -2,7 +2,7 @@ import { useLayoutEffect, useEffect, useMemo, useState, type RefObject } from "r
 import { useMediaQuery } from "./useMedia";
 
 /** ≤ 4 cores or ≤ 4 GB (deviceMemory is missing in Safari/Firefox: assume 8). */
-export const weakDevice = () => {
+const weakDevice = () => {
   const nav = navigator as Navigator & { deviceMemory?: number };
   return (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
 };

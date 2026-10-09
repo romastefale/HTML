@@ -94,7 +94,7 @@ Cada HTML de entrada traz, **nesta ordem**, no `<head>`:
 
 ## 5. Teclado na tela (iOS)
 
-Com a pesquisa aberta, o `SiteHeader` escuta `visualViewport` (`resize` e `scroll`) e aplica `--vv-top = max(0, vv.offsetTop)px` à pílula (`transform: translateY(var(--vv-top, 0px))`).
+Com a pesquisa aberta, o `SiteHeader` escuta `visualViewport` (`resize` e `scroll`) e aplica `--vv-top = max(0, vv.offsetTop)px` à pílula (`transform: translateY(var(--vv-top))`; sem a pesquisa aberta a variável não existe e o `transform` fica `none`).
 
 - **T12. Um campo de entrada fixo RECOMENDA-SE acompanhar o `visualViewport`.**
   *Por quê:* com o teclado aberto, o iOS pode deslocar a viewport visual dentro da de layout, e um elemento `fixed` sairia da tela.
