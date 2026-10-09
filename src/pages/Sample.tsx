@@ -452,8 +452,7 @@ export const Sample: React.FC = () => {
               <a href={HOME_URL}>← Voltar para a página inicial</a>
               <span>
                 Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), pacote{" "}
-                <code>@samasante/liquid-glass</code> 0.1.1. Menu: <a href="https://github.com/romastefale/liquid-glass2">liquid-glass2</a> (MIT, @ybouane), pacote{" "}
-                <code>@ybouane/liquidglass</code> 1.0.3. Fotos: Wikimedia Commons, créditos e licenças em{" "}
+                <code>@samasante/liquid-glass</code> 0.1.1. Fotos: Wikimedia Commons, créditos e licenças em{" "}
                 <a href={CREDITS_URL}>CREDITS.md</a>.
               </span>
             </div>

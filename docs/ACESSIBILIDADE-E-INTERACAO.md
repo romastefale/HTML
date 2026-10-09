@@ -17,7 +17,7 @@
 | Recurso | Implementação |
 |---|---|
 | Rótulo | `<nav aria-label="Seções desta página">` |
-| Item atual | `aria-current="location"` no link da seção atual. A seleção de vidro é `aria-hidden` |
+| Item atual | `aria-current="location"` no link da seção atual. A pílula de seleção é `aria-hidden` |
 | Scroll-spy | o item atual é a última seção cujo topo passou da linha "base do menu + 32px". No fim da página, a última seção vence |
 | Toque num link de seção | seleciona na hora e pausa o spy por 700 ms. Enquanto a página rola, o prazo se renova por 220 ms |
 | Foco por teclado | `onFocus` rola o link para dentro da barra, com 12px de folga, sem rolar a página |
@@ -115,7 +115,7 @@ stateDiagram-v2
 | Preferência | Efeito |
 |---|---|
 | `prefers-reduced-motion: reduce` | Sem órbita da lente (fica em `REST`). Sem transições no menu, no indicador e na pesquisa (a troca é instantânea). `scroll-behavior: auto`. A rolagem da pesquisa e do menu usa `behavior: "auto"` |
-| `prefers-reduced-transparency: reduce` | Tintas quase opacas (`.95`–`.96`), `.gcard-body` com `rgba(255,255,255,.94)`. O vidro do menu e da lista ☰ (`liquid-glass2`) não muda |
+| `prefers-reduced-transparency: reduce` | Tintas quase opacas (`.95`–`.96`), `.gcard-body` com `rgba(255,255,255,.94)`. O vidro do menu e da lista ☰ não muda: as tintas vêm de `vidro.ini` |
 | `prefers-color-scheme` | Tema padrão enquanto o usuário não escolhe. As mudanças do sistema são seguidas até haver escolha salva |
 | `(hover: none)` | A dica do hero diz "Toque no título para guiar a lente." (senão, "Mova o cursor…") |
 

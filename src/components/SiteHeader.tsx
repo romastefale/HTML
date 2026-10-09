@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { LiquidGlass } from "@ybouane/liquidglass";
+import { Glass, type GlassOptics } from "@samasante/liquid-glass";
 import vidroIni from "../../vidro.ini?raw";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
-import fundoClaro from "../assets/fundo-claro.svg";
-import fundoEscuro from "../assets/fundo-escuro.svg";
 import { PAGES, type PageKey } from "../lib/pages";
 import "./SiteHeader.css";
 
@@ -37,13 +35,19 @@ const Moon = () => (
   </svg>
 );
 
-const vidro: Record<string, Record<string, number | boolean>> = {};
+type Vidro = { optics: Partial<GlassOptics>; tintClaro: string; tintEscuro: string };
+const vidro: Record<string, Vidro> = {};
 let secao = "";
 for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
   const s = linha.match(/^\[(.+)\]$/);
-  if (s) vidro[(secao = s[1])] = {};
+  if (s) vidro[(secao = s[1])] = { optics: {}, tintClaro: "transparent", tintEscuro: "transparent" };
   const kv = linha.match(/^(\w+)\s*=\s*(.+)$/);
-  if (kv) vidro[secao][kv[1]] = kv[2] === "true" ? true : kv[2] === "false" ? false : Number(kv[2].replace(",", "."));
+  if (!kv) continue;
+  const [, chave, valor] = kv;
+  if (chave === "tintClaro" || chave === "tintEscuro") vidro[secao][chave] = valor;
+  else
+    (vidro[secao].optics as Record<string, number | boolean>)[chave] =
+      valor === "true" ? true : valor === "false" ? false : Number(valor.replace(",", "."));
 }
 
 const EDGE = 12;
@@ -59,8 +63,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   const barRef = useRef<HTMLElement>(null);
   const indRef = useRef<HTMLDivElement>(null);
   const themeBtn = useRef<HTMLButtonElement>(null);
-  const bgRef = useRef<HTMLImageElement>(null);
-  const glass = useRef<LiquidGlass | null>(null);
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
@@ -68,7 +70,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   const pickerId = `paginas-${useId().replace(/:/g, "")}`;
   const [pickerOpen, setPickerOpen] = useState(false);
   const pickerBtn = useRef<HTMLButtonElement>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(-1);
@@ -173,21 +175,21 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       ind.style.transform = "translate(-9999px, -9999px)";
       return;
     }
+    const bar = barRef.current?.getBoundingClientRect();
+    if (!bar) return;
     const n = nav.getBoundingClientRect();
     const r = a.getBoundingClientRect();
-    const x = Math.max(n.left, Math.min(r.left, n.right - r.width));
+    const x = Math.max(n.left, Math.min(r.left, n.right - r.width)) - bar.left;
     if (!placed.current) ind.style.transition = "none";
     ind.style.width = `${r.width}px`;
     ind.style.height = `${r.height}px`;
-    ind.style.transform = `translate(${x}px, ${r.top}px)`;
+    ind.style.transform = `translate(${x}px, ${r.top - bar.top}px)`;
     if (!placed.current) {
       void ind.offsetHeight;
       ind.style.transition = "";
       placed.current = true;
     }
   }, [active, searchOpen]);
-  const layoutRef = useRef(layout);
-  layoutRef.current = layout;
   useLayoutEffect(() => {
     layout();
     const bar = barRef.current;
@@ -298,133 +300,116 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [searchOpen, layout]);
 
-  useEffect(() => {
-    const bar = barRef.current;
-    const root = bar?.parentElement;
-    const els = [pickerBtn.current, bar, indRef.current, themeBtn.current, searchBtn.current, pickerRef.current];
-    if (!root || !bgRef.current || els.some((e) => !e)) return;
-    let alive = true;
-    (async () => {
-      await Promise.all([document.fonts?.ready, bgRef.current!.decode()]);
-      if (!alive) return;
-      layoutRef.current();
-      const g = await LiquidGlass.init({ root, glassElements: els as HTMLElement[] });
-      if (alive) glass.current = g;
-      else g.destroy();
-    })();
-    const onScroll = () => glass.current?.markChanged();
-    addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      alive = false;
-      removeEventListener("scroll", onScroll);
-      glass.current?.destroy();
-      glass.current = null;
-    };
-  }, [dark]);
-
+  const tint = (v: Vidro) => ({ background: dark ? v.tintEscuro : v.tintClaro });
   return (
     <>
-      <img ref={bgRef} className="page-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
-      <div className="page-fade-top" aria-hidden="true" />
-      <button
-        ref={pickerBtn}
-        type="button"
-        className="sh-btn sh-btn-pages"
-        onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
-        aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
-        aria-expanded={pickerOpen}
-        aria-controls={pickerId}
-        title="Páginas"
-        inert={searchOpen}
+      <Glass
+        className="sh-glass sh-glass-pages"
+        optics={vidro.botoes.optics}
+        style={tint(vidro.botoes)}
         data-hidden={searchOpen || undefined}
-        data-config={JSON.stringify(vidro.botoes)}
       >
-        <span className="label">
-          <Burger />
-        </span>
-      </button>
-      <header
-        ref={barRef}
-        className="site-header"
-        data-mode={searchOpen ? "search" : "menu"}
-        data-config={JSON.stringify(vidro.pilula)}
-      >
-        <span className="sh-slot" />
-        <nav
-          ref={navRef}
-          className="sh-nav"
-          aria-label={label}
-          data-fade-start={fade.start || undefined}
-          data-fade-end={fade.end || undefined}
-          onScroll={syncFade}
+        <button
+          ref={pickerBtn}
+          type="button"
+          className="sh-btn"
+          onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
+          aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
+          aria-expanded={pickerOpen}
+          aria-controls={pickerId}
+          title="Páginas"
           inert={searchOpen}
         >
-          {items.map((it, i) => (
-            <a
-              key={it.href + it.label}
-              ref={(el) => {
-                linkRefs.current[i] = el;
-              }}
-              href={it.href}
-              aria-current={i === active ? "location" : undefined}
-              onFocus={() => reveal(i, false)}
-              onClick={() => {
-                if (it.href.startsWith("#")) {
-                  pin(700);
-                  setActive(i);
-                }
-              }}
-            >
-              <span className="sh-label" data-text={it.label}>
-                {it.label}
-              </span>
-            </a>
-          ))}
-        </nav>
-        <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
-        <div className="sh-actions">
+          <Burger />
+        </button>
+      </Glass>
+      <Glass
+        className="site-header"
+        optics={vidro.pilula.optics}
+        style={tint(vidro.pilula)}
+        data-mode={searchOpen ? "search" : "menu"}
+      >
+        <header ref={barRef} className="sh-bar">
+          <div ref={indRef} className="sh-indicator" aria-hidden="true" style={tint(vidro.selecao)} />
           <span className="sh-slot" />
-          <span className="sh-slot" />
-        </div>
-      </header>
-      <div ref={indRef} className="sh-indicator" aria-hidden="true" data-config={JSON.stringify(vidro.selecao)} />
-      <button
-        ref={themeBtn}
-        type="button"
-        className="sh-btn sh-btn-theme"
-        onClick={toggle}
-        aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-        title="Alternar modo claro / escuro"
-        inert={searchOpen}
+          <nav
+            ref={navRef}
+            className="sh-nav"
+            aria-label={label}
+            data-fade-start={fade.start || undefined}
+            data-fade-end={fade.end || undefined}
+            onScroll={syncFade}
+            inert={searchOpen}
+          >
+            {items.map((it, i) => (
+              <a
+                key={it.href + it.label}
+                ref={(el) => {
+                  linkRefs.current[i] = el;
+                }}
+                href={it.href}
+                aria-current={i === active ? "location" : undefined}
+                onFocus={() => reveal(i, false)}
+                onClick={() => {
+                  if (it.href.startsWith("#")) {
+                    pin(700);
+                    setActive(i);
+                  }
+                }}
+              >
+                <span className="sh-label" data-text={it.label}>
+                  {it.label}
+                </span>
+              </a>
+            ))}
+          </nav>
+          <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
+          <div className="sh-actions">
+            <span className="sh-slot" />
+            <span className="sh-slot" />
+          </div>
+        </header>
+      </Glass>
+      <Glass
+        className="sh-glass sh-glass-theme"
+        optics={vidro.botoes.optics}
+        style={tint(vidro.botoes)}
         data-hidden={searchOpen || undefined}
-        data-config={JSON.stringify(vidro.botoes)}
       >
-        <span className="label">{dark ? <Sun /> : <Moon />}</span>
-      </button>
-      <button
-        ref={searchBtn}
-        type="button"
-        className="sh-btn sh-btn-search"
-        onClick={() => (searchOpen ? closeSearch() : openSearch())}
-        aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-        aria-expanded={searchOpen}
-        aria-controls={searchId}
-        title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-        data-config={JSON.stringify(vidro.botoes)}
-      >
-        <span className="label">
+        <button
+          ref={themeBtn}
+          type="button"
+          className="sh-btn"
+          onClick={toggle}
+          aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
+          title="Alternar modo claro / escuro"
+          inert={searchOpen}
+        >
+          {dark ? <Sun /> : <Moon />}
+        </button>
+      </Glass>
+      <Glass className="sh-glass sh-glass-search" optics={vidro.botoes.optics} style={tint(vidro.botoes)}>
+        <button
+          ref={searchBtn}
+          type="button"
+          className="sh-btn"
+          onClick={() => (searchOpen ? closeSearch() : openSearch())}
+          aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+          aria-expanded={searchOpen}
+          aria-controls={searchId}
+          title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+        >
           <Magnifier />
-        </span>
-      </button>
-      <div
-        ref={pickerRef}
-        id={pickerId}
+        </button>
+      </Glass>
+      <Glass
         className="sh-picker"
+        optics={vidro.lista.optics}
+        style={tint(vidro.lista)}
         data-open={pickerOpen || undefined}
         inert={!pickerOpen}
-        data-config={JSON.stringify(vidro.lista)}
       >
-        <nav aria-label="Páginas do site">
+        <nav ref={pickerRef} id={pickerId} aria-label="Páginas do site">
           <ul>
             {PAGES.map((p) => {
               const here = p.key === current;
@@ -448,7 +433,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             })}
           </ul>
         </nav>
-      </div>
+      </Glass>
     </>
   );
 };
