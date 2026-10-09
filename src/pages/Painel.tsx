@@ -26,6 +26,8 @@ import "./Painel.css";
  * No continuous animation: the lenses move only while you interact.
  */
 
+const SLIDER_LENS = { ...NO_SHINE, edgeShadow: "", edgeInsetShadow: "" };
+
 const SECTIONS = [
   { id: "tela", label: "Tela" },
   { id: "controles", label: "Controles" },
@@ -391,7 +393,7 @@ const ControlCenter: React.FC<{
           sub="Os widgets refratam a foto com o mesmo brilho"
         >
           <div className="cc-slider">
-            {on2 ? <GlassSlider {...common} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor={texto("controles", "controle")} name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
+            {on2 ? <GlassSlider {...common} lens={SLIDER_LENS} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor={texto("controles", "controle")} name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
             <output className="cc-out" aria-live="polite">{bright}%</output>
           </div>
         </Tile>
