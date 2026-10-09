@@ -44,16 +44,17 @@ const Moon = () => (
   </svg>
 );
 
-/** Glass presets of romastefale/liquid-glass2 (site/index.html): "Frosted
- *  Panel" in light mode, "Dark Glass" in dark mode. */
+/** Glass configs of romastefale/liquid-glass2 (site/index.html). Panels
+ *  (pill, page picker): "Frosted Panel" in light mode, "Dark Glass" in dark
+ *  mode. Buttons: #glass-btn-1. Selection: #glass-tab-indicator. */
 const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
   light: { blurAmount: 0.25, cornerRadius: 30 },
   dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
 };
-
-// The site's press feedback on its round pills.
-const pressDown = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(0.96)");
-const pressUp = (e: React.PointerEvent) => ((e.currentTarget as HTMLElement).style.transform = "scale(1)");
+const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 };
+const INDICATOR_GLASS: Partial<GlassConfig> = {
+  cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25,
+};
 
 const EDGE = 12; // px kept clear around an item scrolled into view
 
@@ -72,6 +73,10 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
 }) => {
   const { theme, toggle } = useTheme();
   const barRef = useRef<HTMLElement>(null);
+  const indRef = useRef<HTMLDivElement>(null);
+  const themeBtn = useRef<HTMLButtonElement>(null);
+  const slots = useRef<Record<"pages" | "theme" | "search", HTMLSpanElement | null>>({ pages: null, theme: null, search: null });
+  const glass = useRef<LiquidGlass | null>(null);
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
@@ -99,8 +104,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     pinTimer.current = window.setTimeout(() => (pinned.current = false), ms);
   }, []);
   useEffect(() => () => clearTimeout(pinTimer.current), []);
-  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(null);
-  const [animate, setAnimate] = useState(false);
 
   // Scroll one link into view INSIDE the bar only (never the page).
   const reveal = useCallback(
@@ -187,23 +190,57 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     first.current = false;
   }, [active, reveal]);
 
-  // The selected pill behind the current link: one soft glass highlight that
-  // slides (and resizes) to the link, measured in the nav's scroll content.
-  useLayoutEffect(() => {
+
+  // The glass buttons sit over their slots in the pill, and the selection
+  // glass over the current link (#glass-tab-indicator: sized and moved with
+  // a transform by JS).
+  const placed = useRef(false);
+  const layout = useCallback(() => {
+    const place = (el: HTMLElement | null, slot: HTMLElement | null) => {
+      if (!el || !slot) return;
+      const r = slot.getBoundingClientRect();
+      el.style.left = `${r.left}px`;
+      el.style.top = `${r.top}px`;
+    };
+    place(pickerBtn.current, slots.current.pages);
+    place(themeBtn.current, slots.current.theme);
+    place(searchBtn.current, slots.current.search);
+    const ind = indRef.current;
+    const nav = navRef.current;
     const a = active >= 0 ? linkRefs.current[active] : null;
-    const measure = () => setIndicator(a ? { x: a.offsetLeft, w: a.offsetWidth } : null);
-    measure();
-    if (!a) return;
-    const ro = new ResizeObserver(measure);
-    ro.observe(a);
-    return () => ro.disconnect();
-  }, [active]);
-  // No slide on the first placement (only once it's been drawn).
-  useEffect(() => {
-    if (!indicator || animate) return;
-    const r = requestAnimationFrame(() => setAnimate(true));
-    return () => cancelAnimationFrame(r);
-  }, [indicator, animate]);
+    if (!ind) return;
+    if (!a || !nav || searchOpen) {
+      ind.style.transform = "translate(-9999px, -9999px)";
+      return;
+    }
+    const n = nav.getBoundingClientRect();
+    const r = a.getBoundingClientRect();
+    const x = Math.max(n.left, Math.min(r.left, n.right - r.width));
+    if (!placed.current) ind.style.transition = "none";
+    ind.style.width = `${r.width}px`;
+    ind.style.height = `${r.height}px`;
+    ind.style.transform = `translate(${x}px, ${r.top}px)`;
+    if (!placed.current) {
+      void ind.offsetHeight;
+      ind.style.transition = "";
+      placed.current = true;
+    }
+  }, [active, searchOpen]);
+  useLayoutEffect(() => {
+    layout();
+    const bar = barRef.current;
+    const nav = navRef.current;
+    if (!bar || !nav) return;
+    const ro = new ResizeObserver(layout);
+    ro.observe(bar);
+    nav.addEventListener("scroll", layout, { passive: true });
+    addEventListener("resize", layout);
+    return () => {
+      ro.disconnect();
+      nav.removeEventListener("scroll", layout);
+      removeEventListener("resize", layout);
+    };
+  }, [layout]);
 
   // Open synchronously inside the tap (flushSync) so focus() still counts as
   // user-initiated and iOS brings the keyboard up.
@@ -226,7 +263,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
     const onClick = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (barRef.current?.contains(t)) return;
+      if (barRef.current?.contains(t) || searchBtn.current?.contains(t)) return;
       closeSearch(false);
     };
     document.addEventListener("keydown", onKey);
@@ -269,7 +306,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         all[to].focus({ preventScroll: true });
       }
     };
-    const inside = (n: Node | null) => !!n && (!!barRef.current?.contains(n) || !!root?.contains(n));
+    const inside = (n: Node | null) =>
+      !!n && (!!barRef.current?.contains(n) || !!root?.contains(n) || !!pickerBtn.current?.contains(n));
     const onClick = (e: MouseEvent) => {
       if (!inside(e.target as Node)) closePicker(false);
     };
@@ -280,17 +318,14 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     // The picker sits under the pill's left end.
     const place = () => setPickerLeft(barRef.current?.getBoundingClientRect().left ?? 12);
     place();
-    const bar = barRef.current;
     document.addEventListener("keydown", onKey);
     document.addEventListener("click", onClick);
     addEventListener("resize", place);
-    bar?.addEventListener("focusout", onFocusOut);
     root?.addEventListener("focusout", onFocusOut);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("click", onClick);
       removeEventListener("resize", place);
-      bar?.removeEventListener("focusout", onFocusOut);
       root?.removeEventListener("focusout", onFocusOut);
     };
   }, [pickerOpen, closePicker]);
@@ -299,9 +334,12 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   // layout one; keep the menu (and the open field) pinned to what's visible.
   useEffect(() => {
     const vv = window.visualViewport;
-    const el = barRef.current;
-    if (!vv || !el || !searchOpen) return;
-    const update = () => el.style.setProperty("--vv-top", `${Math.max(0, vv.offsetTop)}px`);
+    const el = document.documentElement;
+    if (!vv || !searchOpen) return;
+    const update = () => {
+      el.style.setProperty("--vv-top", `${Math.max(0, vv.offsetTop)}px`);
+      layout();
+    };
     update();
     vv.addEventListener("resize", update, { passive: true });
     vv.addEventListener("scroll", update, { passive: true });
@@ -310,64 +348,81 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       vv.removeEventListener("scroll", update);
       el.style.removeProperty("--vv-top");
     };
-  }, [searchOpen]);
+  }, [searchOpen, layout]);
 
-  // LiquidGlass.init (README of romastefale/liquid-glass2): the pill and the
-  // page picker are glass elements, direct children of the React root. A
-  // theme change runs destroy() + init(): markChanged() redraws but doesn't
-  // re-capture a root child whose colours changed.
+  // LiquidGlass.init, as in romastefale/liquid-glass2 (site/index.html): the
+  // glass elements are direct children of the React root; fonts are ready
+  // and the elements are sized before init.
   useEffect(() => {
     const bar = barRef.current;
-    const picker = pickerRef.current;
     const root = bar?.parentElement;
-    if (!bar || !picker || !root) return;
+    const els = [pickerBtn.current, bar, indRef.current, themeBtn.current, searchBtn.current, pickerRef.current];
+    if (!root || els.some((e) => !e)) return;
     let alive = true;
-    let glass: LiquidGlass | null = null;
-    LiquidGlass.init({ root, glassElements: [bar, picker] }).then((g) => {
-      if (alive) glass = g;
+    (async () => {
+      await document.fonts?.ready;
+      if (!alive) return;
+      layout();
+      const g = await LiquidGlass.init({ root, glassElements: els as HTMLElement[] });
+      if (alive) glass.current = g;
       else g.destroy();
-    });
+    })();
     return () => {
       alive = false;
-      glass?.destroy();
+      glass.current?.destroy();
+      glass.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Theme: the visible background and fade swap (CSS display), and the glass
+  // is told with markChanged(), as the fork's background tabs do.
+  useEffect(() => {
+    const g = glass.current;
+    if (!g) return;
+    document.querySelectorAll<HTMLElement>(".page-bg, .page-fade-top").forEach((el) => {
+      if (getComputedStyle(el).display !== "none") g.markChanged(el);
+    });
   }, [theme]);
 
   const dark = theme === "dark";
   return (
     <>
-      {/* The page background and the top edge fade, as children of the React
-          root: the glass samples only the root's children (the library
-          README: "Put backgrounds in a sibling element inside the root";
-          its example background is an <img>, drawn from its pixels). */}
-      <img className="page-bg" src={dark ? fundoEscuro : fundoClaro} alt="" aria-hidden="true" />
-      <div className="page-fade-top" aria-hidden="true" />
+      {/* Root children the glass refracts: the background and the top fade of
+          each mode (the other mode's pair is display: none). */}
+      <img className="page-bg page-bg-claro" src={fundoClaro} alt="" aria-hidden="true" />
+      <img className="page-bg page-bg-escuro" src={fundoEscuro} alt="" aria-hidden="true" />
+      <div className="page-fade-top page-fade-claro" aria-hidden="true" />
+      <div className="page-fade-top page-fade-escuro" aria-hidden="true" />
+      <button
+        ref={pickerBtn}
+        type="button"
+        className="sh-btn"
+        onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
+        aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
+        aria-expanded={pickerOpen}
+        aria-controls={pickerId}
+        title="Páginas"
+        inert={searchOpen}
+        data-hidden={searchOpen || undefined}
+        data-config={JSON.stringify(BUTTON_GLASS)}
+      >
+        <span className="label">
+          <Burger />
+        </span>
+      </button>
       <header
         ref={barRef}
         className="site-header"
         data-mode={searchOpen ? "search" : "menu"}
         data-config={JSON.stringify(BAR_GLASS[theme])}
       >
-        {/* The page picker (☰), at the LEFT end of the pill on every page: every
-            page of the portal, Início included, in a glass popover. */}
-        <button
-          ref={pickerBtn}
-          type="button"
-          className="sh-pill sh-pages-btn"
-          onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
-          aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
-          aria-expanded={pickerOpen}
-          aria-controls={pickerId}
-          title="Páginas"
-          inert={searchOpen}
-          onPointerDown={pressDown}
-          onPointerUp={pressUp}
-          onPointerLeave={pressUp}
-        >
-          <Burger />
-        </button>
-        {/* Menu mode. In search mode the links stay in the layout (hidden,
-            inert) so the pill keeps exactly its size and place. */}
+        <span
+          className="sh-slot"
+          ref={(el) => {
+            slots.current.pages = el;
+          }}
+        />
         <nav
           ref={navRef}
           className="sh-nav"
@@ -377,12 +432,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           onScroll={syncFade}
           inert={searchOpen}
         >
-          <span
-            className="sh-indicator"
-            aria-hidden="true"
-            data-animate={animate || undefined}
-            style={indicator ? { width: indicator.w, transform: `translateX(${indicator.x}px)` } : { opacity: 0 }}
-          />
           {items.map((it, i) => (
             <a
               key={it.href + it.label}
@@ -410,41 +459,51 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             </a>
           ))}
         </nav>
-        {/* Search mode: the field takes the pill, up to the magnifier. */}
         <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
         <div className="sh-actions">
-          {/* Hidden during search (the field needs the room at 393px). */}
-          <button
-            type="button"
-            className="sh-pill sh-theme"
-            onClick={toggle}
-            aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-            title="Alternar modo claro / escuro"
-            inert={searchOpen}
-            onPointerDown={pressDown}
-            onPointerUp={pressUp}
-            onPointerLeave={pressUp}
-          >
-            {dark ? <Sun /> : <Moon />}
-          </button>
-          {/* The toggle: opens the search in the pill, closes it again. */}
-          <button
-            ref={searchBtn}
-            type="button"
-            className="sh-pill sh-search-btn"
-            onClick={() => (searchOpen ? closeSearch() : openSearch())}
-            aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-            aria-expanded={searchOpen}
-            aria-controls={searchId}
-            title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
-            onPointerDown={pressDown}
-            onPointerUp={pressUp}
-            onPointerLeave={pressUp}
-          >
-            <Magnifier />
-          </button>
+          <span
+            className="sh-slot"
+            ref={(el) => {
+              slots.current.theme = el;
+            }}
+          />
+          <span
+            className="sh-slot"
+            ref={(el) => {
+              slots.current.search = el;
+            }}
+          />
         </div>
       </header>
+      <div ref={indRef} className="sh-indicator" aria-hidden="true" data-config={JSON.stringify(INDICATOR_GLASS)} />
+      <button
+        ref={themeBtn}
+        type="button"
+        className="sh-btn"
+        onClick={toggle}
+        aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
+        title="Alternar modo claro / escuro"
+        inert={searchOpen}
+        data-hidden={searchOpen || undefined}
+        data-config={JSON.stringify(BUTTON_GLASS)}
+      >
+        <span className="label">{dark ? <Sun /> : <Moon />}</span>
+      </button>
+      <button
+        ref={searchBtn}
+        type="button"
+        className="sh-btn"
+        onClick={() => (searchOpen ? closeSearch() : openSearch())}
+        aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+        aria-expanded={searchOpen}
+        aria-controls={searchId}
+        title={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
+        data-config={JSON.stringify(BUTTON_GLASS)}
+      >
+        <span className="label">
+          <Magnifier />
+        </span>
+      </button>
       <div
         ref={pickerRef}
         id={pickerId}
