@@ -1,6 +1,6 @@
 # Contrato de design
 
-Este documento fixa a linguagem visual do projeto. Os valores foram copiados de `src/styles/global.css`, `src/components/SiteHeader.css`, `src/components/PageSearch.css`, `src/pages/*.css` e `src/lib/optics.ts` no PR #12 (a partir de `5838a71`) e atualizados até o PR #15 (lentes sem brilho, foco neutro, WebGL 2 e lupa sem re-render, a partir de `4748463`).
+Este documento fixa a linguagem visual do projeto. Os números do vidro estão em `vidro.ini`, uma seção por elemento. Medida, raio e posição estão no CSS.
 
 ## 1. Princípios
 
@@ -74,7 +74,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
   *Por quê:*
   - O PR #5 voltou com o aro padrão da biblioteca, mas ele sempre traz o realce de topo (`inset 0 1px 0 rgba(255,255,255,.55·g)`). O PR #6 trocou por uma linha uniforme, que é o pedido de design.
   - Nos cartões `refract`, a pilha de bordas do `GlassNotification` (brilho no topo, realce branco interno, glow e linha escura) foi reduzida à mesma hairline: `.gcard-body { box-shadow: 0 0 0 var(--rim-w) var(--rim), 0 14px 36px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.14) }`.
-- **D7. Toda ótica DEVE usar `specular: 0`, e junto `sheen: 0` e `glow: 0`:** o objeto `NO_SHINE` de `src/lib/optics.ts`, espalhado em `CONTROL`, `FROST`, `HERO_LENS`, `PANEL_LENS`, nas lentes do Painel (segmentado, widgets, `common.lens` do switch e do slider) e nas da Galeria (`PLAYER_OPTICS`, `SCRUB_OPTICS`, `LOUPE_LENS`).
+- **D7. Toda ótica DEVE usar `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`).** `otica` aplica essa seção em `CONTROL`, `FROST` e em cada lente: `[titulo]`, `[faixa]`, `[segmentado]`, `[widget]`, `[visor]`, `[trilha]`, `[lupa]`. A chave e o controle deslizante recebem o mesmo `[brilho]` em `lens`.
   *Por quê:* com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só pula as duas primitivas do brilho (`feColorMatrix` + `feComposite`) quando `glow` e `sheen` também são 0 (`hasSpecular = glow > 0 || sheen > 0`, `src/Glass.tsx`). No PR #15 as 96 capturas de antes e depois (3 contextos, 2 temas, 4 páginas, 4 posições) ficaram idênticas pixel a pixel, o filtro da lente do título da Amostra caiu de 19 para 17 primitivas e o fps dela subiu de 10,3 para 13,7 no iPhone emulado no Chromium ([DESEMPENHO.md](DESEMPENHO.md) §3.4).
 
 **Sombra de flutuação:** `--glass-float: 0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08)`, igual nos dois modos.
@@ -220,7 +220,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 ## 9. Texto e idioma
 
 - **D27. `lang="pt-BR"` DEVE estar em todo HTML, e todo texto visível DEVE estar em pt-BR:** rótulos, `aria-label`, `title`, placeholder, contador ("N de M", "Nenhum resultado") e `noscript`.
-- **D28. Os textos DEVEM descrever o que a página realmente faz.** Se a implementação mudar, o texto muda no mesmo PR. Exemplo: quando os cartões e as legendas passaram a ser `<Frost>` (PR #9), os textos que diziam "usa o `<Glass>`" e "a foto se curva atrás da legenda" tiveram de ser corrigidos logo depois do PR #10.
+- **D28. Os textos DEVEM descrever o que a página realmente faz.** Se a implementação mudar, o texto muda no mesmo PR.
 - **D29. Nas páginas de contrato, o corpo de cada documento DEVE ser uma coluna de cartões de vidro fosco,** não um painel único. O título do documento (a âncora do menu), a fonte e os chips ficam na página; cada título `##` fica na página, acima dos seus cartões. `scripts/vite-docs.ts` monta os cartões no build:
   - cada `###` abre um cartão e é o título dele;
   - cada tabela e cada diagrama mermaid tem um cartão só seu (`.md-card-wide`), e a tabela rola para o lado dentro dele;

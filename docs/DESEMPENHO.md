@@ -82,7 +82,7 @@ Uma superfície só de fosco DEVE usar `<Frost>` (CSS). O `<Glass>` material só
 
 *Por quê:* isso tirou 12 mapas e 12 filtros da página inicial, e a rolagem no Chromium foi de 13,7 para 60 fps.
 
-No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada: toda ótica espalha `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`, `src/lib/optics.ts`). Com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só tira as duas primitivas dele (`feColorMatrix` + `feComposite`) quando `sheen` e `glow` também são 0. No PR #15, as capturas ficaram idênticas e a lente do título ganhou fps (§3.4).
+No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada: toda ótica lê `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`). Com `specular` 0 o ganho do brilho já é zero, e a biblioteca tira as duas primitivas dele (`feColorMatrix` + `feComposite`) quando `glow` e `sheen` também são 0.
 
 ### P3. A biblioteca só nas páginas que a usam (OBRIGATÓRIO)
 
@@ -204,7 +204,7 @@ Mesmo método, com o fundo orgânico e as camadas de borda:
 
 ### 3.4 Medições do PR #15
 
-Mesmo método (Lighthouse 12 mobile, 3 execuções, mediana, `dist/` local), com `NO_SHINE`, WebGL 2, o foco neutro e a lupa nova:
+Mesmo método (Lighthouse 12 mobile, 3 execuções, mediana, `dist/` local), com `[brilho]`, WebGL 2 e o foco neutro:
 
 | Página | Nota | TBT | FCP | LCP | TTI | CLS | Peso | JS (transferido) |
 |---|---|---|---|---|---|---|---|---|

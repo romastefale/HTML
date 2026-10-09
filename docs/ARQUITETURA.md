@@ -77,7 +77,7 @@ HTML/
     │   ├── pages.ts              # PAGES (o portal, a lista ☰)
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
-    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL e FROST (frost e saturate do vidro.ini)
+    │   ├── optics.ts             # CONTROL e FROST; os números estão no vidro.ini
     │   ├── vidro.ts              # lê o vidro.ini; grava --vidro-frost e as tintas de [vidro] no :root; monta as optics do menu
     │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
@@ -281,7 +281,7 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 
 ### 4.5 A lente do título (`Hero`)
 
-- **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `HERO_LENS` (baseada na do docs, com `NO_SHINE`: `specular`, `sheen` e `glow` 0).
+- **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `[titulo]` do `vidro.ini`.
 - **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `76px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
 - **Tamanho da lente:** `round(clamp(130, 0.42 × largura do palco, 200))` px, com `radius = size / 2`.
 - **Posição:** o centro é um par de `glassValue` (`x`, `y`) em frações do palco.
@@ -302,27 +302,27 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 - Um `<Glass refract={cópia} behind={--band-edge}>` com `width`, `height` e `radius` medidos (ResizeObserver no cartão e na faixa).
 - A cópia é um `div` com `background: var(--band-bg)`, deslocado por `-left` e `-top` para ficar alinhado com a faixa real.
-- A ótica é `PANEL_LENS` (`mapSize: 256`, `strength: 0.17`, `NO_SHINE`…) com `brightnessInFilter`.
+- A ótica é `[faixa]` do `vidro.ini`, com `brightnessInFilter`.
 - O conteúdo nítido fica por cima, em `.gcard-body`.
 
 ### 4.7 Painel (`pages/Painel.tsx`)
 
 - **Palco `#tela`:** um papel de parede (`Picture`) que muda com a hora do dia (manhã: Lençóis; tarde: Rio; noite: aurora), com brilho ajustável.
-- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`SEG_LENS`, `NO_SHINE`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
-- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `WIDGET_LENS` (receita do `examples/GlassNotification.tsx`, `NO_SHINE`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
-- **Central de controles `#controles`:** uma `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={NO_SHINE}` e `filterResolution` do aparelho.
+- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`[segmentado]` do `vidro.ini`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
+- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `[widget]` do `vidro.ini` (no escuro, `[widget-escuro]`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
+- **Central de controles `#controles`:** uma `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados, com o cabeçalho MIT). A cor está em `[controles]` do `vidro.ini`, o `lens` lê `[brilho]` e o `filterResolution` segue o aparelho.
 - **Avisos e widgets:** tudo fosco em CSS (`GlassPanel`): notificações com "Limpar avisos", calendário, baterias, tarefas e previsão de 5 dias.
 - **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com indicador deslizante e `useSectionSpy`. Ela repete as seções; a pílula do topo continua igual à das outras páginas.
 - **Montagem adiada (P6):** a lente do segmentado e os widgets montam um por vez depois da primeira pintura (`useDeferredMount`); as chaves e o controle deslizante montam quando a central chega perto da tela (`useNear`), sobre chaves planas do mesmo tamanho, que já funcionam (`role="switch"`).
 
 ### 4.8 Galeria (`pages/Galeria.tsx`)
 
-- **Visor `#visor`:** uma apresentação de 9 fotos. O pôster é um `Picture`. Quando o visor está na tela, a aba visível, a apresentação tocando, a primeira foto decodificada **e o WebGL roda na GPU**, monta um `<Glass draw lenses maxDpr={1}>` (modo `draw` + `lenses` do README do fork): o `draw` pinta a foto com zoom lento e transição, e o WebGL desenha quatro lentes (voltar, tocar/pausar, avançar e a barra de progresso), com óticas do `GlassVideoControls` do fork e `NO_SHINE`. O canvas usa a mesma variante (largura e formato) que o pôster escolheu.
+- **Visor `#visor`:** uma apresentação de 9 fotos. O pôster é um `Picture`. Quando o visor está na tela, a aba visível, a apresentação tocando, a primeira foto decodificada **e o WebGL roda na GPU**, monta um `<Glass draw lenses maxDpr={1}>` (modo `draw` + `lenses` do README do fork): o `draw` pinta a foto com zoom lento e transição, e o WebGL desenha quatro lentes (voltar, tocar/pausar, avançar e a barra de progresso). As óticas são `[visor]` e `[trilha]` do `vidro.ini`. O canvas usa a mesma variante (largura e formato) que o pôster escolheu.
 - **Sem lentes:** pausado, fora da tela, com movimento reduzido, sem WebGL 2 ou com WebGL em software (`softwareGL()`), os controles são discos e barra `<Frost>`; sem GPU, a apresentação começa pausada e, ao tocar, troca as fotos com um temporizador simples.
 - **WebGL 2 (PR #15):** o renderizador da biblioteca só funciona com WebGL 2 (`src/glassWebGL.ts` lança "webgl2 unavailable", e o `<Glass draw>` mostra então um texto cinza em inglês, "WebGL unavailable"). Por isso `hasWebGL()` testa só `getContext("webgl2")`, e `softwareGL()` (`lib/device.ts`) lê o renderizador de um contexto WebGL 2. Um aparelho só com WebGL 1 recebe o fosco do site.
 - **Coleção `#colecao`:** barra de chips fixa (`<Frost>`, `aria-pressed`) com Todas/Brasil/Mundo/À noite e uma grade de fotos com `GlassCaption`.
-- **Folha:** um `<dialog>` modal com a foto e uma **lupa** `<Glass refract>` sobre uma cópia ampliada 1,8× (`LOUPE_LENS`), movida por ponteiro ou setas. A folha tem tinta mais densa, porque o WebKit não desfoca atrás de um `<dialog>` na top layer.
-- **A lupa sem render (PR #15):** a posição fica num ref (fração da foto). O ponteiro e as setas só gravam a posição e pedem um quadro (`requestAnimationFrame`, um por quadro, por mais eventos que cheguem); o quadro escreve o `transform` do invólucro `.loupe` e o `left`/`top` da cópia, direto no DOM. Nada disso passa pelo estado do React (0 commits num arrasto de 120 movimentos; antes, 121). O `transform` fica no invólucro, nunca no elemento filtrado. A cópia fica dentro de um recorte do tamanho da lupa mais o alcance da lente (`COPY_REACH`, 40px), então cada quadro rasteriza uma fonte pequena, não a foto inteira ampliada.
+- **Folha:** um `<dialog>` modal com a foto e uma **lupa** `<Glass refract>` sobre uma cópia ampliada 1,8× (`[lupa]` do `vidro.ini`), movida por ponteiro ou setas. A folha tem tinta mais densa, porque o WebKit não desfoca atrás de um `<dialog>` na top layer.
+- **A lupa:** a posição fica num ref (fração da foto). O ponteiro e as setas só gravam a posição e pedem um quadro (`requestAnimationFrame`, um por quadro, por mais eventos que cheguem); o quadro escreve o `transform` do invólucro `.loupe` e o `left`/`top` da cópia, direto no DOM. O `transform` fica no invólucro, nunca no elemento filtrado. A cópia fica dentro de um recorte do tamanho da lupa mais o alcance da lente (`COPY_REACH`, 40px).
   - **Por que não o `<Glass pixelUnits center>` do fork** (a lente do tamanho do palco, movida só pelo `center`): no WebKit, a região `userSpaceOnUse` desse modo, fixada em 0,0 pela biblioteca, é resolvida a partir do ancestral com `transform` mais próximo (ou da página), não do elemento. Com o palco a mais de ~150px do topo da página, como na folha, a lente fica vazia ou deslocada. Medido no PR #15 com um banco de teste isolado (a mesma lente funciona a 20–100px do topo e some a partir de 200px; no Chromium funciona em qualquer posição).
 
 ### 4.9 Páginas de contrato (`pages/Docs.tsx`)
@@ -369,17 +369,17 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST`: `blur(frost) saturate(saturate)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
-| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE` + o par de `[vidro]` | Amostra |
-| Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
-| Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
+| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `[vidro]` + `[brilho]` | Amostra |
+| Lente do título | `Hero` | `<Glass>` no lugar | `[titulo]` | Amostra |
+| Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `[faixa]` | Amostra |
 | Cartões do portal, documentos, avisos, widgets e notas | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST` | todas |
 | Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
-| Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
-| Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |
-| Chave (1) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: NO_SHINE` | Painel |
-| Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `PLAYER_OPTICS`, `SCRUB_OPTICS` | Galeria |
+| Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `[segmentado]` | Painel |
+| Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `[widget]`, `[widget-escuro]` | Painel |
+| Chave (1) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `[brilho]`, `[controles]` | Painel |
+| Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `[visor]`, `[trilha]` | Galeria |
 | Controles do visor sem lentes | `.vw-disc`, `.vw-bar` | `<Frost>` + `.tint-ink` | `FROST` | Galeria |
-| Lupa da folha | `SheetBody` | `<Glass refract>` | `LOUPE_LENS` | Galeria |
+| Lupa da folha | `SheetBody` | `<Glass refract>` | `[lupa]` | Galeria |
 | Topo das páginas de contrato | `GlassPanel` | `<Frost>` + `.tint-ink` | `FROST` | Contratos |
 
 Contagem de `<Glass>` por página:

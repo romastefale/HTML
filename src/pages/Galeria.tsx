@@ -69,8 +69,7 @@ const SLIDE_MS = 6000;
 const FADE_MS = 700;
 
 // ── 1. The viewer ─────────────────────────────────────────────────────────
-// examples/GlassVideoControls.tsx › PLAYER_OPTICS / SCRUB_OPTICS, with
-// specular 0 (the uniform hairline is the .vw-ring overlays instead).
+// vidro.ini [visor] e [trilha].
 const PLAYER_OPTICS = otica("visor");
 const SCRUB_OPTICS = otica("trilha");
 const PLAY = 72; // CSS px
