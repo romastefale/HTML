@@ -81,7 +81,7 @@
 .site-header[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
 .sh-picker{
   position:fixed;z-index:73;top:calc(var(--bar-top) + 60px);left:var(--bar-l);
-  width:max-content;max-width:calc(100% - 24px);min-width:180px;max-height:calc(100svh - 96px - env(safe-area-inset-top, 0px));overflow:auto;
+  width:max-content;max-width:calc(100% - 24px);min-width:180px;
   border-radius:22px;box-sizing:border-box;
   color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
   visibility:hidden;
