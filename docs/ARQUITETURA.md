@@ -66,7 +66,7 @@ HTML/
     ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
     ├── docs.d.ts                 # tipo do import *.md?doc
     ├── assets/
-    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no CSS e nas raízes de vidro do SiteHeader)
+    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no <img class="page-bg"> do SiteHeader)
     ├── components/
     │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), vidro do liquid-glass2; também o fundo e a faixa de cima
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
@@ -224,21 +224,19 @@ flowchart TD
 As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta página"` e `searchScope = "conteudo"`. Desde o PR #13, a pílula tem, da esquerda para a direita:
 
 1. o **botão ☰** (`button.sh-pages-btn`, `aria-expanded`, `aria-controls`), na ponta esquerda, em toda página;
-2. as **seções da própria página**: links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
+2. as **seções da própria página**, passadas em `items` por cada página: links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
 3. o botão de tema e a lupa.
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liquid-glass2`, filho direto da raiz, sempre no DOM e mostrado com `data-open`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1), com duas raízes: `.sh-root` (a imagem de fundo do modo, o botão ☰, a pílula `<header class="site-header">`, a seleção `.sh-indicator` e os botões de tema e lupa) e `.sh-picker-root` (a imagem de fundo e a lista `.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
+**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve como filhos da raiz do React (`#root`): `<img class="page-bg">` (a imagem do modo) e `<div class="page-fade-top">`, o botão ☰, a pílula (`<header class="site-header">`), a seleção (`.sh-indicator`), os botões de tema e lupa e a lista (`.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
 
 ```ts
-LiquidGlass.init({ root: barra, glassElements: [☰, pílula, seleção, tema, lupa] });
-LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
+LiquidGlass.init({ root: pílula.parentElement, glassElements: [☰, pílula, seleção, tema, lupa, lista] });
 ```
 
-- `data-config`: Os valores de cada vidro ficam em `vidro.ini`, na raiz do repositório (seções `[pilula]`, `[botoes]`, `[selecao]`, `[lista]`, um parâmetro por linha). Os valores entregues são os da demo do fork: pílula e lista ☰ = `.hero-title`; botões = `#glass-btn-1`/`#glass-btn-2`; seleção = `#glass-tab-indicator`; o resto, os padrões de `src/defaults.ts`.
-- Fundo das raízes: `.sh-bg` tem o tamanho da viewport e fica na posição dela (`--root-x`, `--root-y`, `--vw`, gravadas por `alignBg`), como o `html::before`; na raiz da barra, `.sh-fade` repete o `body::before` (`--top-fade`).
-- Troca de tema: as duas instâncias são destruídas e criadas de novo (o `init` recaptura o texto com as cores do modo), depois de `decode()` da imagem nova.
+- `data-config`: Os valores de cada vidro ficam em `vidro.ini`, na raiz do repositório (seções `[pilula]`, `[botoes]`, `[selecao]`, `[lista]`, um parâmetro por linha). Os valores entregues são os da demo do fork: pílula e lista ☰ = "Regular Glass" (`#glass-fp1`: `cornerRadius: 40, blurAmount: 0`, com `floating: false`); botões = "Button Mode" (`button: true, cornerRadius: 24`); seleção = `#glass-tab-indicator` (`cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25`); o resto, os padrões de `src/defaults.ts`.
+- Troca de tema: o `<img class="page-bg">` troca de `src` e o vidro é destruído e criado de novo depois de `decode()` (o `init` recaptura o texto com as cores do modo; `markChanged()` só refaz o shader). Rolagem: `markChanged()` a cada evento de `scroll`, porque a biblioteca não redesenha sozinha um vidro fixo quando a página rola.
 
 | Página | Seções na pílula |
 |---|---|
@@ -291,7 +289,7 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 ### 4.5 A lente do título (`Hero`)
 
 - **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `HERO_LENS` (baseada na do docs, com `NO_SHINE`: `specular`, `sheen` e `glow` 0).
-- **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `88px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
+- **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `76px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
 - **Tamanho da lente:** `round(clamp(130, 0.42 × largura do palco, 200))` px, com `radius = size / 2`.
 - **Posição:** o centro é um par de `glassValue` (`x`, `y`) em frações do palco.
   - Em repouso: `{0.3, 0.42}`.
@@ -375,7 +373,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
 | Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | `vidro.ini` `[pilula]` | todas |
-| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `vidro.ini` `[botoes]` | todas |
+| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `#glass-btn-1` do fork | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |

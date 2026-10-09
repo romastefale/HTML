@@ -3,7 +3,7 @@
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .docs-main{
-  padding:calc(96px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(32px + env(safe-area-inset-bottom, 0px)) var(--gutter-l);
+  padding:calc(84px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(32px + env(safe-area-inset-bottom, 0px)) var(--gutter-l);
   display:flex;flex-direction:column;gap:18px;
 }
 .docs-main > *{width:100%;max-width:880px;margin-left:auto;margin-right:auto}

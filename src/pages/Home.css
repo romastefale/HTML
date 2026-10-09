@@ -1,5 +1,5 @@
 .feed{
-  padding:calc(96px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  padding:calc(84px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
   display:flex;flex-direction:column;gap:16px;
 }
 .feed > *{width:100%;max-width:564px;margin-left:auto;margin-right:auto}
