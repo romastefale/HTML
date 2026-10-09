@@ -3,13 +3,13 @@
    by .glass::after) and a soft float shadow.
 
    ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
-   • The page background (.page-bg, a fixed, viewport-tall static SVG of
+   • The page background (html::before, a fixed, viewport-tall static SVG of
      blurred organic colour fields) STARTS and ENDS on --page-edge, and the
      canvas colour (body background-color, propagated) is --page-edge too (also
      set inline in the HTML head, so it holds before this file loads and in the
      rubber-band overscroll). Whether the browser shows live page pixels behind
      its bars or its fallback tint, it's the same colour: the bars read as the page.
-   • One fixed fade at the top (.page-fade-top) takes the scrolling content from
+   • One fixed fade at the top (body::before) takes the scrolling content from
      transparent to solid --page-edge at the viewport's top edge; it sits above
      the content and BELOW the menu (z 70), so that stays crisp. At the bottom
      there is NO fixed fade (PR #18): body::after is in flow, after the last
@@ -27,6 +27,7 @@
 :root{
   --page-edge:#8b82e6;
   --page-edge-0:rgba(139,130,230,0); /* --page-edge, transparent: the fades end on it */
+  --page-bg:url("../assets/fundo-claro.svg");
   /* The cards band's own smooth multi-colour field (the cards refract a copy). */
   --band-bg:
     radial-gradient(70% 90% at 0% 0%, #ffb3d9 0%, rgba(255,179,217,0) 70%),
@@ -63,6 +64,7 @@
   color-scheme:dark;
   --page-edge:#1b1646;
   --page-edge-0:rgba(27,22,70,0);
+  --page-bg:url("../assets/fundo-escuro.svg");
   --text:#f5f5f7;
   --text-dim:#d1d1d6;
   --faint:#b3b0c8;
@@ -72,7 +74,7 @@
 }
 *{box-sizing:border-box}
 /* html has NO background, so body's background-color becomes the canvas
-   colour (it fills the overscroll too) and .page-bg paints above it. */
+   colour (it fills the overscroll too) and html::before paints above it. */
 html{
   touch-action:pan-x pan-y;
   scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
@@ -96,13 +98,14 @@ body{
 }
 :root{--sel-bg:rgba(255,255,255,.9);--sel-shadow:0 1px 2px rgba(20,16,60,.08),0 2px 6px rgba(20,16,60,.08)}
 :root[data-theme="dark"]{--sel-bg:rgba(255,255,255,.16);--sel-shadow:0 1px 6px rgba(0,0,0,.28)}
-:root:not([data-theme="dark"]) :is(.page-bg-escuro,.page-fade-escuro),
-:root[data-theme="dark"] :is(.page-bg-claro,.page-fade-claro){display:none}
-.page-bg{
-  position:fixed;z-index:-1;left:0;top:0;width:100%;height:100vh;height:100lvh;
-  pointer-events:none;object-fit:fill;
+/* The page background: static, no animation, no JS. Fixed and one large
+   viewport tall (100lvh), so it's rasterised once and never resized when the
+   iPhone toolbars collapse; scrolling only moves the content over it. */
+html::before{
+  content:"";position:fixed;z-index:-1;left:0;right:0;top:0;height:100vh;height:100lvh;
+  pointer-events:none;
+  background:var(--page-bg) center/100% 100% no-repeat;
 }
-#root > :is(main, footer){position:relative}
 /* Edge fades over the scrolling content (see the header note). Solid through
    the safe area, then an eased ramp to transparent.
    --fade-under: how far each fade reaches PAST its viewport edge (off-screen when the fixed
@@ -113,17 +116,14 @@ body{
    at least the toolbar's height (100lvh - 100svh) and never less than 120px. */
 :root{--fade-under:120px}
 @supports (height:100lvh){:root{--fade-under:max(120px, 100lvh - 100svh)}}
-.page-fade-top{
-  position:fixed;z-index:50;left:0;right:0;top:0;pointer-events:none;
-  height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
-  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) env(safe-area-inset-top, 0px),
-    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
-    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
+body::before{
+  content:"";position:fixed;z-index:50;left:0;right:0;pointer-events:none;
+  top:calc(-1 * var(--fade-under));
+  height:calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top));
+  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) calc(var(--fade-under) + env(safe-area-inset-top, 0px)),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
     var(--page-edge-0) 100%);
-}
-.page-fade-top::before{
-  content:"";position:absolute;left:0;right:0;bottom:100%;height:var(--fade-under);
-  background:linear-gradient(var(--page-edge), var(--page-edge));
 }
 /* The end of the page (PR #18): in flow after the last content, not fixed, so
    mid-page the content runs to the bottom of the screen with no overlay. It

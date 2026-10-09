@@ -66,7 +66,7 @@ HTML/
     ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
     ├── docs.d.ts                 # tipo do import *.md?doc
     ├── assets/
-    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no <img class="page-bg"> do SiteHeader)
+    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no CSS e nas raízes de vidro do SiteHeader)
     ├── components/
     │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), vidro do liquid-glass2; também o fundo e a faixa de cima
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
@@ -75,7 +75,7 @@ HTML/
     │   ├── Surfaces.tsx          # GlassPanel, GlassCaption, Picture, WIDTHS, asset() e URLs
     │   └── examples/             # GlassSwitch e GlassSlider, copiados sem mudança do examples/ do fork (MIT)
     ├── lib/
-    │   ├── pages.ts              # PAGES (o portal, a lista ☰) e pageNav(): as seções do menu
+    │   ├── pages.ts              # PAGES (o portal, a lista ☰)
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
     │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL
@@ -196,7 +196,7 @@ flowchart TD
   PAINEL --> HEADER
   GALERIA --> HEADER
   DOCS --> HEADER
-  HEADER --> NAV["lib/pages.ts · pageNav"]
+  HEADER --> NAV["lib/pages.ts · PAGES"]
   HEADER --> SEARCH["components/PageSearch.tsx"]
   HEADER --> THEME["lib/theme.ts · useTheme"]
   HEADER --> FROST["components/Frost.tsx"]
@@ -224,19 +224,20 @@ flowchart TD
 As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta página"` e `searchScope = "conteudo"`. Desde o PR #13, a pílula tem, da esquerda para a direita:
 
 1. o **botão ☰** (`button.sh-pages-btn`, `aria-expanded`, `aria-controls`), na ponta esquerda, em toda página;
-2. as **seções da própria página**, montadas com `pageNav(página, seções)` (`src/lib/pages.ts`): links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
+2. as **seções da própria página**: links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
 3. o botão de tema e a lupa.
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liquid-glass2`, filho direto da raiz, sempre no DOM e mostrado com `data-open`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve como filhos da raiz do React (`#root`): `<img class="page-bg">` e `<div class="page-fade-top">` de cada modo, o botão ☰, a pílula (`<header class="site-header">`), a seleção (`.sh-indicator`), os botões de tema e lupa e a lista (`.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
+**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1), com duas raízes: `.sh-root` (a imagem de fundo do modo, o botão ☰, a pílula `<header class="site-header">`, a seleção `.sh-indicator` e os botões de tema e lupa) e `.sh-picker-root` (a imagem de fundo e a lista `.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
 
 ```ts
-LiquidGlass.init({ root: pílula.parentElement, glassElements: [☰, pílula, seleção, tema, lupa, lista] });
+LiquidGlass.init({ root: barra, glassElements: [☰, pílula, seleção, tema, lupa] });
+LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
 ```
 
 - `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` (`#glass-tab-indicator`). Em todos: `edgeHighlight: 0`, `fresnel: 0`, `shadowOpacity: 0` (sem borda com brilho e sem sombra).
-- Troca de tema: `markChanged()` no fundo e na faixa de cima do modo novo.
+- Troca de tema: a imagem de fundo troca de `src` e as duas instâncias recebem `markChanged()`.
 
 | Página | Seções na pílula |
 |---|---|

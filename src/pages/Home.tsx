@@ -1,11 +1,11 @@
 import React from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
-import { PAGES, pageNav } from "../lib/pages";
+import { PAGES } from "../lib/pages";
 import "./Home.css";
 
 // Every section of the page, in order (the other pages are in the ☰ picker).
-const NAV: NavItem[] = pageNav("inicio", [
+const NAV: NavItem[] = [
   { href: "#topo", label: "Início" },
   { href: "#paginas", label: "Páginas" },
   { href: "#menu", label: "Menu" },
@@ -14,7 +14,7 @@ const NAV: NavItem[] = pageNav("inicio", [
   { href: "#cartoes", label: "Cartões" },
   { href: "#ceu", label: "Céu noturno" },
   { href: "#creditos", label: "Créditos" },
-]);
+];
 
 // The portal: one card per page. Each page's accent is a CSS gradient disc
 // (no photo here: the cards sit near the top, and the home stays light).

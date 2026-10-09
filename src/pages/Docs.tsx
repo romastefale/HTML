@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL } from "../components/Surfaces";
-import { pageNav, page, type PageKey } from "../lib/pages";
+import { page, type PageKey } from "../lib/pages";
 import { useThemeName } from "../lib/theme";
 import { drawMermaid } from "../lib/mermaid";
 import { useDeferredMount } from "../lib/device";
@@ -112,10 +112,10 @@ export const DocsPage: React.FC<{
   hero: Skyline;
 }> = ({ self, eyebrow, lead, docs, hero }) => {
   const info = page(self);
-  const nav: NavItem[] = pageNav(self, [
+  const nav: NavItem[] = [
     ...docs.map(({ doc, label }) => ({ href: `#${doc.id}`, label })),
     { href: "#creditos", label: "Créditos" },
-  ]);
+  ];
   const mainRef = useRef<HTMLElement>(null);
   const theme = useThemeName();
 

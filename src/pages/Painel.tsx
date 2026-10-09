@@ -6,7 +6,6 @@ import { GlassCaption, GlassPanel, Picture, CREDITS_URL } from "../components/Su
 import { GlassSwitch } from "../components/examples/GlassSwitch";
 import { GlassSlider } from "../components/examples/GlassSlider";
 import { FROST, NO_SHINE } from "../lib/optics";
-import { pageNav } from "../lib/pages";
 import { useThemeName } from "../lib/theme";
 import { useReducedMotion } from "../lib/useMedia";
 import { useBox, useDeferredMount, useFilterResolution, useNear, useSectionSpy } from "../lib/device";
@@ -32,10 +31,10 @@ const SECTIONS = [
   { id: "avisos", label: "Avisos" },
   { id: "widgets", label: "Widgets" },
 ] as const;
-const NAV: NavItem[] = pageNav("painel", [
+const NAV: NavItem[] = [
   ...SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.label })),
   { href: "#creditos", label: "Créditos" },
-]);
+];
 
 type Period = "manha" | "tarde" | "noite";
 const PERIODS: { key: Period; label: string }[] = [
