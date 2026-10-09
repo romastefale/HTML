@@ -77,7 +77,7 @@ HTML/
     │   ├── pages.ts              # PAGES (o portal, a lista ☰)
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
-    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL (frost do vidro.ini)
+    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL e FROST (frost e saturate do vidro.ini)
     │   ├── vidro.ts              # lê o vidro.ini; grava --vidro-frost e as tintas de [vidro] no :root; monta as optics do menu
     │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
@@ -229,7 +229,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): fosco só (`<Frost>`), sempre
 
 **O vidro:** a pílula (`.site-header`), a lista e os três botões (`.sh-glass`, 34px) são o mesmo fosco, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1). A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site; `[menu]` tem `saturate`. O menu usa `frost` e `saturate` no `<Frost>`. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só, na seção `[vidro]`: `frost`, `saturate`, `tintClaro` e `tintEscuro`. O fosco do site é `blur(frost) saturate(saturate)` (`FROST` e o par de `CONTROL`). A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema); `frost` e `saturate` como `--vidro-frost` e `--vidro-saturate`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -366,13 +366,13 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Pílula do menu | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
 | Lista ☰ | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
 | Botões ☰, tema e lupa | `.sh-glass` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
-| Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
-| Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
+| Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST`: `blur(frost) saturate(saturate)` | Início |
+| Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
-| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE`, com o `frost` do `vidro.ini` (`saturate` 1.15) | Amostra |
+| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE` + o par de `[vidro]` | Amostra |
 | Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
 | Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
-| Cartões do portal, documentos, avisos, widgets e notas | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
+| Cartões do portal, documentos, avisos, widgets e notas | `GlassPanel` | `<Frost>` + `.tint-frost` | `FROST` | todas |
 | Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
 | Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
 | Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |
@@ -380,7 +380,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `PLAYER_OPTICS`, `SCRUB_OPTICS` | Galeria |
 | Controles do visor sem lentes | `.vw-disc`, `.vw-bar` | `<Frost>` + `.tint-ink` | `FROST` | Galeria |
 | Lupa da folha | `SheetBody` | `<Glass refract>` | `LOUPE_LENS` | Galeria |
-| Topo das páginas de contrato | `GlassPanel` | `<Frost>` + `.tint-ink` | `PANEL` | Contratos |
+| Topo das páginas de contrato | `GlassPanel` | `<Frost>` + `.tint-ink` | `FROST` | Contratos |
 
 Contagem de `<Glass>` por página:
 
@@ -402,7 +402,7 @@ Medido no DOM do build da amostra (corpo da página, sem o menu), com iPhone 15 
 Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 
 - **A10. Uma superfície só de fosco (sem refração: `strength: 0`, `dispersion: 0`, `specular: 0`) DEVE usar `<Frost>`, NÃO um `<Glass>` material.**
-  *Por quê (PR #9):* o `<Glass>` material gera um mapa de deslocamento no main thread para cada instância (canvas pixel a pixel e `toDataURL`, um PNG de ~110 KB em data URL). Isso acontece até quando a força é 0, e até no WebKit/Gecko, onde o mapa nem é usado. No Chromium, ele ainda aplica um `backdrop-filter: url(#svg)` que não muda nada visualmente, mas é re-rasterizado a cada quadro de rolagem. O `<Frost>` desenha exatamente o mesmo visual: `blur()` e `saturate()` com os valores de `MATERIAL_OPTICS` do fork, a tinta no `background` do elemento e a hairline no `.glass::after`. A comparação pixel a pixel com o site anterior deu diferença máxima de 0–6/255.
+  *Por quê (PR #9):* o `<Glass>` material gera um mapa de deslocamento no main thread para cada instância (canvas pixel a pixel e `toDataURL`, um PNG de ~110 KB em data URL). Isso acontece até quando a força é 0, e até no WebKit/Gecko, onde o mapa nem é usado. No Chromium, ele ainda aplica um `backdrop-filter: url(#svg)` que não muda nada visualmente, mas é re-rasterizado a cada quadro de rolagem. O `<Frost>` desenha `blur()` e `saturate()` com `frost` e `saturate` de `[vidro]`, a tinta no `background` do elemento e a hairline no `.glass::after`. A comparação pixel a pixel com o site anterior deu diferença máxima de 0–6/255.
 - **A11. O `<Glass>` material só DEVE ser montado onde a curvatura ao vivo aparece, ou seja, no Blink.** A detecção DEVE ser a mesma da biblioteca (`useSupportsBackdropUrl` em `src/GlassMaterial.tsx`):
 
   ```ts
@@ -420,12 +420,11 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 
 ```ts
 export const NO_SHINE = { specular: 0, sheen: 0, glow: 0 };
-export const CONTROL = { ...NO_SHINE, frost };                                            // material padrão, sem aro nem brilho
-export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 }; // frost = [vidro] frost
-export const PANEL   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.4 };
+export const CONTROL = { ...NO_SHINE, frost, saturate };                              // material padrão; o par de [vidro]
+export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate }; // o mesmo par, sem lente
 ```
 
 - **A14. Toda ótica DEVE espalhar `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`).** A hairline DEVE vir do CSS (`.glass::after`).
   *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também é o ganho do brilho direcional e do glow interno, mas a biblioteca só tira as duas primitivas deles do filtro quando `sheen` e `glow` também são 0 (`hasSpecular = glow > 0 || sheen > 0`). No WebGL, o brilho usa `u_sheen = specular`, que já é 0. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3 e D7.
 
-`frostFilter(optics)` em `Frost.tsx` converte a ótica em CSS: `blur(${frost ?? 6}px) saturate(${saturate ?? 1.15})`. Um termo é omitido quando o blur é 0 ou a saturação é 1.
+`frostFilter(optics)` em `Frost.tsx` converte a ótica em CSS: `blur(${frost}px) saturate(${saturate})`, com os dois números de `[vidro]` quando a ótica não os traz. Um termo é omitido quando o blur é 0 ou a saturação é 1.

@@ -3,7 +3,7 @@ import { Glass, type GlassOptics, type GlassSurfaceLens } from "@samasante/liqui
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
 import { GlassCaption, GlassPanel, Picture, WIDTHS, asset } from "../components/Surfaces";
-import { FROST, NO_SHINE, PANEL } from "../lib/optics";
+import { FROST, NO_SHINE } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import { softwareGL, useBox, useFilterResolution, useOnScreen } from "../lib/device";
 import "./Galeria.css";
@@ -452,7 +452,7 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
   };
 
   return (
-    <Frost className="glass sheet-glass tint-frost" optics={PANEL}>
+    <Frost className="glass sheet-glass tint-frost" optics={FROST}>
       <div className="sheet-grip" aria-hidden="true" />
       <div
         ref={stageRef}

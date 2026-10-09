@@ -1,16 +1,13 @@
 import React, { useLayoutEffect, useRef, useState, type Ref } from "react";
 import type { GlassOptics } from "@samasante/liquid-glass";
-
-/** The library's material defaults for the two knobs a frost-only surface uses
- *  (MATERIAL_OPTICS in the fork's src/GlassMaterial.tsx: frost 6px, saturate 1.15). */
-const MATERIAL_FROST = 6;
-const MATERIAL_SATURATE = 1.15;
+import { frost, saturate } from "../lib/vidro";
 
 /** The frost half of the library's material backdrop-filter (GlassMaterial.tsx
- *  `applyBackdropFilter`), without the Blink-only `url(#…)` displacement. */
+ *  `applyBackdropFilter`), without the Blink-only `url(#…)` displacement.
+ *  Missing knobs fall back to `[vidro]` in vidro.ini, the same pair as the bar. */
 const frostFilter = (optics: Partial<GlassOptics>) => {
-  const blur = Math.max(0, optics.frost ?? MATERIAL_FROST);
-  const sat = optics.saturate ?? MATERIAL_SATURATE;
+  const blur = Math.max(0, optics.frost ?? frost);
+  const sat = optics.saturate ?? saturate;
   return [blur > 0 ? `blur(${blur}px)` : "", sat !== 1 ? `saturate(${sat})` : ""].filter(Boolean).join(" ") || "none";
 };
 

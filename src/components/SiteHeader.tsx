@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { menuOptics } from "../lib/vidro";
+import { FROST } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
@@ -284,7 +284,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       <div className="sh-band" aria-hidden="true" />
       <Frost
         className="sh-glass sh-glass-pages"
-        optics={menuOptics}
+        optics={FROST}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -303,7 +303,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Frost>
       <Frost
         className="site-header"
-        optics={menuOptics}
+        optics={FROST}
         data-mode={searchOpen ? "search" : "menu"}
       >
         <header ref={barRef} className="sh-bar">
@@ -349,7 +349,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Frost>
       <Frost
         className="sh-glass sh-glass-theme"
-        optics={menuOptics}
+        optics={FROST}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -364,7 +364,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           {dark ? <Sun /> : <Moon />}
         </button>
       </Frost>
-      <Frost className="sh-glass sh-glass-search" optics={menuOptics}>
+      <Frost className="sh-glass sh-glass-search" optics={FROST}>
         <button
           ref={searchBtn}
           type="button"
@@ -380,7 +380,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       </Frost>
       <Frost
         className="sh-picker"
-        optics={menuOptics}
+        optics={FROST}
         data-open={pickerOpen || undefined}
         inert={!pickerOpen}
       >

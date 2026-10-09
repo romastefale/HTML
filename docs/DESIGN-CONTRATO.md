@@ -59,7 +59,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 ```
 
 - **D3. Todo vidro DEVE ter exatamente uma hairline, com uma cor só em volta toda,** desenhada em camada própria (`::after`). O `box-shadow` do elemento fica reservado para a sombra de flutuação.
-  - **Exceção: a pílula e a lista ☰.** Não levam `.glass::after`. O fosco delas é `blur()` e `saturate()` (D9.1), e o `specular` do menu é 0.
+  - **Exceção: o menu (pílula, lista ☰ e os três botões).** Não levam `.glass::after`. O fosco deles é `blur()` e `saturate()` (D9.1).
   *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
 - **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
 - **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
@@ -74,20 +74,18 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
   *Por quê:*
   - O PR #5 voltou com o aro padrão da biblioteca, mas ele sempre traz o realce de topo (`inset 0 1px 0 rgba(255,255,255,.55·g)`). O PR #6 trocou por uma linha uniforme, que é o pedido de design.
   - Nos cartões `refract`, a pilha de bordas do `GlassNotification` (brilho no topo, realce branco interno, glow e linha escura) foi reduzida à mesma hairline: `.gcard-body { box-shadow: 0 0 0 var(--rim-w) var(--rim), 0 14px 36px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.14) }`.
-- **D7. Toda ótica DEVE usar `specular: 0`, e junto `sheen: 0` e `glow: 0`:** o objeto `NO_SHINE` de `src/lib/optics.ts`, espalhado em `CONTROL`, `FROST`, `PANEL`, `HERO_LENS`, `PANEL_LENS`, nas lentes do Painel (segmentado, widgets, `common.lens` do switch e do slider) e nas da Galeria (`PLAYER_OPTICS`, `SCRUB_OPTICS`, `LOUPE_LENS`).
+- **D7. Toda ótica DEVE usar `specular: 0`, e junto `sheen: 0` e `glow: 0`:** o objeto `NO_SHINE` de `src/lib/optics.ts`, espalhado em `CONTROL`, `FROST`, `HERO_LENS`, `PANEL_LENS`, nas lentes do Painel (segmentado, widgets, `common.lens` do switch e do slider) e nas da Galeria (`PLAYER_OPTICS`, `SCRUB_OPTICS`, `LOUPE_LENS`).
   *Por quê:* com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só pula as duas primitivas do brilho (`feColorMatrix` + `feComposite`) quando `glow` e `sheen` também são 0 (`hasSpecular = glow > 0 || sheen > 0`, `src/Glass.tsx`). No PR #15 as 96 capturas de antes e depois (3 contextos, 2 temas, 4 páginas, 4 posições) ficaram idênticas pixel a pixel, o filtro da lente do título da Amostra caiu de 19 para 17 primitivas e o fps dela subiu de 10,3 para 13,7 no iPhone emulado no Chromium ([DESEMPENHO.md](DESEMPENHO.md) §3.4).
 
 **Sombra de flutuação:** `--glass-float: 0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08)`, igual nos dois modos.
 
 ## 4. Fosco e tintas
 
-O desfoque de todo vidro das páginas é o `frost` da seção `[vidro]` do `vidro.ini` (ele vira `--vidro-frost` e o `frost` de `FROST`, `PANEL` e `CONTROL`, em `src/lib/vidro.ts` e `src/lib/optics.ts`). As lentes de refração (`<Glass>` com cópia) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px.
+O fosco do site é um par só, na seção `[vidro]` do `vidro.ini`: `frost` e `saturate`. Eles viram `--vidro-frost`, `--vidro-saturate` e os mesmos campos de `FROST` e `CONTROL` (`src/lib/vidro.ts`, `src/lib/optics.ts`). O filtro é `blur(frost) saturate(saturate)`. A tinta do menu, das barras e dos cartões é `--vidro-tint`. As lentes de refração (`<Glass>` com cópia, no lugar ou em WebGL) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px. As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) também ficam fora do `--vidro-tint`, porque a cor é o significado delas; o desfoque e a saturação continuam os de `[vidro]`.
 
-| Uso | Ótica / CSS | `backdrop-filter` resultante |
+| Uso | Ótica | `backdrop-filter` |
 |---|---|---|
-| Legendas de foto | `FROST` | `blur(frost) saturate(1.15)` |
-| Cartões, introdução, notas e rodapés | `PANEL` | `blur(frost) saturate(1.4)` |
-| Botões de vidro fora do Blink | `CONTROL` | `blur(frost) saturate(1.15)` |
+| Menu, barras, cartões, legendas, notas, folha e botões de vidro fora do Blink | `FROST` ou `CONTROL` | `blur(frost) saturate(saturate)` |
 
 - **D8. A tinta DEVE ser o `background` translúcido do próprio elemento** (classe `tint-*`). É PROIBIDO tinta opaca, exceto em `prefers-reduced-transparency`.
   *Por quê:* é a regra da biblioteca ("the background is the tint"). O fosco só aparece se o fundo deixar passar luz.
@@ -99,7 +97,7 @@ O desfoque de todo vidro das páginas é o `frost` da seção `[vidro]` do `vidr
 | `.tint-blue` | `rgba(10,132,255,.52)`, texto `#fff` | igual | `rgba(10,110,230,.96)` |
 | `.tint-red` / `.tint-green` | `rgba(248,113,113,.40)` / `rgba(48,209,88,.36)` | igual | `rgba(255,255,255,.95)` |
 
-As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm a cor própria, porque a cor é o significado delas; o desfoque delas é o `frost` do `vidro.ini`.
+As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm a cor própria, porque a cor é o significado delas; o desfoque e a saturação são os de `[vidro]`.
 
 **Raios:**
 
@@ -136,7 +134,7 @@ As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm
 | Propriedade | Valor |
 |---|---|
 | Pílula | `.site-header`, fosco só (`<Frost>`): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `height: 52px`, `border-radius: 26px`. Dentro dele, `<header class="sh-bar">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px). Os botões ocupam `.sh-slot` de 34px |
-| Vidro | Pílula, lista e os três botões são o mesmo fosco (D9.1): `blur(frost) saturate(saturate)`, com `frost` e `saturate` de `vidro.ini`. A tinta é `--vidro-tint` |
+| Vidro | O menu é o fosco do site (D9.1): `blur(frost) saturate(saturate)`, os dois de `[vidro]`. A tinta é `--vidro-tint` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-glass`: o mesmo `<Frost>` da pílula, 34×34, raio 17px, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`); o `<button class="sh-btn">` preenche o vidro |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
@@ -156,7 +154,8 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
-- **D9.1. O menu inteiro DEVE usar o fosco da barra:** pílula, lista ☰ e os três botões. O filtro é `backdrop-filter: blur(frost) saturate(saturate)`, sem `url(#…)`. Os números saem de `vidro.ini` (`[vidro] frost`, `[menu] saturate`) e quem pinta é `<Frost>`. A tinta é o `background` translúcido, `--vidro-tint`.
+- **D9.1. O menu inteiro DEVE usar o fosco do site:** pílula, lista ☰ e os três botões. O filtro é `backdrop-filter: blur(frost) saturate(saturate)`, sem `url(#…)`. Os dois números saem de `[vidro]` no `vidro.ini` e quem pinta é `<Frost>` com `FROST`. A tinta é o `background` translúcido, `--vidro-tint`. O mesmo par vale para as outras superfícies só de fosco (§4).
+  *Por quê:* é o tratamento que o `BROWSERS.md` do fork pede para a barra.
   *Por quê:* é o tratamento que o `BROWSERS.md` do fork pede para a barra. O mesmo par de filtros vale para os botões, com a mesma tinta, o mesmo raio e o mesmo tamanho.
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
@@ -229,7 +228,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - cada PR do histórico é um cartão (`.md-entry`);
   - o resto entre dois desses fica num cartão só.
 
-  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (`frost` do `vidro.ini`, saturate 1,4) e a hairline de `.glass::after`.
+  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (`frost` e `saturate` de `[vidro]`) e a hairline de `.glass::after`.
 - **D30. Nenhum texto DEVE passar da largura da tela ou do seu cartão:** ele quebra a linha.
   - `body` tem `overflow-wrap: break-word`; `code` e `kbd`, `overflow-wrap: anywhere`; `p`, `li`, `dd`, `dt`, títulos e `figcaption` têm `min-width: 0` (dentro de flex e grid eles podem encolher).
   - Blocos de código quebram dentro do cartão (`white-space: break-spaces`, `overflow-wrap: anywhere`), mantendo a indentação. No celular (≤ 700px), o código em linha usa `word-break: break-all`, porque o WebKit deixava o padding de 6px de um trecho no fim da linha passar 2–4px do cartão.

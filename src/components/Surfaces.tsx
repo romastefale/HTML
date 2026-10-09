@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import { FROST, PANEL } from "../lib/optics";
+import { FROST } from "../lib/optics";
 import { Frost } from "./Frost";
 
 /** A frosted reading panel (card, note, footer): frost-only glass (Frost.tsx). */
@@ -8,7 +8,7 @@ export const GlassPanel: React.FC<{
   tint?: string;
   children: React.ReactNode;
 }> = ({ className = "", tint = "tint-frost", children }) => (
-  <Frost className={`glass ${tint} ${className}`} optics={PANEL} style={{ display: "block", width: "100%" }}>
+  <Frost className={`glass ${tint} ${className}`} optics={FROST} style={{ display: "block", width: "100%" }}>
     {children}
   </Frost>
 );

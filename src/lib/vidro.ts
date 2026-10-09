@@ -1,4 +1,3 @@
-import type { GlassOptics } from "@samasante/liquid-glass";
 import vidroIni from "../../vidro.ini?raw";
 
 const secoes: Record<string, Record<string, string>> = {};
@@ -11,13 +10,10 @@ for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
 }
 
 export const frost = Number(secoes.vidro.frost);
-
-export const menuOptics: Partial<GlassOptics> = {
-  ...Object.fromEntries(Object.entries(secoes.menu).map(([k, v]) => [k, Number(v)])),
-  frost,
-};
+export const saturate = Number(secoes.vidro.saturate);
 
 const raiz = document.documentElement.style;
 raiz.setProperty("--vidro-frost", `${frost}px`);
+raiz.setProperty("--vidro-saturate", String(saturate));
 raiz.setProperty("--vidro-tint-claro", secoes.vidro.tintClaro);
 raiz.setProperty("--vidro-tint-escuro", secoes.vidro.tintEscuro);
