@@ -36,13 +36,14 @@ const Moon = () => (
   </svg>
 );
 
-const NO_EDGE: Partial<GlassConfig> = { edgeHighlight: 0, fresnel: 0, shadowOpacity: 0 };
 const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
-  light: { blurAmount: 0.25, cornerRadius: 30, ...NO_EDGE },
-  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50, ...NO_EDGE },
+  light: { blurAmount: 0.25, cornerRadius: 30 },
+  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
 };
-const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1, ...NO_EDGE };
-const INDICATOR_GLASS: Partial<GlassConfig> = { cornerRadius: 16, zRadius: 16, blurAmount: 0, ...NO_EDGE };
+const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 };
+const INDICATOR_GLASS: Partial<GlassConfig> = {
+  cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25,
+};
 
 const EDGE = 12;
 

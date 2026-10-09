@@ -99,7 +99,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Sem WebGL 2 (`getContext("webgl2")` devolvendo `null` num init script, com `?webgl=forcar`), o visor usa os controles foscos, sem o texto "WebGL unavailable" e sem erro, e "Reproduzir" troca a foto.
 
 ### Contratos
-- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 84px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.
+- [ ] Todos os corpos montam (nenhum `.md-wait` depois de ~2 s), e um link direto para uma seção (`contrato-arquitetura.html#checklist-…`) põe o título a 96px do topo (o `scroll-padding`). O alvo do teste DEVE ser um título que consegue chegar ao topo: os do fim da página param antes.
 - [ ] O corpo é uma coluna de cartões (D29): nenhum parágrafo, lista, código ou tabela fora de um `.md-card`; toda tabela dentro de um cartão; um raio só; nenhum cartão passa da largura da tela.
 
 ### Quebra de linha (todas as páginas)

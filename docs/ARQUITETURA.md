@@ -236,7 +236,7 @@ LiquidGlass.init({ root: barra, glassElements: [☰, pílula, seleção, tema, l
 LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
 ```
 
-- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` (`#glass-tab-indicator`). Em todos: `edgeHighlight: 0`, `fresnel: 0`, `shadowOpacity: 0` (sem borda com brilho e sem sombra).
+- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25 }` (`#glass-tab-indicator`). Como no `site/index.html` do fork.
 - Troca de tema: a imagem de fundo troca de `src` e as duas instâncias recebem `markChanged()`.
 
 | Página | Seções na pílula |
@@ -290,7 +290,7 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 ### 4.5 A lente do título (`Hero`)
 
 - **Modo:** lente **no lugar** (`size` + `center` + filhos), o mesmo padrão do `LiveHero` em `site/src/views/Docs.tsx` do fork. A ótica é `HERO_LENS` (baseada na do docs, com `NO_SHINE`: `specular`, `sheen` e `glow` 0).
-- **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `76px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
+- **Palco:** `.hero-stage`, do tamanho do bloco do título, **não** do hero inteiro. Ele vai de `88px + safe-top` até `132px + safe-bottom`, com largura máxima de 1100 px.
 - **Tamanho da lente:** `round(clamp(130, 0.42 × largura do palco, 200))` px, com `radius = size / 2`.
 - **Posição:** o centro é um par de `glassValue` (`x`, `y`) em frações do palco.
   - Em repouso: `{0.3, 0.42}`.

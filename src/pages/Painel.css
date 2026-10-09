@@ -2,7 +2,7 @@
 html{scroll-behavior:smooth;scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .pn{
-  padding:calc(84px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(112px + env(safe-area-inset-bottom, 0px)) var(--gutter-l);
+  padding:calc(96px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(112px + env(safe-area-inset-bottom, 0px)) var(--gutter-l);
   display:flex;flex-direction:column;gap:clamp(40px, 7vw, 72px);
 }
 .pn > *{width:100%;max-width:1040px;margin-left:auto;margin-right:auto}

@@ -20,16 +20,16 @@ O objetivo: a página vai de ponta a ponta, por baixo da barra de status e do in
 | Elemento | Regra |
 |---|---|
 | Menu (`.site-header`) | `top: calc(12px + env(safe-area-inset-top, 0px))`; lateral `max(12px, env(safe-area-inset-left/right, 0px))` |
-| Feed da página inicial | `padding: calc(84px + safe-top) max(18px, safe-right) calc(28px + safe-bottom) max(18px, safe-left)` |
+| Feed da página inicial | `padding: calc(96px + safe-top) max(18px, safe-right) calc(28px + safe-bottom) max(18px, safe-left)` |
 | Margens da amostra | `--gutter-l/r: max(20px, env(safe-area-inset-left/right, 0px))` |
-| Palco da lente | `top: calc(76px + safe-top)`, `bottom: calc(132px + safe-bottom)` |
+| Palco da lente | `top: calc(88px + safe-top)`, `bottom: calc(132px + safe-bottom)` |
 | Botões e dica do hero | `bottom: calc(68px + safe-bottom)` / `calc(24px + safe-bottom)` |
 | Rodapé da amostra | `padding-bottom: calc(28px + safe-bottom)` |
-| Âncoras | `html { scroll-padding-top: calc(84px + safe-top); scroll-padding-bottom: calc(24px + safe-bottom) }`, para uma seção não ficar escondida sob o menu |
+| Âncoras | `html { scroll-padding-top: calc(96px + safe-top); scroll-padding-bottom: calc(24px + safe-bottom) }`, para uma seção não ficar escondida sob o menu |
 | Link "Pular para o conteúdo" | com foco, `top: calc(12px + safe-top)` |
 
 - **T4. Todo conteúdo interativo e todo texto DEVEM respeitar `env(safe-area-inset-*)`.** Todo `env()` DEVE ter fallback `0px`. Só o **fundo** passa por baixo das áreas seguras.
-- **T5. O deslocamento de 84px no topo** (12 de margem + 52 de pílula + 20 de folga) DEVE acompanhar a altura do menu. Se o menu mudar, `.feed` e `scroll-padding-top` mudam juntos.
+- **T5. O deslocamento de 96px no topo** (12 de margem + 64 da caixa da barra + 20 de folga) DEVE acompanhar a altura do menu. Se o menu mudar, `.feed` e `scroll-padding-top` mudam juntos.
 
 ## 3. Unidades de altura
 
