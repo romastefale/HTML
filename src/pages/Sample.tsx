@@ -429,7 +429,7 @@ export const Sample: React.FC = () => {
                 </ul>
               </Note>
               <Note title="Arquitetura">
-                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca. O <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code> fica onde há refração: a lente do título, os cartões com <code>refract</code> e, no Chrome e no Edge, os botões. O menu do topo também é o <code>&lt;Glass&gt;</code>, e legendas, notas e rodapé são vidro fosco em CSS.</p>
+                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca. O <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code> fica onde há refração: a lente do título, os cartões com <code>refract</code> e, no Chrome e no Edge, os botões. O menu, as legendas, as notas e o rodapé são o vidro fosco.</p>
               </Note>
             </div>
           </div>

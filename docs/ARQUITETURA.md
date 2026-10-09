@@ -138,9 +138,9 @@ Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` i
 
 | Arquivo | Bruto | gzip | Conteúdo | Carregado por |
 |---|---|---|---|---|
-| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,09 kB | 88,02 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces, `pages.ts` e tema. O número é do menu no `<Glass>`; sem esse import a biblioteca sai deste chunk | todas |
+| `assets/Surfaces-*.js` (era `pages-*.js`) | 238,55 kB | 75,02 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces, `pages.ts` e tema | todas |
 | `assets/index-*.js` | 7,13 kB | 2,73 kB | portal | Início |
-| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`**. O menu não a importa, então este chunk volta a ser só da amostra, do painel e da galeria | Amostra, Painel e Galeria |
+| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`** | Amostra, Painel e Galeria |
 | `assets/sample-*.js` | 14,40 kB | 5,35 kB | amostra | Amostra |
 | `assets/painel-*.js` | 34,70 kB | 11,11 kB | painel, com `GlassSwitch` e `GlassSlider` | Painel |
 | `assets/galeria-*.js` | 19,12 kB | 7,18 kB | galeria | Galeria |
@@ -197,12 +197,12 @@ flowchart TD
   HEADER --> NAV["lib/pages.ts · PAGES"]
   HEADER --> SEARCH["components/PageSearch.tsx"]
   HEADER --> THEME["lib/theme.ts · useTheme"]
-  HEADER --> LIB
+  HEADER --> FROST
   HEADER --> INI[("vidro.ini")]
   HOME --> SURF["components/Surfaces.tsx<br/>GlassPanel · GlassCaption · Picture"]
   SURF --> FROST["components/Frost.tsx"]
 
-  SAMPLE --> LIB[("@samasante/liquid-glass<br/>chunk compartilhado")]
+  SAMPLE --> LIB["@samasante/liquid-glass"]
   PAINEL --> LIB
   PAINEL --> EX["components/examples<br/>GlassSwitch · GlassSlider"]
   EX --> LIB
@@ -229,7 +229,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): fosco só (`<Frost>`), sempre
 
 **O vidro:** a pílula (`.site-header`), a lista e os três botões (`.sh-glass`, 34px) são o mesmo fosco, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1). A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca. O menu usa `frost` e `saturate`. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site; `[menu]` tem `saturate`. O menu usa `frost` e `saturate` no `<Frost>`. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -347,7 +347,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 - **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
   - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx`, `components/Surfaces.tsx` e `components/SiteHeader.tsx`.
 
-  *Por quê:* `import type` é apagado na compilação. O menu não importa a biblioteca (D9.1), então ela fica num chunk próprio, baixado só pela amostra, pelo painel e pela galeria (DESEMPENHO P3).
+  *Por quê:* `import type` é apagado na compilação. A biblioteca fica num chunk próprio, baixado só pela amostra, pelo painel e pela galeria (DESEMPENHO P3).
 
 ### Modos da biblioteca usados
 
@@ -411,7 +411,7 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
   ```
 
   *Por quê:* `backdrop-filter: url()` só existe no Blink (`BROWSERS.md`). No Safari e no Firefox, o material pinta só fosco e tinta, mas continua gerando o mapa.
-- **A12. A pílula do menu, a lista ☰ e as outras barras largas NÃO DEVEM usar lente de deslocamento.** O tratamento é o fosco da biblioteca: `blur()` e `saturate()`, sem `backdrop-filter: url()`.
+- **A12. O menu (pílula, lista ☰ e os três botões) e as outras barras largas usam só o fosco:** `blur()` e `saturate()`, sem `backdrop-filter: url()`.
   *Por quê:* `BROWSERS.md › Known limitations`: "Very wide panels … shouldn't use a single stretched displacement lens, because it blooms an oval. Use a frost-only treatment."
 - **A13. Lentes DEVEM ser do tamanho do conteúdo, e deve haver poucas.**
   *Por quê:* `BROWSERS.md`: "SVG filters are GPU-bound … keep lenses content-sized and prefer one or a few". Além disso, o WebKit tem um teto de tamanho para a fonte do filtro.

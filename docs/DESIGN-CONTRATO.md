@@ -105,7 +105,7 @@ As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm
 
 | Elemento | Raio |
 |---|---|
-| Pílula do menu | 26px (CSS; o `<Glass>` lê o raio do CSS) |
+| Pílula do menu | 26px |
 | Cartões e introdução (Início) | 22px |
 | Notas | 20px |
 | Rodapé da amostra | 22px |

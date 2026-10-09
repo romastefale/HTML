@@ -86,7 +86,7 @@ No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada
 
 ### P3. A biblioteca só nas páginas que a usam (OBRIGATÓRIO)
 
-Módulos compartilhados DEVEM importar só **tipos** da biblioteca (`import type`). O valor só é importado nas páginas com refração (`Sample.tsx`, `Painel.tsx`, `Galeria.tsx`), em `GlassPill.tsx` e em `components/examples/*`. Com três páginas usando a biblioteca, o Rollup a separa num chunk próprio, `dist-*.js`, que só a amostra, o painel e a galeria baixam. O Início e os contratos não o baixam. O menu é `<Frost>` (D9.1) e não importa a biblioteca. O mermaid das páginas de contrato é um `import()` dinâmico: não entra no carregamento inicial nem em `modulepreload`.
+Módulos compartilhados DEVEM importar só **tipos** da biblioteca (`import type`). O valor só é importado nas páginas com refração (`Sample.tsx`, `Painel.tsx`, `Galeria.tsx`), em `GlassPill.tsx` e em `components/examples/*`. Com três páginas usando a biblioteca, o Rollup a separa num chunk próprio, `dist-*.js`, que só a amostra, o painel e a galeria baixam. O Início e os contratos não o baixam. O mermaid das páginas de contrato é um `import()` dinâmico: não entra no carregamento inicial nem em `modulepreload`.
 
 Ao criar uma página nova, confira no `pnpm build` (e nos `<script>`/`modulepreload` do HTML gerado em `dist/`) quais chunks ela carrega.
 
@@ -236,23 +236,6 @@ As variações de TBT (10–20 ms) estão dentro do ruído entre execuções (no
   | Chromium desktop (`filterResolution` 2) | 12,8 fps (p95 150 ms) | **19,1 fps** (p95 67 ms) | 9,4 → 6,4 s |
 
   React: 121 commits por arrasto antes, 0 depois; no Chromium, o tempo de script do arrasto caiu de 53 para 16 ms (iPhone emulado) e de 83 para 27 ms (desktop). O maior ganho no WebKit vem do recorte da cópia: antes, a fonte do filtro era a foto inteira ampliada 1,8× (≈700×470 CSS px, ×3 no iPhone), e o WebKit a rasterizava a cada quadro e ainda a reduzia (a lupa ficava mais borrada); agora é a lupa mais 40px de cada lado. No Chromium a lupa parada ficou igual à de antes (84 pixels com diferença acima de 8/255, na borda); no WebKit ela ficou mais nítida.
-
-### 3.5 Medições do menu com o `<Glass>`
-
-`pnpm build` local; soma dos chunks JS de cada página, em gzip. O chunk compartilhado (`Surfaces-*.js`) tem 88 KB gz, com a biblioteca dentro.
-
-| Página | PR #15 | Menu com o `<Glass>` | Orçamento (§3) |
-|---|---|---|---|
-| Início | 76 KB | **90 KB** | ≤ 80 KB: **estoura** |
-| Amostra | 95 KB | 93 KB | ≤ 100 KB |
-| Painel | 102 KB | 99 KB | ≤ 110 KB |
-| Galeria | 98 KB | 96 KB | ≤ 110 KB |
-| Contrato de design | 104 KB | 119 KB | ≤ 130 KB |
-| Arquitetura e operação | 117 KB | **133 KB** | ≤ 130 KB: **estoura** |
-
-- Início e Arquitetura passam do orçamento porque passaram a baixar a biblioteca (P3). Na amostra, no painel e na galeria ela já vinha; lá o total caiu um pouco, porque o chunk próprio dela deixou de existir.
-- Quem levar esta mudança para a `main` DEVE justificar o estouro no PR (regra do §3).
-- O menu inteiro é o fosco da barra (D9.1). O `SiteHeader` não importa a biblioteca, então ela volta a um chunk próprio das páginas com refração (P3).
 
 ## 4. Limites conhecidos (custo do próprio design)
 
