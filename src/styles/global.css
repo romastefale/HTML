@@ -22,8 +22,6 @@
      menu (SiteHeader.css) is inset 12px under the safe area and from the
      sides (it is also the search bar: the magnifier turns it into the field,
      no separate panel).
-   • .page-bg and .page-fade-top are children of the React root (rendered by
-     SiteHeader), where the top bar's glass samples them.
    • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
      toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
 :root{
@@ -76,6 +74,7 @@
 /* html has NO background, so body's background-color becomes the canvas
    colour (it fills the overscroll too) and .page-bg paints above it. */
 html{
+  touch-action:pan-x pan-y;
   scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
   scroll-padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
 }
@@ -93,15 +92,16 @@ body{
   font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
-  touch-action:manipulation; /* pan + pinch-zoom stay allowed */
+  touch-action:manipulation;
 }
-/* The page background: an <img> of the mode's SVG (src/assets/fundo-*.svg),
-   fixed, one large viewport tall (100lvh). */
+:root{--sel-bg:rgba(255,255,255,.9);--sel-shadow:0 1px 2px rgba(20,16,60,.08),0 2px 6px rgba(20,16,60,.08)}
+:root[data-theme="dark"]{--sel-bg:rgba(255,255,255,.16);--sel-shadow:0 1px 6px rgba(0,0,0,.28)}
+:root:not([data-theme="dark"]) :is(.page-bg-escuro,.page-fade-escuro),
+:root[data-theme="dark"] :is(.page-bg-claro,.page-fade-claro){display:none}
 .page-bg{
   position:fixed;z-index:-1;left:0;top:0;width:100%;height:100vh;height:100lvh;
   pointer-events:none;object-fit:fill;
 }
-/* Positioned, so the top bar's glass paints them above .page-bg. */
 #root > :is(main, footer){position:relative}
 /* Edge fades over the scrolling content (see the header note). Solid through
    the safe area, then an eased ramp to transparent.
@@ -113,8 +113,6 @@ body{
    at least the toolbar's height (100lvh - 100svh) and never less than 120px. */
 :root{--fade-under:120px}
 @supports (height:100lvh){:root{--fade-under:max(120px, 100lvh - 100svh)}}
-/* Top fade from the viewport's top edge; the solid part above the edge
-   (--fade-under) is its ::before. */
 .page-fade-top{
   position:fixed;z-index:50;left:0;right:0;top:0;pointer-events:none;
   height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
@@ -125,7 +123,7 @@ body{
 }
 .page-fade-top::before{
   content:"";position:absolute;left:0;right:0;bottom:100%;height:var(--fade-under);
-  background:linear-gradient(var(--page-edge), var(--page-edge)); /* gradient only, no background-color (T11) */
+  background:linear-gradient(var(--page-edge), var(--page-edge));
 }
 /* The end of the page (PR #18): in flow after the last content, not fixed, so
    mid-page the content runs to the bottom of the screen with no overlay. It

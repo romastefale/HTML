@@ -60,7 +60,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 ```
 
 - **D3. Todo vidro DEVE ter exatamente uma hairline, com uma cor só em volta toda,** desenhada em camada própria (`::after`). O `box-shadow` do elemento fica reservado para a sombra de flutuação.
-  - **Exceção: o menu e a lista ☰.** A borda, o brilho e a sombra são os do vidro do `liquid-glass2` (D9.1).
+  - **Exceção: o menu e a lista ☰.** O vidro é o do `liquid-glass2` (D9.1), sem borda com brilho e sem sombra.
   *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
 - **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
 - **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
@@ -134,13 +134,13 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 | Propriedade | Valor |
 |---|---|
-| Pílula | `<header class="site-header">`, filho direto da raiz do React (D9.1): `position: fixed; z-index: 70`, `top: calc(12px + env(safe-area-inset-top))`, `left`/`right` `max(12px, env(safe-area-inset-*))`, `width: fit-content` com `margin: 0 auto` (centrada), `max-width: 1040px`; `height: 52px`, `border-radius: 26px`, `padding: 0 9px`, `gap: var(--pill-gap)` (6px, D11.1). Em telas ≤ 760px, `width: auto` e `padding: 0 8px` |
-| Vidro | o `<canvas>` que `LiquidGlass.init` injeta como primeiro filho da pílula e da lista ☰ (D9.1). Claro: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`); escuro: "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`), em `data-config` |
+| Pílula | `<header class="site-header">`, filho direto da raiz do React: `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `height: 52px`, `border-radius: 26px`, `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px). Os botões ocupam `.sh-slot` de 34px |
+| Vidro | `@ybouane/liquidglass` (D9.1), em `data-config`. Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }` (`#glass-tab-indicator`). Em todos: `edgeHighlight: 0`, `fresnel: 0`, `shadowOpacity: 0` (sem borda com brilho e sem sombra) |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
-| Botões redondos | 34×34, `border: 1px solid var(--chip-border)`, `background: var(--chip-bg)`, sem `backdrop-filter`, `scale(.96)` ao tocar |
+| Botões ☰, tema e lupa | `.sh-btn`: elementos de vidro, filhos diretos da raiz, 34×34, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`) |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
-| Pílula de seleção | `.sh-indicator`: 34px, raio 17px, `--sel-bg` e `--sel-shadow`, **sem borda**. Transição de 0,45s em `--glass-ease` = `cubic-bezier(.34,1.36,.42,1)` (a mola da biblioteca) |
-| Lista de páginas | `.sh-picker`: elemento de vidro do `liquid-glass2` (D9.1), filho direto da raiz, sempre no DOM e mostrado com `data-open` (`visibility`); `position: fixed`, `z-index: 71`, 8px abaixo da pílula, alinhada à esquerda dela (sob o ☰), raio 22px, `padding: 6px`, largura pelo conteúdo (`width: max-content`, mínimo 180px). Itens de 44px de altura, raio 16px, em grade `auto 15px` com `gap: 14px`; a página atual fica na pílula de seleção (`--sel-bg`), em 600 e com um ✓ |
+| Seleção | `.sh-indicator`: elemento de vidro, filho direto da raiz, `position: fixed`, `z-index: 71`, do tamanho do link atual e movido por `transform` (`transition: transform .45s cubic-bezier(.65,0,.35,1)`), como o `#glass-tab-indicator` do fork |
+| Lista de páginas | `.sh-picker`: elemento de vidro, filho direto da raiz, mostrado com `data-open` (`visibility`); `position: fixed`, `z-index: 73`, `top: calc(var(--bar-top) + 60px)`, `left: var(--bar-l)`, raio 22px, `padding: 6px`, `width: max-content` (mínimo 180px). Itens de 44px de altura, em grade `auto 15px` com `gap: 14px`; a página atual em 600 e com um ✓ |
 | Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
 
 Paleta do menu (a mesma do `site/src/theme.ts` do fork):
@@ -149,18 +149,16 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 |---|---|---|
 | `--bar-bg` (`.tint-bar`) | `rgba(238,240,245,.72)` | `rgba(6,6,7,.72)` |
 | `--bar-text` / `--bar-sub` | `#0a0b0d` / `rgba(0,0,0,.6)` | `#fff` / `rgba(255,255,255,.6)` |
-| `--chip-bg` / `--chip-border` | `rgba(255,255,255,.66)` / `rgba(0,0,0,.12)` | `rgba(255,255,255,.05)` / `rgba(255,255,255,.14)` |
-| `--sel-bg` | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
+| `--sel-bg` (barra de abas do Painel, chips da Galeria) | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
 | `--sel-shadow` | `0 1px 2px rgba(20,16,60,.1), 0 3px 10px rgba(20,16,60,.1)` | `0 2px 10px rgba(0,0,0,.3)` |
-| `--hover-bg` | `rgba(0,0,0,.05)` | `rgba(255,255,255,.07)` |
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
 - **D9.1. O vidro do menu e da lista ☰ DEVE ser o `LiquidGlass` de `@ybouane/liquidglass` (o fork `romastefale/liquid-glass2`), usado como o README do fork documenta,** com os presets "Frosted Panel" (claro) e "Dark Glass" (escuro) da demo (`BAR_GLASS` em `SiteHeader.tsx`):
-  - `LiquidGlass.init({ root, glassElements: [pílula, lista] })`, com `root` = a raiz do React (`#root`) e os dois como filhos diretos dela;
+  - `LiquidGlass.init({ root, glassElements })`, depois de `document.fonts.ready`, com `root` = a raiz do React (`#root`) e a pílula, os três botões, a seleção e a lista como filhos diretos dela;
   - a configuração vai em `data-config`;
   - o fundo que o vidro refrata é um irmão dentro da raiz: o `<img class="page-bg">` (D1) e a `.page-fade-top` (D2.1);
-  - na troca de tema, `destroy()` e um `init()` novo: `markChanged()` redesenha, mas não refaz a captura de um filho da raiz cujas cores mudaram (testado).
+  - na troca de tema, o fundo e a faixa de cima do outro modo aparecem (`display`) e o vidro recebe `markChanged()`, como as abas de fundo do fork.
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
@@ -178,14 +176,14 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 - **D12.2. O botão ☰ DEVE ficar na ponta esquerda da pílula, em todas as páginas (inclusive no Início), e abrir a lista de páginas.** À direita ficam só o tema e a lupa. A lista:
   - é um popover de vidro fosco ancorado sob a ponta esquerda da pílula, NÃO uma tela cheia;
   - lista as seis páginas na ordem de `PAGES` (Início, Amostra, Painel, Galeria, Contrato de design, Arquitetura e operação);
-  - marca a página atual com `aria-current="page"`, a pílula de seleção, peso 600 e um ✓ (não só cor);
+  - marca a página atual com `aria-current="page"`, peso 600 e um ✓ (não só cor);
   - fecha com Esc (o foco volta ao ☰), com um toque fora, ao escolher uma página e ao tocar no ☰ de novo; fecha também quando o foco sai dela;
   - ao abrir, leva o foco para a página atual; ↑/↓, Home e End andam entre os itens; o ☰ tem `aria-expanded` e `aria-controls`;
   - usa um anel de foco neutro (`inset 0 0 0 1.5px var(--bar-sub)`), NUNCA o azul;
   - no modo pesquisa, o ☰ some como o botão de tema, e abrir a pesquisa fecha a lista.
 - **D13. Os links que não cabem DEVEM rolar para o lado,** com a barra de rolagem oculta e degradê no lado em que há mais itens. Isso vale para toque, trackpad e Shift + roda.
-- **D14. O item atual DEVE ter uma pílula suave atrás,** com uma só pílula que desliza e muda de largura entre os links, e sempre DEVE ficar visível no menu.
-  *Por quê:* a pílula não pode mudar de tamanho quando o negrito muda. Por isso cada rótulo reserva a largura em negrito com `.sh-label::after { content: attr(data-text); font-weight: 600; height: 0; visibility: hidden }`.
+- **D14. O item atual DEVE ter a seleção de vidro por cima (`.sh-indicator`),** que desliza e muda de largura entre os links.
+  Cada rótulo reserva a largura em negrito com `.sh-label::after { content: attr(data-text); font-weight: 600; height: 0; visibility: hidden }`.
 
 ## 6. Pesquisa na lupa
 
@@ -194,7 +192,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - O formulário cobre a pílula da borda esquerda até a lupa (`right: 49px`, ou 48px em telas ≤ 760px).
 
   *Por quê:* nada se mexe nem muda de tamanho ao abrir. Um painel ou barra separada (a barra fixa embaixo dos PRs #3–#7) foi removido no PR #8.
-- **D16. A lupa DEVE ficar no mesmo lugar, em estado ativo** (`aria-expanded="true"`, preenchida com `background: var(--bar-text)` e `color: var(--bar-bg-solid)`). **Um novo toque nela DEVE fechar a pesquisa.**
+- **D16. A lupa DEVE ficar no mesmo lugar** (`aria-expanded="true"` com a pesquisa aberta). **Um novo toque nela DEVE fechar a pesquisa.**
 - **D17. No modo pesquisa, é PROIBIDO anel ou contorno de foco na pílula e no campo** (`.site-header[data-mode="search"], .page-search input:focus, .page-search input:focus-visible { outline: none }`). A pílula fica só com a borda do próprio vidro. O cursor de texto (`caret-color: var(--bar-text)`, neutro desde o PR #15) mostra onde se digita.
   *Por quê:* o anel azul `0 0 0 2px rgba(76,154,255,.55)` via `:has(input:focus)` foi removido no PR #9, a pedido. Os anéis de teclado dos links, dos botões redondos e dos botões ▲▼✕ (`.ps-btn:focus-visible`) continuam, neutros (D31).
 - **D18. O campo DEVE ter `font-size` ≥ 16px** (17px aqui).
@@ -276,8 +274,6 @@ O azul que continua no site é preenchimento, não foco: o trilho ligado do swit
 | N13 | `<mark>` para destacar ocorrências | O React é dono dos nós de texto. Use a Highlight API com overlay de fallback | PR #4 |
 | N14 | `<Glass>` material em superfície só de fosco | Gera mapas e filtros inúteis. Use `<Frost>` | PR #9 |
 | N15 | Servir o JPEG de 1600 px direto | No iPhone 15, a foto de Hong Kong cai de 373 KB (JPEG) para 112 KB (AVIF de 1080 px) | PR #9 |
-| N16 | `interactive-widget=resizes-content` no viewport | Gerava erro no console do WebKit | PR #2 |
-| N17 | `maximum-scale` / `user-scalable=no` | O zoom por pinça DEVE continuar permitido | PR #2 |
 | N18 | Estilos escuros por `prefers-color-scheme` | Ignoram a escolha manual | PR #7 |
 | N19 | `filterResolution={2}` sempre ligado | Quadruplica os pixels do filtro. Use só em tela 1× e em máquina forte | PRs #5, #9 |
 | N20 | Merge da troca para Vite antes de mudar a fonte do Pages para Actions | O site fica em branco (os fontes sem build seriam publicados) | PR #4 |

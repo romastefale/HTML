@@ -17,7 +17,7 @@
 | Recurso | Implementação |
 |---|---|
 | Rótulo | `<nav aria-label="Seções desta página">` |
-| Item atual | `aria-current="location"` no link da seção atual. A pílula de seleção é `aria-hidden` |
+| Item atual | `aria-current="location"` no link da seção atual. A seleção de vidro é `aria-hidden` |
 | Scroll-spy | o item atual é a última seção cujo topo passou da linha "base do menu + 32px". No fim da página, a última seção vence |
 | Toque num link de seção | seleciona na hora e pausa o spy por 700 ms. Enquanto a página rola, o prazo se renova por 220 ms |
 | Foco por teclado | `onFocus` rola o link para dentro da barra, com 12px de folga, sem rolar a página |
@@ -101,7 +101,7 @@ stateDiagram-v2
 | Onde | Estilo |
 |---|---|
 | Global | `:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 10px }`, com `--focus` neutro e translúcido: `rgba(28,28,30,.5)` no claro, `rgba(245,245,247,.62)` no escuro (era `#0a84ff` até o PR #14) |
-| Links do menu, itens da lista ☰, botões redondos do menu e botões ▲▼✕ da pesquisa | `outline: none; box-shadow: inset 0 0 0 1.5px var(--bar-sub)` (um aro por dentro, porque a rolagem da `nav` cortaria um anel de fora); no item atual da lista, o aro se soma a `--sel-shadow`. Até o PR #14 era `outline: 2px solid #4c9aff` |
+| Links do menu, itens da lista ☰ e botões ☰, tema e lupa | `outline: 1.5px solid var(--bar-sub); outline-offset: -1.5px` |
 | Chips da galeria e barra de abas do painel | o mesmo aro interno `--bar-sub`; num chip marcado, somado a `--sel-shadow` |
 | Controle segmentado, switch e slider do painel, cartões e foto da lupa da galeria | `outline` com `var(--focus)` (2px; 3px nos cartões e na foto). No switch e no slider o anel vai no elemento visível depois do `<input>` (`input:focus-visible + *`) |
 | Botões sobre a foto do visor | `outline: 2px solid var(--focus-on-photo)` (`rgba(255,255,255,.85)`) |
@@ -136,6 +136,6 @@ stateDiagram-v2
 
 ## 7. Toque
 
-- `-webkit-tap-highlight-color: transparent` nos links e botões do menu, com `scale(.96)` ao pressionar os botões redondos.
+- `-webkit-tap-highlight-color: transparent` nos links e botões do menu.
 - Na lente, um toque posiciona e a segura por 1,6 s; o `pointercancel` solta na hora.
-- O zoom por pinça é permitido (veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md) T2).
+- O zoom da página é travado (veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md) T2).

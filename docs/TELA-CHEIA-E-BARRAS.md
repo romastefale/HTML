@@ -11,9 +11,9 @@ O objetivo: a página vai de ponta a ponta, por baixo da barra de status e do in
 
 - **T1. `viewport-fit=cover` é OBRIGATÓRIO.**
   *Por quê:* sem ele, o iOS deixa faixas nas áreas da status bar e do indicador de início, e `env(safe-area-inset-*)` fica 0.
-- **T2. O viewport NÃO DEVE ter `maximum-scale`, `user-scalable=no` nem `interactive-widget=resizes-content`.**
-  *Por quê:* o zoom por pinça é acessibilidade. `interactive-widget` gerava erro no console do WebKit (PR #2), e o teclado é tratado pelo `visualViewport` (§5).
-- **T3. `body` DEVE usar `touch-action: manipulation`**, que mantém rolagem e pinça e tira o atraso do duplo toque. O hero da amostra usa `touch-action: pan-y pinch-zoom`, para arrastar na horizontal mover a lente.
+- **T2. O viewport DEVE ter `maximum-scale=1, user-scalable=no`, e o `html` DEVE ter `touch-action: pan-x pan-y`:** o zoom da página fica travado.
+  *Por quê:* decisão do dono do projeto (commit `d9ddd1a`).
+- **T3. `body` DEVE usar `touch-action: manipulation`**, que tira o atraso do duplo toque. O hero da amostra usa `touch-action: pan-y`, para arrastar na horizontal mover a lente.
 
 ## 2. Safe areas
 

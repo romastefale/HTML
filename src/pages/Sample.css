@@ -5,7 +5,7 @@ html{scroll-behavior:smooth}
 
 /* Hero: headline over the page gradient, wrapped by an IN-PLACE <Glass> lens
    that bends it (transparent, so the gradient runs unbroken from the bar down). */
-.hero{position:relative;height:var(--hero-h);overflow:hidden;touch-action:pan-y pinch-zoom}
+.hero{position:relative;height:var(--hero-h);overflow:hidden;touch-action:pan-y}
 /* The lens stage: the headline block only, between the nav (top) and the hero
    buttons (bottom), inside the safe area. The <Glass> fills it; the lens never
    leaves it (BROWSERS.md: keep lenses content-sized). */
