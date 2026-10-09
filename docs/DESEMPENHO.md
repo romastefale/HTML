@@ -88,7 +88,7 @@ No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada
 
 Módulos compartilhados DEVEM importar só **tipos** da biblioteca (`import type`). O valor só é importado nas páginas com refração (`Sample.tsx`, `Painel.tsx`, `Galeria.tsx`), em `GlassPill.tsx` e em `components/examples/*`. Com três páginas usando a biblioteca, o Rollup a separa num chunk próprio, `dist-*.js` (49,35 kB, ou 16,60 kB gz), que só a amostra, o painel e a galeria baixam. O Início e os contratos não o baixam. O mermaid das páginas de contrato é um `import()` dinâmico: não entra no carregamento inicial nem em `modulepreload`.
 
-O menu do topo é a exceção: o `SiteHeader`, que toda página usa, importa o `<Glass>` (o vidro da pílula, dos botões e da lista ☰, DESIGN-CONTRATO D9.1). A biblioteca vai no chunk compartilhado (`Surfaces-*.js`) e todas as páginas a baixam (§3.5).
+O menu do topo importa o `<Glass>` só nos três botões de 34px (DESIGN-CONTRATO D9.1). A pílula e a lista ☰ são `<Frost>` e não pedem a biblioteca. Com esse import no `SiteHeader`, a biblioteca vai no chunk compartilhado (`Surfaces-*.js`) e todas as páginas a baixam (§3.5).
 
 Ao criar uma página nova, confira no `pnpm build` (e nos `<script>`/`modulepreload` do HTML gerado em `dist/`) quais chunks ela carrega.
 
@@ -148,7 +148,7 @@ Metas **normativas** para o estado atual. Elas foram tiradas dos números medido
 | Total Blocking Time (Lighthouse) | ≤ 600 ms | ≤ 600 ms | ≤ 600 ms | ≤ 600 ms | ≤ 600 ms |
 | Peso transferido no carregamento | ≤ 250 KiB | ≤ 350 KiB | ≤ 350 KiB | ≤ 350 KiB | ≤ 350 KiB |
 | JS gzip (soma dos chunks da página) | ≤ 80 KB | ≤ 100 KB | ≤ 110 KB | ≤ 110 KB | ≤ 130 KB (inclui o texto dos documentos, ~20–32 KB gz, que cresce com o contrato) |
-| `<Glass>` montados | 0 | ≤ 4 fixos + os botões materiais no Blink (hoje 5) | ≤ 6 | 1 renderizador (4 lentes) + 1 lupa na folha | 0 |
+| `<Glass>` montados | 3 botões do menu, no Blink | ≤ 4 fixos + 5 botões no Blink + 3 do menu | ≤ 6 + 3 do menu | 1 renderizador (4 lentes) + 1 lupa na folha + 3 do menu | 3 botões do menu, no Blink |
 | Lentes animadas continuamente | 0 | ≤ 1 | 0 | ≤ 1 renderizador, só com GPU | 0 |
 | Maior imagem baixada no iPhone 15 | ≤ 150 KB (AVIF) | ≤ 150 KB (AVIF) | ≤ 150 KB (AVIF) | ≤ 150 KB (AVIF) | ≤ 150 KB (AVIF) |
 | Erros de console / 404 | 0 | 0 | 0 | 0 | 0 |
@@ -254,6 +254,7 @@ As variações de TBT (10–20 ms) estão dentro do ruído entre execuções (no
 
 - Início e Arquitetura passam do orçamento porque passaram a baixar a biblioteca (P3). Na amostra, no painel e na galeria ela já vinha; lá o total caiu um pouco, porque o chunk próprio dela deixou de existir.
 - Quem levar esta mudança para a `main` DEVE justificar o estouro no PR (regra do §3).
+- A pílula e a lista ☰ são fosco só (A12). Os três botões de 34px continuam sendo o `<Glass>` que puxa a biblioteca para o chunk compartilhado.
 
 ## 4. Limites conhecidos (custo do próprio design)
 

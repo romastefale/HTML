@@ -5,7 +5,7 @@ import { Frost } from "./Frost";
 
 /** Blink only renders `backdrop-filter: url()` (the live bend); the same sniff
  *  as the library's useSupportsBackdropUrl (src/GlassMaterial.tsx). */
-const isBlink = (() => {
+export const isBlink = (() => {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;
   const hasUAData = (navigator as Navigator & { userAgentData?: unknown }).userAgentData != null;

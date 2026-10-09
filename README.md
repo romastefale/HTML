@@ -36,7 +36,7 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 
 - `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
 - `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰).
-- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa), com o `<Glass>` material (valores em `vidro.ini`).
+- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa). A pílula e a lista são fosco; a lente fica nos três botões de 34px. Valores em `vidro.ini`.
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
@@ -45,7 +45,7 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 - `src/styles/global.css`: o fundo orgânico (`src/assets/fundo-*.svg`, gerados por `scripts/make-organic-bg.py`), as camadas de borda, a hairline, as tintas e o foco.
 - `public/img/`: as fotos, as variantes AVIF/WebP (`r/`) e o `CREDITS.md`. As variantes são geradas por `scripts/make-responsive-images.py`.
 
-A biblioteca `@samasante/liquid-glass` vai no chunk compartilhado, em todas as páginas, porque o menu usa o `<Glass>`. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.
+A biblioteca `@samasante/liquid-glass` vai no chunk compartilhado, em todas as páginas, porque os três botões do menu usam o `<Glass>`. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.
 
 ```bash
 pnpm install

@@ -67,7 +67,7 @@ HTML/
     ├── assets/
     │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada, vira data URL no CSS)
     ├── components/
-    │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), <Glass> material; valores em vidro.ini
+    │   ├── SiteHeader.tsx/.css   # menu: pílula e lista em fosco; lente nos 3 botões de 34px
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
     │   ├── Frost.tsx             # superfície fosca em CSS puro (blur + saturate)
     │   ├── GlassPill.tsx         # botão de vidro: <Glass> no Blink, <Frost> nos demais
@@ -225,11 +225,11 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 2. as **seções da própria página**, passadas em `items` por cada página: links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
 3. o botão de tema e a lupa.
 
-O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre no DOM e mostrado com `data-open` (`inert` quando fechado), posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
+O ☰ abre a **lista de páginas** (`.sh-picker`): fosco só (`<Frost>`), sempre no DOM e mostrado com `data-open` (`inert` quando fechado), posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
+**O vidro:** a pílula (`.site-header`) e a lista são fosco só, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1, `BROWSERS.md`). Os três botões (`.sh-glass`, 34px, com o `<button class="sh-btn">` dentro) são a lente: `<Glass>` material no Blink e o mesmo fosco nos outros motores. A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca, usadas pelos cinco `<Glass>` do menu. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca. A pílula e a lista usam `frost` e `saturate`. Os três botões usam `[menu]` inteiro. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -353,7 +353,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Modo (README do fork) | Como se ativa | Onde é usado aqui |
 |---|---|---|
-| **Material** (a caixa translúcida vira vidro) | `<Glass>` sem geometria | `GlassPill` **só no Blink** (5 botões na amostra) |
+| **Material** (a caixa translúcida vira vidro) | `<Glass>` sem geometria | `GlassPill` **só no Blink** (5 botões na amostra); os 3 botões do menu, **só no Blink** |
 | **No lugar** (a lente dobra os próprios filhos) | `size` + `center` + filhos | a lente do título da amostra; a seleção do segmentado do painel |
 | **Cópia** (`refract` + `behind`) | `refract={nó}` e `behind={cor}` | os 3 cartões da faixa da amostra; os 2 widgets do painel; a lupa da folha da galeria |
 | **Canvas + várias lentes** (WebGL) | `draw={fn}` + `lenses=[…]` | o visor da galeria (4 lentes num renderizador) |
@@ -363,8 +363,9 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
-| Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
+| Pílula do menu | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
+| Lista ☰ | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
+| Botões ☰, tema e lupa | `.sh-glass` | **Blink:** `<Glass>` material. **Outros:** `<Frost>` | `vidro.ini` `[menu]` | todas |
 | Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
@@ -385,13 +386,13 @@ Contagem de `<Glass>` por página:
 
 | Página | `<Glass>` | Laço contínuo |
 |---|---|---|
-| Início | 0 | nenhum |
-| Amostra | 4 fixos (a lente e 3 cartões), mais 5 no Chromium (os botões) | a órbita da lente, só na tela |
-| Painel | 6 (seleção, 2 widgets, 2 chaves, 1 controle deslizante) | nenhum: só anima ao interagir |
-| Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta | o `draw` do visor, só nessas condições |
-| Contratos | 0 | nenhum |
+| Início | 3 (os botões do menu, só no Blink) | nenhum |
+| Amostra | 4 fixos (a lente e 3 cartões), mais 5 no Chromium (os botões) e mais 3 do menu no Blink | a órbita da lente, só na tela |
+| Painel | 6 (seleção, 2 widgets, 2 chaves, 1 controle deslizante) e mais 3 do menu no Blink | nenhum: só anima ao interagir |
+| Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta, e mais 3 do menu no Blink | o `draw` do visor, só nessas condições |
+| Contratos | 3 (os botões do menu, só no Blink) | nenhum |
 
-Medido no DOM do build atual, na amostra, com iPhone 15 emulado:
+Medido no DOM do build da amostra (corpo da página, sem o menu), com iPhone 15 emulado:
 
 | Motor | Superfícies `[data-frost]` | `backdrop-filter: url()` | `filter: url()` | `<filter>` SVG | mapas `data:` em `feImage` |
 |---|---|---|---|---|---|
@@ -410,7 +411,7 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
   ```
 
   *Por quê:* `backdrop-filter: url()` só existe no Blink (`BROWSERS.md`). No Safari e no Firefox, o material pinta só fosco e tinta, mas continua gerando o mapa.
-- **A12. Barras e painéis largos NÃO DEVEM usar lente de deslocamento.**
+- **A12. A pílula do menu, a lista ☰ e as outras barras largas NÃO DEVEM usar lente de deslocamento.** O tratamento é o fosco da biblioteca: `blur()` e `saturate()`, sem `backdrop-filter: url()`.
   *Por quê:* `BROWSERS.md › Known limitations`: "Very wide panels … shouldn't use a single stretched displacement lens, because it blooms an oval. Use a frost-only treatment."
 - **A13. Lentes DEVEM ser do tamanho do conteúdo, e deve haver poucas.**
   *Por quê:* `BROWSERS.md`: "SVG filters are GPU-bound … keep lenses content-sized and prefer one or a few". Além disso, o WebKit tem um teto de tamanho para a fonte do filtro.

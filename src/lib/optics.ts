@@ -17,10 +17,10 @@ export const NO_SHINE: Partial<GlassOptics> = { specular: 0, sheen: 0, glow: 0 }
  *  default material look (bends the live page in Chrome/Edge). */
 export const CONTROL: Partial<GlassOptics> = { ...NO_SHINE, frost };
 
-/** Wide bars (the Painel tab bar, the Galeria chips) + caption pills: frost only. BROWSERS.md: "Very
- *  wide panels shouldn't use a single stretched displacement lens … use a
- *  frost-only treatment". Rendered by <Frost> (plain CSS, same look) rather
- *  than a material <Glass>: see src/components/Frost.tsx. */
+/** Wide panels (the menu pill, the page list, the Painel tab bar, the Galeria
+ *  chips) and caption pills: frost only. BROWSERS.md: a dock-style bar must not
+ *  use one stretched displacement lens; use a frost-only treatment. <Frost>
+ *  paints the library's `blur()` + `saturate()`, without `backdrop-filter: url()`. */
 export const FROST: Partial<GlassOptics> = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 };
 
 /** Reading panels (cards, notes, footer): frost only (<Frost>), stronger saturation. */

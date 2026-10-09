@@ -40,14 +40,14 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Menu
 - [ ] A pílula flutua: 12px abaixo da safe area e 12px das laterais, sem encostar no topo. Ela é igual no topo e rolando, em todas as páginas.
 - [ ] O menu não tem marca. Os links da pílula são só seções (`href="#…"`), sem separador. Em toda página (inclusive no Início), o primeiro item da pílula é o ☰; não há botão Início.
-- [ ] ☰ abre a lista de páginas (6 itens, dentro da tela, com o `<Glass>`), com `aria-expanded="true"`, o foco na página atual e só ela com `aria-current="page"`. ↓ move o foco; Esc fecha e devolve o foco ao ☰; ☰ de novo fecha; um toque fora fecha; escolher outra página navega.
+- [ ] ☰ abre a lista de páginas (6 itens, dentro da tela, fosco, sem `backdrop-filter: url()`), com `aria-expanded="true"`, o foco na página atual e só ela com `aria-current="page"`. ↓ move o foco; Esc fecha e devolve o foco ao ☰; ☰ de novo fecha; um toque fora fecha; escolher outra página navega.
 - [ ] No modo pesquisa, o ☰ e o tema ficam ocultos e `inert`.
 - [ ] Todo `href="#…"` da página tem um alvo com esse id (inclui os índices de chips dos documentos).
 - [ ] Os links rolam para o lado, e o degradê só aparece no lado em que há mais itens. Shift + roda funciona no Chromium e no WebKit.
 - [ ] A seleção inicial é a primeira seção da página ("Início" no Início, "Lente" na amostra, "Tela" no painel, "Visor" na galeria, "Visão geral" e "Arquitetura" nos contratos).
 - [ ] Ao tocar num link do meio (Fundo / Lugares), `aria-current` fica **só** nele durante toda a rolagem, e a pílula de seleção fica atrás dele.
 - [ ] A pílula do menu não muda de tamanho quando a seleção troca.
-- [ ] O vidro do menu e da lista ☰ roda: `.site-header`, os três `.sh-glass` e `.sh-picker` com `data-liquid-glass="material"` e o `backdrop-filter` da biblioteca, em todas as páginas, no claro e no escuro, sem erro no console.
+- [ ] A pílula (`.site-header`) e a lista (`.sh-picker`) têm `data-frost` e `backdrop-filter` com `blur(` e `saturate(`, sem `url(`. No Blink, os três `.sh-glass` têm `data-liquid-glass="material"`. Nos outros motores, os três têm `data-frost`. Claro e escuro, sem erro no console.
 - [ ] Tab percorre todos os links com o anel visível, e cada link focado aparece dentro da barra.
 
 ### Pesquisa
@@ -77,7 +77,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Imagens e desempenho
 - [ ] Cada foto é um `<picture>`, e o `currentSrc` escolhido é AVIF (no iPhone 15: variantes de 1080 no Início e de 1440 na amostra), com no máximo 150 KB por foto.
 - [ ] As fotos fora da primeira dobra estão com `loading="lazy"`.
-- [ ] No `pnpm build`, `@samasante/liquid-glass` fica no chunk compartilhado (`Surfaces-*.js`), que todas as páginas carregam, porque o menu usa o `<Glass>` (confira os `<script>`/`modulepreload` em `dist/*.html`). Nenhum chunk do mermaid aparece nos HTML.
+- [ ] No `pnpm build`, `@samasante/liquid-glass` fica no chunk compartilhado (`Surfaces-*.js`), que todas as páginas carregam, porque os três botões do menu usam o `<Glass>` (confira os `<script>`/`modulepreload` em `dist/*.html`). Nenhum chunk do mermaid aparece nos HTML.
 - [ ] Os números de [DESEMPENHO.md §3](DESEMPENHO.md#3-orçamento-de-desempenho) continuam dentro do orçamento (Lighthouse mobile), ou o PR justifica o estouro.
 
 ### Lente (amostra)

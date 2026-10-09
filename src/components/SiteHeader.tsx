@@ -5,6 +5,8 @@ import { menuOptics } from "../lib/vidro";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
+import { Frost } from "./Frost";
+import { isBlink } from "./GlassPill";
 import { PAGES, type PageKey } from "../lib/pages";
 import "./SiteHeader.css";
 
@@ -37,6 +39,10 @@ const Moon = () => (
 
 
 const EDGE = 12;
+
+/** Content-sized controls keep the lens (BROWSERS.md). A wide bar does not. */
+const MenuControl: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) =>
+  isBlink ? <Glass optics={menuOptics} {...props} /> : <Frost optics={menuOptics} {...props} />;
 
 export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: string; searchScope?: string }> = ({
   items,
@@ -282,9 +288,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   return (
     <>
       <div className="sh-band" aria-hidden="true" />
-      <Glass
+      <MenuControl
         className="sh-glass sh-glass-pages"
-        optics={menuOptics}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -300,8 +305,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         >
           <Burger />
         </button>
-      </Glass>
-      <Glass
+      </MenuControl>
+      <Frost
         className="site-header"
         optics={menuOptics}
         data-mode={searchOpen ? "search" : "menu"}
@@ -346,10 +351,9 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             <span className="sh-slot" />
           </div>
         </header>
-      </Glass>
-      <Glass
+      </Frost>
+      <MenuControl
         className="sh-glass sh-glass-theme"
-        optics={menuOptics}
         data-hidden={searchOpen || undefined}
       >
         <button
@@ -363,8 +367,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         >
           {dark ? <Sun /> : <Moon />}
         </button>
-      </Glass>
-      <Glass className="sh-glass sh-glass-search" optics={menuOptics}>
+      </MenuControl>
+      <MenuControl className="sh-glass sh-glass-search">
         <button
           ref={searchBtn}
           type="button"
@@ -377,8 +381,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         >
           <Magnifier />
         </button>
-      </Glass>
-      <Glass
+      </MenuControl>
+      <Frost
         className="sh-picker"
         optics={menuOptics}
         data-open={pickerOpen || undefined}
@@ -408,7 +412,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             })}
           </ul>
         </nav>
-      </Glass>
+      </Frost>
     </>
   );
 };
