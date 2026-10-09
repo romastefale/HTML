@@ -188,9 +188,7 @@ export const Home: React.FC = () => {
             Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Vidro: o fosco
             desta página segue os valores do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT ©
             Sam Asante), e o <code>&lt;Glass&gt;</code> do pacote <code>@samasante/liquid-glass</code> é usado na{" "}
-            <a href={SAMPLE_URL}>amostra</a>, no painel e na galeria. O vidro do menu do topo é o do{" "}
-            <a href="https://github.com/romastefale/liquid-glass2">liquid-glass2</a> (MIT, @ybouane), pacote{" "}
-            <code>@ybouane/liquidglass</code>.
+            <a href={SAMPLE_URL}>amostra</a>, no painel, na galeria e no menu do topo.
           </footer>
         </GlassPanel>
       </main>

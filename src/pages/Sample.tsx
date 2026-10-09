@@ -438,7 +438,7 @@ export const Sample: React.FC = () => {
                 </ul>
               </Note>
               <Note title="Arquitetura">
-                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca. O <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code> fica onde há refração: a lente do título, os cartões com <code>refract</code> e, no Chrome e no Edge, os botões. O menu do topo é o vidro do <a href="https://github.com/romastefale/liquid-glass2">liquid-glass2</a> (WebGL), e legendas, notas e rodapé são vidro fosco em CSS.</p>
+                <p>Esta página é um app React (Vite + TypeScript), como o site de demonstração da biblioteca. O <code>&lt;Glass&gt;</code> de <code>@samasante/liquid-glass</code> fica onde há refração: a lente do título, os cartões com <code>refract</code> e, no Chrome e no Edge, os botões. O menu do topo também é o <code>&lt;Glass&gt;</code>, e legendas, notas e rodapé são vidro fosco em CSS.</p>
               </Note>
             </div>
           </div>
@@ -452,8 +452,7 @@ export const Sample: React.FC = () => {
               <a href={HOME_URL}>← Voltar para a página inicial</a>
               <span>
                 Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), pacote{" "}
-                <code>@samasante/liquid-glass</code> 0.1.1. Menu: <a href="https://github.com/romastefale/liquid-glass2">liquid-glass2</a> (MIT, @ybouane), pacote{" "}
-                <code>@ybouane/liquidglass</code> 1.0.3. Fotos: Wikimedia Commons, créditos e licenças em{" "}
+                <code>@samasante/liquid-glass</code> 0.1.1. Fotos: Wikimedia Commons, créditos e licenças em{" "}
                 <a href={CREDITS_URL}>CREDITS.md</a>.
               </span>
             </div>

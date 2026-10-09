@@ -8,7 +8,6 @@ Esta pasta descreve **como o projeto foi construído e por quê**. Ela é escrit
 | **Páginas** | [Amostra](https://romastefale.github.io/HTML/liquid-glass-sample.html) · [Painel](https://romastefale.github.io/HTML/painel.html) · [Galeria](https://romastefale.github.io/HTML/galeria.html) · [Contrato de design](https://romastefale.github.io/HTML/contrato-design.html) · [Arquitetura e operação](https://romastefale.github.io/HTML/contrato-arquitetura.html) |
 | **Repositório** | [`romastefale/HTML`](https://github.com/romastefale/HTML) |
 | **Biblioteca de vidro** | [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, idêntica ao fork [`romastefale/liquid-glass`](https://github.com/romastefale/liquid-glass) no commit `4e7b769` |
-| **Vidro do menu** (branch `main-alt`) | [`@ybouane/liquidglass`](https://www.npmjs.com/package/@ybouane/liquidglass) 1.0.3, idêntica ao fork [`romastefale/liquid-glass2`](https://github.com/romastefale/liquid-glass2) no commit `59af227` |
 | **Estado descrito** | PR #15 (`lentes-e-foco`, em revisão), que parte de `4748463` (merge do PR #14) |
 
 ## Resumo do projeto

@@ -2,7 +2,7 @@
 
 Site: https://romastefale.github.io/HTML/
 
-App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. Na branch `main-alt`, o vidro do menu do topo é o da biblioteca [`@ybouane/liquidglass`](https://www.npmjs.com/package/@ybouane/liquidglass) 1.0.3, idêntica ao fork [romastefale/liquid-glass2](https://github.com/romastefale/liquid-glass2) no commit `59af227` (valores em `vidro.ini`). É um portal de seis páginas em pt-BR:
+App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. O menu do topo também usa o `<Glass>` dessa biblioteca, com os valores em [`vidro.ini`](vidro.ini). É um portal de seis páginas em pt-BR:
 
 | Página | Endereço | O que mostra |
 |---|---|---|
@@ -36,7 +36,7 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 
 - `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
 - `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰).
-- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa), com o vidro do `liquid-glass2`; ele também renderiza o fundo da página e a faixa de cima, que o vidro refrata.
+- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa), com o `<Glass>` material (valores em `vidro.ini`).
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
@@ -45,7 +45,7 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 - `src/styles/global.css`: o fundo orgânico (`src/assets/fundo-*.svg`, gerados por `scripts/make-organic-bg.py`), as camadas de borda, a hairline, as tintas e o foco.
 - `public/img/`: as fotos, as variantes AVIF/WebP (`r/`) e o `CREDITS.md`. As variantes são geradas por `scripts/make-responsive-images.py`.
 
-A biblioteca `@samasante/liquid-glass` fica num chunk próprio, carregado só pela amostra, pelo painel e pela galeria; a do menu (`@ybouane/liquidglass`) vai em todas as páginas. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.
+A biblioteca `@samasante/liquid-glass` vai no chunk compartilhado, em todas as páginas, porque o menu usa o `<Glass>`. O renderizador de diagramas (mermaid) só é baixado quando alguém pede para desenhar um diagrama.
 
 ```bash
 pnpm install

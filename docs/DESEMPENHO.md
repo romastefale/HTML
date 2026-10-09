@@ -88,7 +88,7 @@ No `<Glass>` que fica, o filtro também NÃO DEVE ter passes que não mudam nada
 
 Módulos compartilhados DEVEM importar só **tipos** da biblioteca (`import type`). O valor só é importado nas páginas com refração (`Sample.tsx`, `Painel.tsx`, `Galeria.tsx`), em `GlassPill.tsx` e em `components/examples/*`. Com três páginas usando a biblioteca, o Rollup a separa num chunk próprio, `dist-*.js` (49,35 kB, ou 16,60 kB gz), que só a amostra, o painel e a galeria baixam. O Início e os contratos não o baixam. O mermaid das páginas de contrato é um `import()` dinâmico: não entra no carregamento inicial nem em `modulepreload`.
 
-O vidro do menu (`@ybouane/liquidglass`, branch `main-alt`) é a exceção: ele está no `SiteHeader`, que toda página usa, então vai no chunk compartilhado (`Surfaces-*.js`) e todas as páginas o baixam (§3.5).
+O menu do topo é a exceção: o `SiteHeader`, que toda página usa, importa o `<Glass>` (o vidro da pílula, dos botões e da lista ☰, DESIGN-CONTRATO D9.1). A biblioteca vai no chunk compartilhado (`Surfaces-*.js`) e todas as páginas a baixam (§3.5).
 
 Ao criar uma página nova, confira no `pnpm build` (e nos `<script>`/`modulepreload` do HTML gerado em `dist/`) quais chunks ela carrega.
 
@@ -239,42 +239,23 @@ As variações de TBT (10–20 ms) estão dentro do ruído entre execuções (no
 
   React: 121 commits por arrasto antes, 0 depois; no Chromium, o tempo de script do arrasto caiu de 53 para 16 ms (iPhone emulado) e de 83 para 27 ms (desktop). O maior ganho no WebKit vem do recorte da cópia: antes, a fonte do filtro era a foto inteira ampliada 1,8× (≈700×470 CSS px, ×3 no iPhone), e o WebKit a rasterizava a cada quadro e ainda a reduzia (a lupa ficava mais borrada); agora é a lupa mais 40px de cada lado. No Chromium a lupa parada ficou igual à de antes (84 pixels com diferença acima de 8/255, na borda); no WebKit ela ficou mais nítida.
 
-### 3.5 Medições da branch `main-alt` (vidro do menu do `liquid-glass2`)
+### 3.5 Medições do menu com o `<Glass>`
 
-Medido com Playwright: Chromium headless, iPhone 15 emulado, WebGL por software (SwiftShader), `dist/` local servido pelo `vite preview`; `main` e `main-alt` na mesma máquina e na mesma sessão. Não é Lighthouse: os números servem para comparar as duas branches, não como valor absoluto.
+`pnpm build` local; soma dos chunks JS de cada página, em gzip. O chunk compartilhado (`Surfaces-*.js`) tem 88 KB gz, com a biblioteca dentro.
 
-**JS (gzip, soma dos chunks de cada página):** o chunk compartilhado passou de 74,68 para 91,13 kB gz (+16,45 kB: a biblioteca com o `html-to-image` embutido).
-
-| Página | `main` | `main-alt` | Orçamento (§3) |
+| Página | PR #15 | Menu com o `<Glass>` | Orçamento (§3) |
 |---|---|---|---|
-| Início | 76 KB | **94 KB** | ≤ 80 KB: **estoura** |
-| Amostra | 95 KB | **113 KB** | ≤ 100 KB: **estoura** |
-| Painel | 102 KB | **120 KB** | ≤ 110 KB: **estoura** |
-| Galeria | 98 KB | **116 KB** | ≤ 110 KB: **estoura** |
-| Contrato de design | 104 KB | 122 KB | ≤ 130 KB |
-| Arquitetura e operação | 117 KB | **135 KB** | ≤ 130 KB: **estoura** |
+| Início | 76 KB | **90 KB** | ≤ 80 KB: **estoura** |
+| Amostra | 95 KB | 93 KB | ≤ 100 KB |
+| Painel | 102 KB | 99 KB | ≤ 110 KB |
+| Galeria | 98 KB | 96 KB | ≤ 110 KB |
+| Contrato de design | 104 KB | 119 KB | ≤ 130 KB |
+| Arquitetura e operação | 117 KB | **133 KB** | ≤ 130 KB: **estoura** |
 
-**Main thread** (soma das tarefas longas até ~1,5 s depois de o vidro ficar pronto; entre parênteses, a maior):
-
-| Página | `main` | `main-alt` | Até o vidro ficar pronto | Troca de tema (novo `init`, rolado 700px) |
-|---|---|---|---|---|
-| Início | 67 ms (67) | 855 ms (329) | ~1,3 s | ~0,8 s |
-| Amostra | 210 ms (210) | 1198 ms (389) | ~2,3 s | ~1,1 s |
-| Painel | 59 ms (59) | 1143 ms (425) | ~1,5 s | ~1,4 s |
-| Galeria | 69 ms (69) | 1230 ms (354) | ~1,7 s | ~1,0 s |
-| Contrato de design | 0 ms | 2578 ms (677) | ~2,0–2,3 s | **~11,5 s** |
-| Arquitetura e operação | 0 ms | 5120 ms (1396) | ~3,0–5,0 s | **~25,9 s** |
-
-- A causa é o método da biblioteca: ela rasteriza com `html-to-image` cada filho da raiz que encosta no vidro, **inteiro**. O `<main>` das páginas de contrato tem de ~13.500 a ~39.000 px de altura, e é clonado com os estilos de cada elemento e desenhado num canvas desse tamanho.
-- Quem decidir levar a `main-alt` para a `main` DEVE justificar o estouro do orçamento no PR (regra do §3).
+- Início e Arquitetura passam do orçamento porque passaram a baixar a biblioteca (P3). Na amostra, no painel e na galeria ela já vinha; lá o total caiu um pouco, porque o chunk próprio dela deixou de existir.
+- Quem levar esta mudança para a `main` DEVE justificar o estouro no PR (regra do §3).
 
 ## 4. Limites conhecidos (custo do próprio design)
-
-- **O vidro do menu (`main-alt`).** O custo do §3.5 cresce com a altura da página e se repete a cada troca de tema. Além disso:
-  - a biblioteca só refaz a captura de um filho da raiz quando o **tamanho** dele muda; uma mudança de conteúdo do mesmo tamanho (por exemplo, o texto da hora e do clima no Painel ao trocar o período) aparece na pílula com a imagem antiga até a próxima mudança de tamanho, troca de tema ou `resize`. `<img>`, `<canvas>` e `<video>` são desenhados direto e ficam sempre atuais;
-  - cada mudança de altura de um filho da raiz refaz a captura dele inteira. Nas páginas de contrato, cada parte do documento que monta depois (P6) aumenta a altura do `<main>` e dispara uma nova captura; numa medição, as partes do documento de arquitetura levaram ~42 s para terminar de montar (em outra, ~3,3 s; na `main`, ~0,8 s);
-  - com o main thread ocupado pelas capturas, a pesquisa nas páginas de contrato respondeu em ~2,3–3,4 s (na `main`, ~0,2–0,4 s);
-  - os navegadores limitam o tamanho de um canvas, e a captura do `<main>` mais alto medido no iPhone emulado tem ~39.000 px × 3 de densidade. No Chromium ela funcionou; **no Safari/WebKit não foi verificado** (não havia WebKit no ambiente da medição).
 
 - **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 17 primitivas SVG (19 até o PR #14) sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.
   - Parada no topo da amostra: ~11–12 fps em render por software no PR #14; 13,7 fps no PR #15 (iPhone emulado no Chromium, §3.4). Com movimento reduzido, 60 fps.

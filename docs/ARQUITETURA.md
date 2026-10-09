@@ -1,6 +1,6 @@
 # Arquitetura
 
-> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11), atualizado até o PR #15 (`lentes-e-foco`, a partir de `4748463`, merge do PR #14) e, na branch `main-alt`, com o vidro do menu do `liquid-glass2` (§4.1, A8.1). As versões vêm de `package.json` e `pnpm-lock.yaml`.
+> Estado descrito: PR #12 (`novas-paginas-e-contrato`, a partir de `5838a71`, merge do PR #11), atualizado até o PR #15 (`lentes-e-foco`, a partir de `4748463`, merge do PR #14). As versões vêm de `package.json` e `pnpm-lock.yaml`.
 
 **Prioridade do projeto (decisão do usuário, PR #15): a translucidez e o vídeo são o foco.**
 
@@ -14,7 +14,6 @@
 | UI | `react` | `^19.2.0` | **19.3.0** |
 | UI | `react-dom` | `^19.2.0` | **19.3.0** |
 | Vidro | `@samasante/liquid-glass` | `0.1.1` (exato) | **0.1.1** |
-| Vidro do menu | `@ybouane/liquidglass` | `1.0.3` (exato) | **1.0.3** (o fork `romastefale/liquid-glass2`; `postinstall` em `pnpm.ignoredBuiltDependencies`, A8.1) |
 | Build | `vite` | `^8.0.0` | **8.3.1** |
 | Build | `@vitejs/plugin-react` | `^6.0.0` | **6.1.1** |
 | Tipos | `typescript` | `^5.7.0` | **5.9.3** |
@@ -66,9 +65,9 @@ HTML/
     ├── contrato-design.tsx · contrato-arquitetura.tsx   # cada um monta a sua página em #root
     ├── docs.d.ts                 # tipo do import *.md?doc
     ├── assets/
-    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada; data URL no <img class="page-bg"> do SiteHeader)
+    │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada, vira data URL no CSS)
     ├── components/
-    │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), vidro do liquid-glass2; também o fundo e a faixa de cima
+    │   ├── SiteHeader.tsx/.css   # menu flutuante (☰, seções, tema, lupa), <Glass> material; valores em vidro.ini
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
     │   ├── Frost.tsx             # superfície fosca em CSS puro (blur + saturate)
     │   ├── GlassPill.tsx         # botão de vidro: <Glass> no Blink, <Frost> nos demais
@@ -140,9 +139,9 @@ Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` i
 
 | Arquivo | Bruto | gzip | Conteúdo | Carregado por |
 |---|---|---|---|---|
-| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,14 kB | 91,13 kB | compartilhado: React, react-dom, SiteHeader, **`@ybouane/liquidglass`** (vidro do menu, com o `html-to-image` embutido), PageSearch, Frost, Surfaces, `pages.ts` e tema. Medido na `main-alt`; antes dela, 237,35 kB / 74,68 kB | todas |
+| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,09 kB | 88,02 kB | compartilhado: React, react-dom, SiteHeader, **`@samasante/liquid-glass`** (desde que o menu usa o `<Glass>`), PageSearch, Frost, Surfaces, `pages.ts` e tema. Medido com o menu no `<Glass>` | todas |
 | `assets/index-*.js` | 7,13 kB | 2,73 kB | portal | Início |
-| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`** | Amostra, Painel e Galeria |
+| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`**; com o menu no `<Glass>`, ela foi para o chunk compartilhado | Amostra, Painel e Galeria |
 | `assets/sample-*.js` | 14,40 kB | 5,35 kB | amostra | Amostra |
 | `assets/painel-*.js` | 34,70 kB | 11,11 kB | painel, com `GlassSwitch` e `GlassSlider` | Painel |
 | `assets/galeria-*.js` | 19,12 kB | 7,18 kB | galeria | Galeria |
@@ -199,12 +198,12 @@ flowchart TD
   HEADER --> NAV["lib/pages.ts · PAGES"]
   HEADER --> SEARCH["components/PageSearch.tsx"]
   HEADER --> THEME["lib/theme.ts · useTheme"]
-  HEADER --> FROST["components/Frost.tsx"]
-  HEADER --> LG2[("@ybouane/liquidglass<br/>vidro da pílula")]
+  HEADER --> LIB
+  HEADER --> INI[("vidro.ini")]
   HOME --> SURF["components/Surfaces.tsx<br/>GlassPanel · GlassCaption · Picture"]
-  SURF --> FROST
+  SURF --> FROST["components/Frost.tsx"]
 
-  SAMPLE --> LIB[("@samasante/liquid-glass<br/>chunk próprio")]
+  SAMPLE --> LIB[("@samasante/liquid-glass<br/>chunk compartilhado")]
   PAINEL --> LIB
   PAINEL --> EX["components/examples<br/>GlassSwitch · GlassSlider"]
   EX --> LIB
@@ -223,20 +222,16 @@ flowchart TD
 
 As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta página"` e `searchScope = "conteudo"`. Desde o PR #13, a pílula tem, da esquerda para a direita:
 
-1. o **botão ☰** (`button.sh-pages-btn`, `aria-expanded`, `aria-controls`), na ponta esquerda, em toda página;
+1. o **botão ☰** (`aria-expanded`, `aria-controls`), na ponta esquerda, em toda página;
 2. as **seções da própria página**, passadas em `items` por cada página: links `#…`, que rolam dentro dela e seguem o scroll-spy. Só elas ficam na pílula;
 3. o botão de tema e a lupa.
 
-O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liquid-glass2`, filho direto da raiz, sempre no DOM e mostrado com `data-open`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
+O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre no DOM e mostrado com `data-open` (`inert` quando fechado), posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve como filhos da raiz do React (`#root`): `<img class="page-bg">` (a imagem do modo) e `<div class="page-fade-top">`, o botão ☰, a pílula (`<header class="site-header">`), a seleção (`.sh-indicator`), os botões de tema e lupa e a lista (`.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
+**O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro da `.sh-bar`, atrás dos links.
 
-```ts
-LiquidGlass.init({ root: pílula.parentElement, glassElements: [☰, pílula, seleção, tema, lupa, lista] });
-```
-
-- `data-config`: Os valores de cada vidro ficam em `vidro.ini`, na raiz do repositório (seções `[pilula]`, `[botoes]`, `[selecao]`, `[lista]`, um parâmetro por linha). Os valores entregues são os da demo do fork: pílula e lista ☰ = "Regular Glass" (`#glass-fp1`: `cornerRadius: 40, blurAmount: 0`, com `floating: false`); botões = "Button Mode" (`button: true, cornerRadius: 24`); seleção = `#glass-tab-indicator` (`cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25`); o resto, os padrões de `src/defaults.ts`.
-- Troca de tema: o `<img class="page-bg">` troca de `src` e o vidro é destruído e criado de novo depois de `decode()` (o `init` recaptura o texto com as cores do modo; `markChanged()` só refaz o shader). Rolagem: `markChanged()` a cada evento de `scroll`, porque a biblioteca não redesenha sozinha um vidro fixo quando a página rola.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`). Cada seção (`[pilula]`, `[botoes]`, `[lista]`) tem as optics da biblioteca, um parâmetro por linha, e `tintClaro` / `tintEscuro` (o `background` translúcido do `<Glass>` em cada modo); `[selecao]` tem só a tinta. Vírgula decimal é aceita.
+- Entregues: as optics são o `MATERIAL_OPTICS` do fork, com `specular = 0` (sem o hairline e o realce de cima, `src/GlassMaterial.tsx`, `edgeShadow`) e `sheen = 0`, `glow = 0` (P2 do DESEMPENHO); as tintas são as cores do cabeçalho (`headerBg`) e dos chips (`chipBg`) da demo do fork, com alfa 0,4; a seleção usa `--sel-bg`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -254,7 +249,7 @@ Estado interno:
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
 | `pickerOpen` | mostra a lista de páginas (`data-open`, `inert` quando fechada). Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
 | `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
-| `active` → `.sh-indicator` | a seleção de vidro recebe a largura, a altura e o `transform` do link atual |
+| `active` → `.sh-indicator` | a pílula de seleção recebe a largura, a altura e o `transform` do link atual; não anima na primeira colocação |
 | `fade {start, end}` | degradê só no lado em que há mais links |
 | `pinned` (ref) | depois de um toque em um link, pausa o scroll-spy por 700 ms. O prazo se renova por 220 ms enquanto a página rola, para a seleção não voltar no meio da rolagem |
 
@@ -351,12 +346,10 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
   - O fork **não versiona `dist/`** (está no `.gitignore`) e não tem script `prepare`. Instalado via GitHub, o pacote viria vazio.
   - O `dist/` publicado no npm é **byte a byte idêntico** ao build do fork em `4e7b769`. Foi conferido no PR #4 e de novo ao escrever este documento: `cmp` de `dist/index.js` e `dist/index.d.ts` depois de `pnpm build` no fork. Ou seja, é o código do fork, com integridade fixada pelo lockfile.
   - O bundle vendorizado (PRs #1–#3) foi removido no PR #4.
-- **A8.1. O vidro do menu DEVE vir do npm** (`"@ybouane/liquidglass": "1.0.3"`, exato), não do GitHub.
-  O fork não versiona `dist/`. O pacote npm é idêntico ao fork em `59af227`: os 6 arquivos de `src/` são iguais, e `dist/index.js` e `dist/index.d.ts` são iguais (`cmp`) ao `npm ci && npm run build` do fork. O `postinstall` do pacote (`patch-package`) não tem o que aplicar no projeto que instala (o `html-to-image` já vem no `dist`) e fica em `pnpm.ignoredBuiltDependencies`.
 - **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
-  - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
+  - Só importam valores da biblioteca: `components/SiteHeader.tsx`, `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
 
-  *Por quê:* `import type` é apagado na compilação. Assim a biblioteca fica num chunk próprio (`dist-*.js`), baixado só pela amostra, pelo painel e pela galeria; o Início e os contratos não o carregam (PRs #9 e #12).
+  *Por quê:* `import type` é apagado na compilação. Até o menu usar o `<Glass>`, a biblioteca ficava num chunk próprio (`dist-*.js`), baixado só pela amostra, pelo painel e pela galeria (PRs #9 e #12). Com o `SiteHeader` importando o `<Glass>`, ela vai no chunk compartilhado e todas as páginas a baixam (DESEMPENHO P3 e §3.5).
 
 ### Modos da biblioteca usados
 
@@ -372,8 +365,8 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | `vidro.ini` `[pilula]` | todas |
-| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `#glass-btn-1` do fork | todas |
+| Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[pilula]`, `[lista]` | todas |
+| Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[botoes]` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
@@ -400,7 +393,7 @@ Contagem de `<Glass>` por página:
 | Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta | o `draw` do visor, só nessas condições |
 | Contratos | 0 | nenhum |
 
-Medido no DOM do build do PR #15, na amostra, com iPhone 15 emulado (na `main-alt` a pílula do menu deixou de ser `[data-frost]`: uma superfície a menos em cada motor):
+Medido no DOM do build atual, na amostra, com iPhone 15 emulado:
 
 | Motor | Superfícies `[data-frost]` | `backdrop-filter: url()` | `filter: url()` | `<filter>` SVG | mapas `data:` em `feImage` |
 |---|---|---|---|---|---|
