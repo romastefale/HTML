@@ -40,10 +40,8 @@ const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
   light: { blurAmount: 0.25, cornerRadius: 30 },
   dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
 };
-const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 };
-const INDICATOR_GLASS: Partial<GlassConfig> = {
-  cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25,
-};
+const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 24 };
+const INDICATOR_GLASS: Partial<GlassConfig> = { cornerRadius: 16, zRadius: 16, blurAmount: 0 };
 
 const EDGE = 12;
 
@@ -372,7 +370,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
                 href={it.href}
                 aria-current={i === active ? "location" : undefined}
                 onFocus={() => reveal(i, false)}
-                onClick={(e) => {
+                onClick={() => {
                   if (it.href.startsWith("#")) {
                     pin(700);
                     setActive(i);

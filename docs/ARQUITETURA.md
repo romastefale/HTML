@@ -236,7 +236,7 @@ LiquidGlass.init({ root: barra, glassElements: [☰, pílula, seleção, tema, l
 LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
 ```
 
-- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25 }` (`#glass-tab-indicator`). Como no `site/index.html` do fork.
+- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 24 }` (o exemplo "Button Mode" do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }`.
 - Troca de tema: a imagem de fundo troca de `src` e as duas instâncias recebem `markChanged()`.
 
 | Página | Seções na pílula |
@@ -374,7 +374,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
 | Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | "Frosted Panel" (claro) / "Dark Glass" (escuro) | todas |
-| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `#glass-btn-1` do fork | todas |
+| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `{ button: true, cornerRadius: 24 }` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
