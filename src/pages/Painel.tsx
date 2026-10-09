@@ -6,6 +6,7 @@ import { GlassPanel, Picture } from "../components/Surfaces";
 import { GlassSwitch } from "../components/examples/GlassSwitch";
 import { GlassSlider } from "../components/examples/GlassSlider";
 import { FROST, NO_SHINE } from "../lib/optics";
+import { otica, texto } from "../lib/vidro";
 import { useThemeName } from "../lib/theme";
 import { useReducedMotion } from "../lib/useMedia";
 import { useBox, useDeferredMount, useFilterResolution, useNear, useSectionSpy } from "../lib/device";
@@ -70,14 +71,7 @@ const WALLS: Record<Period, Wall> = {
 const EASE = cubicBezier(0.34, 1.36, 0.42, 1); // the library's spring curve (glassEase)
 
 // ── 1. Segmented control: the selection is an in-place lens ────────────────
-const SEG_LENS: Partial<GlassOptics> = {
-  mapSize: 256, clipToShape: true, softEdge: true,
-  // A short, wide lens: the bend is relative to the row, so a small strength
-  // (~3 px of displacement on a 32 px lens) magnifies the label without folding it.
-  strength: 0.022, depth: 0.5, curvature: 0.55, dispersion: 0.35,
-  bend: 0.15, bendWidth: 0.12, splay: 0, frost: 0, brightness: 0.05,
-  ...NO_SHINE, // uniform hairline = .seg-ring
-};
+const SEG_LENS = otica("segmentado");
 /** The segmented row's scene, inside the lens once it has mounted (P6). */
 const SegLens: React.FC<{
   on: boolean; optics: Partial<GlassOptics>; x: ReturnType<typeof glassValue>;
@@ -180,13 +174,8 @@ const Segmented: React.FC<{ value: Period; onChange: (p: Period) => void }> = ({
 };
 
 // ── 2. Widgets over the photo: <Glass refract> on a copy of the wallpaper ──
-const WIDGET_LENS: Partial<GlassOptics> = {
-  mapSize: 256, clipToShape: true, softEdge: true,
-  depth: 1, curvature: 0.5, dispersion: 0.6, strength: 0.17,
-  bend: 0.7, bendWidth: 0.12, frost: 4, brightness: 0.2,
-  ...NO_SHINE, // examples/GlassNotification.tsx: specular 1.3; the uniform CSS hairline instead
-};
-const WIDGET_LENS_DARK: Partial<GlassOptics> = { ...WIDGET_LENS, brightness: -0.12 };
+const WIDGET_LENS = otica("widget");
+const WIDGET_LENS_DARK = otica("widget", "widget-escuro");
 
 type Geo = { w: number; h: number; left: number; top: number; bw: number; bh: number; r: number };
 const RefractCard: React.FC<{
@@ -382,8 +371,8 @@ const ControlCenter: React.FC<{
   const on2 = useDeferredMount(near);
   const common = {
     scheme: (dark ? "dark" : "light") as "dark" | "light",
-    surface: dark ? "#221e4c" : "#f3eefb",
-    trackColor: dark ? "#3a3569" : "#d9d4e8",
+    surface: dark ? texto("controles", "superficieEscura") : texto("controles", "superficieClara"),
+    trackColor: dark ? texto("controles", "trilhoEscuro") : texto("controles", "trilhoClaro"),
     filterResolution: fr,
     lens: NO_SHINE,
   };
@@ -395,7 +384,7 @@ const ControlCenter: React.FC<{
           title="Widgets na tela"
           sub={showWidgets ? "Clima e lembrete visíveis" : "Ocultos"}
         >
-          {on1 ? <GlassSwitch {...common} checked={showWidgets} onCheckedChange={setShowWidgets} ariaLabel="Widgets na tela" activeColor="#30d158" /> : <StandIn on={showWidgets} color="#30d158" label="Widgets na tela" onToggle={setShowWidgets} />}
+          {on1 ? <GlassSwitch {...common} checked={showWidgets} onCheckedChange={setShowWidgets} ariaLabel="Widgets na tela" activeColor={texto("controles", "chave")} /> : <StandIn on={showWidgets} color={texto("controles", "chave")} label="Widgets na tela" onToggle={setShowWidgets} />}
         </Tile>
         <Tile
           wide
@@ -405,7 +394,7 @@ const ControlCenter: React.FC<{
           sub="Os widgets refratam a foto com o mesmo brilho"
         >
           <div className="cc-slider">
-            {on2 ? <GlassSlider {...common} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor="#0a84ff" name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
+            {on2 ? <GlassSlider {...common} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor={texto("controles", "controle")} name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
             <output className="cc-out" aria-live="polite">{bright}%</output>
           </div>
         </Tile>

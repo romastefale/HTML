@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Glass, type GlassOptics, type GlassSurfaceLens } from "@samasante/liquid-glass";
+import { Glass, type GlassSurfaceLens } from "@samasante/liquid-glass";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
 import { GlassCaption, GlassPanel, Picture, WIDTHS, asset } from "../components/Surfaces";
-import { FROST, NO_SHINE } from "../lib/optics";
+import { FROST } from "../lib/optics";
+import { otica } from "../lib/vidro";
 import { useReducedMotion } from "../lib/useMedia";
 import { softwareGL, useBox, useFilterResolution, useOnScreen } from "../lib/device";
 import "./Galeria.css";
@@ -70,17 +71,8 @@ const FADE_MS = 700;
 // ── 1. The viewer ─────────────────────────────────────────────────────────
 // examples/GlassVideoControls.tsx › PLAYER_OPTICS / SCRUB_OPTICS, with
 // specular 0 (the uniform hairline is the .vw-ring overlays instead).
-const PLAYER_OPTICS: Partial<GlassOptics> = {
-  mapSize: 512, clipToShape: true, softEdge: true,
-  strength: 0.16, depth: 0.2, curvature: 0.55, bend: 0.25, bendWidth: 0.08, dispersion: 0.15,
-  ...NO_SHINE,
-  frost: 3, brightness: 0,
-};
-const SCRUB_OPTICS: Partial<GlassOptics> = {
-  strength: 0.03, depth: 0.3, curvature: 0.25, dispersion: 0.2, bend: 0.05, bendWidth: 0.06,
-  ...NO_SHINE,
-  frost: 6, brightness: 0,
-};
+const PLAYER_OPTICS = otica("visor");
+const SCRUB_OPTICS = otica("trilha");
 const PLAY = 72; // CSS px
 const SKIP = 52;
 const GAP = 0.23; // skip centre offset (fraction of the width)
@@ -362,11 +354,7 @@ const LOUPE = 116;
 const ZOOM = 1.8;
 /** How far past the loupe the lens can sample (its displacement + edge), px. */
 const COPY_REACH = 40;
-const LOUPE_LENS: Partial<GlassOptics> = {
-  mapSize: 256, clipToShape: true, softEdge: true,
-  strength: 0.2, depth: 0.9, curvature: 0.6, dispersion: 0.3, bend: 0.5, bendWidth: 0.1,
-  frost: 0, brightness: 0.04, ...NO_SHINE,
-};
+const LOUPE_LENS = otica("lupa");
 
 /** The sheet's content, mounted with the photo (so its measurements start with it).
  *

@@ -186,28 +186,28 @@ code,kbd{overflow-wrap:anywhere}
 /* Tints: always TRANSLUCENT (the library rule: the background is the tint). */
 :root{--vidro-tint:var(--vidro-tint-claro)}
 :root[data-theme="dark"]{--vidro-tint:var(--vidro-tint-escuro)}
-.tint-ink{background:rgba(24,20,56,.46);color:#fff}
-.tint-blue{background:rgba(10,132,255,.52);color:#fff}
-.tint-red{background:rgba(248,113,113,.40);color:#1c1c1e}
-.tint-green{background:rgba(48,209,88,.36);color:#1c1c1e}
-.tint-white{background:var(--vidro-tint);color:#1c1c1e}
-.tint-soft{background:var(--vidro-tint);color:#1c1c1e}
-.tint-frost{background:var(--vidro-tint);color:#1c1c1e}
-.tint-control{background:var(--vidro-tint);color:#111}
+.tint-ink{background:var(--tinta-ink);color:var(--tinta-ink-texto)}
+.tint-blue{background:var(--tinta-blue);color:var(--tinta-blue-texto)}
+.tint-red{background:var(--tinta-red);color:var(--tinta-red-texto)}
+.tint-green{background:var(--tinta-green);color:var(--tinta-green-texto)}
+.tint-white{background:var(--vidro-tint);color:var(--tinta-texto)}
+.tint-soft{background:var(--vidro-tint);color:var(--tinta-texto)}
+.tint-frost{background:var(--vidro-tint);color:var(--tinta-texto)}
+.tint-control{background:var(--vidro-tint);color:var(--tinta-controle)}
 .tint-bar{background:var(--vidro-tint);color:var(--bar-text)}
-:root[data-theme="dark"] .tint-white{color:#f5f5f7}
-:root[data-theme="dark"] .tint-soft{color:#f5f5f7}
-:root[data-theme="dark"] .tint-frost{color:#f5f5f7}
-:root[data-theme="dark"] .tint-control{color:#f5f5f7}
+:root[data-theme="dark"] .tint-white{color:var(--tinta-texto-escuro)}
+:root[data-theme="dark"] .tint-soft{color:var(--tinta-texto-escuro)}
+:root[data-theme="dark"] .tint-frost{color:var(--tinta-texto-escuro)}
+:root[data-theme="dark"] .tint-control{color:var(--tinta-texto-escuro)}
 @media (prefers-reduced-transparency:reduce){
-  .tint-ink{background:rgba(24,20,56,.94)}
-  .tint-blue{background:rgba(10,110,230,.96)}
-  .tint-red,.tint-green,.tint-white,.tint-soft,.tint-frost,.tint-control{background:rgba(255,255,255,.95);color:#1c1c1e}
-  .tint-bar{background:#eef0f5}
-  :root[data-theme="dark"] .tint-bar{background:#060607}
+  .tint-ink{background:var(--tinta-ink-solida)}
+  .tint-blue{background:var(--tinta-blue-solida)}
+  .tint-red,.tint-green,.tint-white,.tint-soft,.tint-frost,.tint-control{background:var(--tinta-neutra-solida);color:var(--tinta-neutra-texto)}
+  .tint-bar{background:var(--tinta-barra-solida)}
+  :root[data-theme="dark"] .tint-bar{background:var(--tinta-barra-escura)}
 }
 @media (prefers-reduced-transparency:reduce){
-  :root[data-theme="dark"] :is(.tint-soft,.tint-frost,.tint-control){background:rgba(28,24,60,.96);color:#f5f5f7}
+  :root[data-theme="dark"] :is(.tint-soft,.tint-frost,.tint-control){background:var(--tinta-neutra-escura);color:var(--tinta-neutra-escura-texto)}
 }
 
 /* Pills (buttons/links inside a GlassPill: a material <Glass> in Blink,

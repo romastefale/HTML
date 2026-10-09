@@ -81,7 +81,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 ## 4. Fosco e tintas
 
-O fosco do site é um par só, na seção `[vidro]` do `vidro.ini`: `frost` e `saturate`. Eles viram `--vidro-frost`, `--vidro-saturate` e os mesmos campos de `FROST` e `CONTROL` (`src/lib/vidro.ts`, `src/lib/optics.ts`). O filtro é `blur(frost) saturate(saturate)`. A tinta do menu, das barras e dos cartões é `--vidro-tint`. As lentes de refração (`<Glass>` com cópia, no lugar ou em WebGL) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px. As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) também ficam fora do `--vidro-tint`, porque a cor é o significado delas; o desfoque e a saturação continuam os de `[vidro]`.
+O fosco do site é um par só, na seção `[vidro]` do `vidro.ini`: `frost` e `saturate`. Eles viram `--vidro-frost`, `--vidro-saturate` e os mesmos campos de `FROST` e `CONTROL`. O filtro é `blur(frost) saturate(saturate)`. A tinta do menu, das barras e dos cartões é `--vidro-tint`. Cada lente é uma seção do mesmo arquivo (`[titulo]`, `[faixa]`, `[segmentado]`, `[widget]`, `[widget-escuro]`, `[visor]`, `[trilha]`, `[lupa]`) e o código só lê `otica`. `[brilho]` entra em todas. As lentes de refração ficam fora do blur em px: nelas o `frost` da biblioteca é dividido pelo tamanho da lente. As tintas de cor estão em `[tinta]`; a cor é o significado delas, e o desfoque e a saturação continuam os de `[vidro]`.
 
 | Uso | Ótica | `backdrop-filter` |
 |---|---|---|
@@ -90,14 +90,14 @@ O fosco do site é um par só, na seção `[vidro]` do `vidro.ini`: `frost` e `s
 - **D8. A tinta DEVE ser o `background` translúcido do próprio elemento** (classe `tint-*`). É PROIBIDO tinta opaca, exceto em `prefers-reduced-transparency`.
   *Por quê:* é a regra da biblioteca ("the background is the tint"). O fosco só aparece se o fundo deixar passar luz.
 
-| Classe | Claro | Escuro | Transparência reduzida |
-|---|---|---|---|
-| `.tint-bar` (barra de abas, chips), `.tint-frost` (painéis), `.tint-control`, `.tint-soft`, `.tint-white` | `tintClaro` de `[vidro]` no `vidro.ini` (`--vidro-tint`) | `tintEscuro` de `[vidro]` | `.tint-bar`: `#eef0f5` / `#060607`; os outros: `rgba(255,255,255,.95)` / `rgba(28,24,60,.96)` |
-| `.tint-ink` (legendas) | `rgba(24,20,56,.46)`, texto `#fff` | igual | `rgba(24,20,56,.94)` |
-| `.tint-blue` | `rgba(10,132,255,.52)`, texto `#fff` | igual | `rgba(10,110,230,.96)` |
-| `.tint-red` / `.tint-green` | `rgba(248,113,113,.40)` / `rgba(48,209,88,.36)` | igual | `rgba(255,255,255,.95)` |
+| Classe | Chave em `[tinta]` | Transparência reduzida |
+|---|---|---|
+| `.tint-bar`, `.tint-frost`, `.tint-control`, `.tint-soft`, `.tint-white` | `tintClaro` / `tintEscuro` de `[vidro]` | `barraSolida` / `barraEscura` na barra; `neutraSolida` ou `neutraEscura` nos outros |
+| `.tint-ink` | `ink`, texto `inkTexto` | `inkSolida` |
+| `.tint-blue` | `blue`, texto `blueTexto` | `blueSolida` |
+| `.tint-red` / `.tint-green` | `red` / `green` | `neutraSolida` |
 
-As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm a cor própria, porque a cor é o significado delas; o desfoque e a saturação são os de `[vidro]`.
+As tintas de cor mantêm a cor da seção `[tinta]`, porque a cor é o significado delas; o desfoque e a saturação são os de `[vidro]`.
 
 **Raios:**
 

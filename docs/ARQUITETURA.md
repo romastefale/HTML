@@ -229,7 +229,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): fosco só (`<Frost>`), sempre
 
 **O vidro:** a pílula (`.site-header`), a lista e os três botões (`.sh-glass`, 34px) são o mesmo fosco, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1). A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só, na seção `[vidro]`: `frost`, `saturate`, `tintClaro` e `tintEscuro`. O fosco do site é `blur(frost) saturate(saturate)` (`FROST` e o par de `CONTROL`). A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema); `frost` e `saturate` como `--vidro-frost` e `--vidro-saturate`.
+- Valores: `vidro.ini`, na raiz. `src/lib/vidro.ts` lê o arquivo no build. Cada número aparece uma vez, na seção do elemento: `[vidro]` (fosco e tinta neutra), `[brilho]`, `[fosco]`, `[tinta]`, `[titulo]`, `[faixa]`, `[segmentado]`, `[widget]`, `[widget-escuro]`, `[visor]`, `[trilha]`, `[lupa]`, `[controles]`. O código pede a seção (`otica`, `texto`) e não repete o número.
 
 | Página | Seções na pílula |
 |---|---|
@@ -419,12 +419,12 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 ## 7. Óticas (`src/lib/optics.ts`)
 
 ```ts
-export const NO_SHINE = { specular: 0, sheen: 0, glow: 0 };
-export const CONTROL = { ...NO_SHINE, frost, saturate };                              // material padrão; o par de [vidro]
-export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate }; // o mesmo par, sem lente
+export const NO_SHINE = otica();                                          // [brilho]
+export const CONTROL = { ...NO_SHINE, frost, saturate };                   // [vidro]; a curva é a da biblioteca
+export const FROST   = { ...otica("fosco"), frost, saturate };             // [vidro] + [fosco]
 ```
 
-- **A14. Toda ótica DEVE espalhar `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`).** A hairline DEVE vir do CSS (`.glass::after`).
+- **A14. Toda ótica DEVE espalhar `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`).** `otica` faz isso. A hairline DEVE vir do CSS (`.glass::after`).
   *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também é o ganho do brilho direcional e do glow interno, mas a biblioteca só tira as duas primitivas deles do filtro quando `sheen` e `glow` também são 0 (`hasSpecular = glow > 0 || sheen > 0`). No WebGL, o brilho usa `u_sheen = specular`, que já é 0. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3 e D7.
 
 `frostFilter(optics)` em `Frost.tsx` converte a ótica em CSS: `blur(${frost}px) saturate(${saturate})`, com os dois números de `[vidro]` quando a ótica não os traz. Um termo é omitido quando o blur é 0 ou a saturação é 1.

@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
-import { NO_SHINE } from "../lib/optics";
+import { Glass, glassValue } from "@samasante/liquid-glass";
+import { otica } from "../lib/vidro";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, Picture, HOME_URL } from "../components/Surfaces";
 import { GlassPill } from "../components/GlassPill";
@@ -15,19 +15,8 @@ const NAV: NavItem[] = [
   { href: "#suporte", label: "Suporte" },
 ];
 
-// ── Hero: an IN-PLACE lens (geometry + children), the fork's docs hero
-//    (site/src/views/Docs.tsx › LiveHero): it bends its own children in every
-//    browser. Optics = HERO_LENS from that file.
-const HERO_LENS: Partial<GlassOptics> = {
-  mapSize: 512, clipToShape: true, softEdge: true,
-  strength: 0.06, depth: 0.7, curvature: 0.62, dispersion: 1,
-  bend: 0, bendWidth: 0.16, splay: 0, frost: 0.5, brightness: 0.06,
-  // specular 0 (docs: 1.3): no sheen/glow pooling at the top; the uniform
-  // hairline is the .hero-ring overlay instead. sheen 0 + glow 0 too: with a
-  // zero gain they add nothing, and at 0 the library skips the two specular
-  // filter primitives (hasSpecular = glow > 0 || sheen > 0, src/Glass.tsx).
-  ...NO_SHINE,
-};
+// Numbers: vidro.ini [titulo].
+const HERO_LENS = otica("titulo");
 const REST = { x: 0.3, y: 0.42 };
 const ORBIT = { cx: 0.5, cy: 0.5, rx: 0.26, ry: 0.14, speed: 0.5 };
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -257,12 +246,8 @@ const Hero: React.FC = () => {
 
 // ── Cards over the band: <Glass refract> on a position-matched copy of the
 //    band's gradient, crisp content on top (examples/GlassNotification.tsx).
-const PANEL_LENS: Partial<GlassOptics> = {
-  mapSize: 256, clipToShape: true, softEdge: true,
-  depth: 1, curvature: 0.5, dispersion: 0.6, strength: 0.17,
-  bend: 0.7, bendWidth: 0.12, frost: 3, brightness: 0.22,
-  ...NO_SHINE, // example: specular 1.3; uniform CSS hairline instead
-};
+// Numbers: vidro.ini [faixa].
+const PANEL_LENS = otica("faixa");
 const BAND_BG = "var(--band-bg)";
 
 type Geo = { w: number; h: number; left: number; top: number; bw: number; bh: number; r: number };
