@@ -67,7 +67,7 @@ HTML/
     ├── assets/
     │   └── fundo-claro.svg · fundo-escuro.svg  # fundo orgânico (~2,7 kB cada, vira data URL no CSS)
     ├── components/
-    │   ├── SiteHeader.tsx/.css   # menu: pílula e lista em fosco; lente nos 3 botões de 34px
+    │   ├── SiteHeader.tsx/.css   # menu em fosco (pílula, lista e 3 botões); valores em vidro.ini
     │   ├── PageSearch.tsx/.css   # pesquisa dentro da pílula (Highlight API + fallback)
     │   ├── Frost.tsx             # superfície fosca em CSS puro (blur + saturate)
     │   ├── GlassPill.tsx         # botão de vidro: <Glass> no Blink, <Frost> nos demais
@@ -138,9 +138,9 @@ Cada HTML de entrada tem, no `<head>`, um script inline de tema e um `<style>` i
 
 | Arquivo | Bruto | gzip | Conteúdo | Carregado por |
 |---|---|---|---|---|
-| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,09 kB | 88,02 kB | compartilhado: React, react-dom, SiteHeader, **`@samasante/liquid-glass`** (desde que o menu usa o `<Glass>`), PageSearch, Frost, Surfaces, `pages.ts` e tema. Medido com o menu no `<Glass>` | todas |
+| `assets/Surfaces-*.js` (era `pages-*.js`) | 289,09 kB | 88,02 kB | compartilhado: React, react-dom, SiteHeader, PageSearch, Frost, Surfaces, `pages.ts` e tema. O número é do menu no `<Glass>`; sem esse import a biblioteca sai deste chunk | todas |
 | `assets/index-*.js` | 7,13 kB | 2,73 kB | portal | Início |
-| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`**; com o menu no `<Glass>`, ela foi para o chunk compartilhado | Amostra, Painel e Galeria |
+| `assets/dist-*.js` (o maior) | 49,35 kB | 16,60 kB | **`@samasante/liquid-glass`**. O menu não a importa, então este chunk volta a ser só da amostra, do painel e da galeria | Amostra, Painel e Galeria |
 | `assets/sample-*.js` | 14,40 kB | 5,35 kB | amostra | Amostra |
 | `assets/painel-*.js` | 34,70 kB | 11,11 kB | painel, com `GlassSwitch` e `GlassSlider` | Painel |
 | `assets/galeria-*.js` | 19,12 kB | 7,18 kB | galeria | Galeria |
@@ -227,9 +227,9 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): fosco só (`<Frost>`), sempre no DOM e mostrado com `data-open` (`inert` quando fechado), posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** a pílula (`.site-header`) e a lista são fosco só, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1, `BROWSERS.md`). Os três botões (`.sh-glass`, 34px, com o `<button class="sh-btn">` dentro) são a lente: `<Glass>` material no Blink e o mesmo fosco nos outros motores. A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
+**O vidro:** a pílula (`.site-header`), a lista e os três botões (`.sh-glass`, 34px) são o mesmo fosco, `blur(frost) saturate(saturate)` sem `url(#…)` (DESIGN-CONTRATO D9.1). A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca. A pílula e a lista usam `frost` e `saturate`. Os três botões usam `[menu]` inteiro. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`) por `src/lib/vidro.ts`. Cada valor aparece uma vez só: `[vidro]` tem `frost`, `tintClaro` e `tintEscuro`, que valem para todo o vidro do site (menu e páginas); `[menu]` tem as outras optics da biblioteca. O menu usa `frost` e `saturate`. A tinta chega ao CSS como `--vidro-tint` (claro ou escuro pelo tema), e o `frost` como `--vidro-frost` e como o `frost` de `menuOptics`, `FROST`, `PANEL` e `CONTROL`.
 
 | Página | Seções na pílula |
 |---|---|
@@ -345,15 +345,15 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
   - O `dist/` publicado no npm é **byte a byte idêntico** ao build do fork em `4e7b769`. Foi conferido no PR #4 e de novo ao escrever este documento: `cmp` de `dist/index.js` e `dist/index.d.ts` depois de `pnpm build` no fork. Ou seja, é o código do fork, com integridade fixada pelo lockfile.
   - O bundle vendorizado (PRs #1–#3) foi removido no PR #4.
 - **A9. Só a API pública DEVE ser importada:** `Glass`, `glassValue`, `animateGlassValue`, `cubicBezier` e os tipos (`GlassOptics`, `GlassSurfaceLens`, …); os exemplos copiados usam também `GlassDiv` e os utilitários públicos de movimento.
-  - Só importam valores da biblioteca: `components/SiteHeader.tsx`, `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx` e `components/Surfaces.tsx`.
+  - Só importam valores da biblioteca: `pages/Sample.tsx`, `pages/Painel.tsx`, `pages/Galeria.tsx`, `components/GlassPill.tsx` e `components/examples/*`. Os demais arquivos **só podem importar tipos** (`import type`). É o caso de `lib/optics.ts`, `components/Frost.tsx`, `components/Surfaces.tsx` e `components/SiteHeader.tsx`.
 
-  *Por quê:* `import type` é apagado na compilação. Até o menu usar o `<Glass>`, a biblioteca ficava num chunk próprio (`dist-*.js`), baixado só pela amostra, pelo painel e pela galeria (PRs #9 e #12). Com o `SiteHeader` importando o `<Glass>`, ela vai no chunk compartilhado e todas as páginas a baixam (DESEMPENHO P3 e §3.5).
+  *Por quê:* `import type` é apagado na compilação. O menu não importa a biblioteca (D9.1), então ela fica num chunk próprio, baixado só pela amostra, pelo painel e pela galeria (DESEMPENHO P3).
 
 ### Modos da biblioteca usados
 
 | Modo (README do fork) | Como se ativa | Onde é usado aqui |
 |---|---|---|
-| **Material** (a caixa translúcida vira vidro) | `<Glass>` sem geometria | `GlassPill` **só no Blink** (5 botões na amostra); os 3 botões do menu, **só no Blink** |
+| **Material** (a caixa translúcida vira vidro) | `<Glass>` sem geometria | `GlassPill` **só no Blink** (5 botões na amostra) |
 | **No lugar** (a lente dobra os próprios filhos) | `size` + `center` + filhos | a lente do título da amostra; a seleção do segmentado do painel |
 | **Cópia** (`refract` + `behind`) | `refract={nó}` e `behind={cor}` | os 3 cartões da faixa da amostra; os 2 widgets do painel; a lupa da folha da galeria |
 | **Canvas + várias lentes** (WebGL) | `draw={fn}` + `lenses=[…]` | o visor da galeria (4 lentes num renderizador) |
@@ -365,7 +365,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 |---|---|---|---|---|
 | Pílula do menu | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
 | Lista ☰ | `SiteHeader` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
-| Botões ☰, tema e lupa | `.sh-glass` | **Blink:** `<Glass>` material. **Outros:** `<Frost>` | `vidro.ini` `[menu]` | todas |
+| Botões ☰, tema e lupa | `.sh-glass` | `<Frost>` | `blur(frost) saturate(saturate)` de `vidro.ini` | todas |
 | Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
@@ -386,11 +386,11 @@ Contagem de `<Glass>` por página:
 
 | Página | `<Glass>` | Laço contínuo |
 |---|---|---|
-| Início | 3 (os botões do menu, só no Blink) | nenhum |
-| Amostra | 4 fixos (a lente e 3 cartões), mais 5 no Chromium (os botões) e mais 3 do menu no Blink | a órbita da lente, só na tela |
-| Painel | 6 (seleção, 2 widgets, 2 chaves, 1 controle deslizante) e mais 3 do menu no Blink | nenhum: só anima ao interagir |
-| Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta, e mais 3 do menu no Blink | o `draw` do visor, só nessas condições |
-| Contratos | 3 (os botões do menu, só no Blink) | nenhum |
+| Início | 0 | nenhum |
+| Amostra | 4 fixos (a lente e 3 cartões), mais 5 no Chromium (os botões) | a órbita da lente, só na tela |
+| Painel | 6 (seleção, 2 widgets, 2 chaves, 1 controle deslizante) | nenhum: só anima ao interagir |
+| Galeria | 1 renderizador WebGL com 4 lentes (só tocando, na tela e com GPU) + 1 lupa quando a folha está aberta | o `draw` do visor, só nessas condições |
+| Contratos | 0 | nenhum |
 
 Medido no DOM do build da amostra (corpo da página, sem o menu), com iPhone 15 emulado:
 

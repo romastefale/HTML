@@ -136,9 +136,9 @@ As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm
 | Propriedade | Valor |
 |---|---|
 | Pílula | `.site-header`, fosco só (`<Frost>`): `position: fixed; z-index: 70`, `top: var(--bar-top)`, `left: var(--bar-l)`, `right: var(--bar-r)` (12px ou a safe area, centrada em no máximo 1040px), `height: 52px`, `border-radius: 26px`. Dentro dele, `<header class="sh-bar">`: `padding: 0 var(--bar-pad)` (9px; 8px em telas ≤ 760px), `gap: var(--pill-gap)` (6px). Os botões ocupam `.sh-slot` de 34px |
-| Vidro | A pílula e a lista são fosco só (D9.1): `blur(frost) saturate(saturate)`, com `frost` e `saturate` de `vidro.ini`. Os três botões de 34px são o `<Glass>` material, com `[menu]`. A tinta é `--vidro-tint` |
+| Vidro | Pílula, lista e os três botões são o mesmo fosco (D9.1): `blur(frost) saturate(saturate)`, com `frost` e `saturate` de `vidro.ini`. A tinta é `--vidro-tint` |
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
-| Botões ☰, tema e lupa | `.sh-glass`: um `<Glass>` material por botão no Blink, `<Frost>` nos outros motores, 34×34, raio 17px, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`); o `<button class="sh-btn">` preenche o vidro |
+| Botões ☰, tema e lupa | `.sh-glass`: o mesmo `<Frost>` da pílula, 34×34, raio 17px, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`); o `<button class="sh-btn">` preenche o vidro |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
 | Rolagem de borda | `.sh-band`: uma faixa fixa sem cor, só `backdrop-filter: blur(var(--vidro-frost))` com máscara em degradê, de 10px acima a 20px abaixo da pílula (nunca encosta na borda de cima, T11) |
 | Seleção | `.sh-indicator`: pílula de cor (a tinta de `[vidro]`, `--vidro-tint`), dentro do `<nav>` e atrás dos links (`position: absolute; z-index: 0`), por isso rola junto com eles; do tamanho do link atual (`offsetLeft`, `offsetTop`, `offsetWidth`, `offsetHeight`) e movida por `transform` só quando a seção ativa muda (`transition: transform .45s cubic-bezier(.65,0,.35,1)`). Não é um `<Glass>`: um `backdrop-filter` dentro de outro só enxerga o conteúdo do pai |
@@ -156,10 +156,8 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
-- **D9.1. A pílula e a lista ☰ DEVEM ser fosco só. Os três botões DEVEM ser a lente, porque cabem no conteúdo.**
-  - A pílula é uma barra de ponta a ponta e a lista é um painel largo. O `BROWSERS.md` do fork manda, para esse caso, não usar uma lente de deslocamento esticada: o tratamento é `backdrop-filter: blur(frost) saturate(saturate)`, sem `url(#…)`. Os números saem de `vidro.ini` (`[vidro] frost`, `[menu] saturate`) e quem pinta é `<Frost>`. A tinta continua o `background` translúcido.
-  - Os botões ☰, tema e lupa são discos de 34px. A lente fica neles: `<Glass>` material com `[menu]` no Blink, e o mesmo fosco nos outros motores (a curvatura ao vivo só existe no Blink).
-  *Por quê:* é o limite que o fork escreve em `BROWSERS.md › Known limitations`. Uma lente esticada na barra larga vira um oval e o filtro SVG pesa na GPU.
+- **D9.1. O menu inteiro DEVE usar o fosco da barra:** pílula, lista ☰ e os três botões. O filtro é `backdrop-filter: blur(frost) saturate(saturate)`, sem `url(#…)`. Os números saem de `vidro.ini` (`[vidro] frost`, `[menu] saturate`) e quem pinta é `<Frost>`. A tinta é o `background` translúcido, `--vidro-tint`.
+  *Por quê:* é o tratamento que o `BROWSERS.md` do fork pede para a barra. O mesmo par de filtros vale para os botões, com a mesma tinta, o mesmo raio e o mesmo tamanho.
 - **D10. O menu DEVE ser o mesmo em todas as páginas e em qualquer posição de rolagem:** a pílula não encolhe nem vira "…".
   *Por quê:* o menu que virava "…" com popover (PRs #3–#6) foi removido no PR #7.
 - **D11. O menu NÃO DEVE ter palavra de marca.** O menu contém só:
@@ -288,4 +286,4 @@ O azul que continua no site é preenchimento, não foco: o trilho ligado do swit
 | N28 | Fundo animado, gerado por JS ou do tamanho do documento (`background-attachment: fixed`, imagem esticada na página inteira) | Custa pintura a cada quadro ou rasteriza uma imagem de milhares de pixels; o iOS ignora o `fixed`. Use a camada fixa `html::before` de `100lvh` (D1, D2.2) | PR #14 |
 | N29 | Sombra, faixa ou fundo que escureça a primeira ou a última linha da viewport | A borda deixa de ser a cor da barra e a emenda aparece (D2.3) | PR #14 |
 | N30 | Lente de lupa que re-renderiza o React a cada movimento do dedo, ou `transform` no elemento filtrado | Um render por evento travava o arrasto no WebKit, e o Safari descarta o `filter: url()` de um elemento filtrado com `transform`. Guarde a posição num ref, escreva uma vez por quadro (`requestAnimationFrame`) e mova o invólucro | PR #15 |
-| N31 | Lente de deslocamento esticada na pílula ou na lista ☰ | Painel largo é fosco só. A lente fica nos três botões de 34px | `BROWSERS.md` |
+| N31 | Lente de deslocamento no menu (pílula, lista ou botões) | O menu inteiro é o fosco da barra: `blur` e `saturate`, sem `url()` | `BROWSERS.md` |

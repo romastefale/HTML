@@ -47,7 +47,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] A seleção inicial é a primeira seção da página ("Início" no Início, "Lente" na amostra, "Tela" no painel, "Visor" na galeria, "Visão geral" e "Arquitetura" nos contratos).
 - [ ] Ao tocar num link do meio (Fundo / Lugares), `aria-current` fica **só** nele durante toda a rolagem, e a pílula de seleção fica atrás dele.
 - [ ] A pílula do menu não muda de tamanho quando a seleção troca.
-- [ ] A pílula (`.site-header`) e a lista (`.sh-picker`) têm `data-frost` e `backdrop-filter` com `blur(` e `saturate(`, sem `url(`. No Blink, os três `.sh-glass` têm `data-liquid-glass="material"`. Nos outros motores, os três têm `data-frost`. Claro e escuro, sem erro no console.
+- [ ] A pílula (`.site-header`), a lista (`.sh-picker`) e os três `.sh-glass` têm `data-frost` e `backdrop-filter` com `blur(` e `saturate(`, sem `url(`. Claro e escuro, sem erro no console.
 - [ ] Tab percorre todos os links com o anel visível, e cada link focado aparece dentro da barra.
 
 ### Pesquisa
@@ -77,7 +77,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 ### Imagens e desempenho
 - [ ] Cada foto é um `<picture>`, e o `currentSrc` escolhido é AVIF (no iPhone 15: variantes de 1080 no Início e de 1440 na amostra), com no máximo 150 KB por foto.
 - [ ] As fotos fora da primeira dobra estão com `loading="lazy"`.
-- [ ] No `pnpm build`, `@samasante/liquid-glass` fica no chunk compartilhado (`Surfaces-*.js`), que todas as páginas carregam, porque os três botões do menu usam o `<Glass>` (confira os `<script>`/`modulepreload` em `dist/*.html`). Nenhum chunk do mermaid aparece nos HTML.
+- [ ] No `pnpm build`, `@samasante/liquid-glass` fica num chunk próprio, carregado pela amostra, pelo painel e pela galeria, e não pelo Início nem pelos contratos (confira os `<script>`/`modulepreload` em `dist/*.html`). Nenhum chunk do mermaid aparece nos HTML.
 - [ ] Os números de [DESEMPENHO.md §3](DESEMPENHO.md#3-orçamento-de-desempenho) continuam dentro do orçamento (Lighthouse mobile), ou o PR justifica o estouro.
 
 ### Lente (amostra)
