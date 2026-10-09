@@ -1,5 +1,3 @@
-import type { NavItem } from "../components/SiteHeader";
-
 const BASE = import.meta.env.BASE_URL;
 
 /** Every page of the portal (Vite entries in vite.config.ts), in menu order. */
@@ -39,13 +37,3 @@ export const PAGES: PageInfo[] = [
   },
 ];
 export const page = (key: PageKey) => PAGES.find((p) => p.key === key)!;
-
-/**
- * The menu of a page: only its own sections (they scroll inside the page and
- * follow the scroll-spy). The other pages are NOT in the pill's links: they
- * live in the page picker (☰, SiteHeader), and every page but the home has
- * a round Início button at the start of the pill (DESIGN-CONTRATO D12).
- */
-export function pageNav(_self: PageKey, sections: NavItem[]): NavItem[] {
-  return sections.map((s) => ({ ...s }));
-}

@@ -5,17 +5,16 @@ import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL, HOME_URL } from "../components/Surfaces";
 import { GlassPill } from "../components/GlassPill";
 import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
-import { pageNav } from "../lib/pages";
 import "./Sample.css";
 
 // Every section of the page, in order (the other pages are in the ☰ picker).
-const NAV: NavItem[] = pageNav("amostra", [
+const NAV: NavItem[] = [
   { href: "#topo", label: "Lente" },
   { href: "#componentes", label: "Componentes" },
   { href: "#lugares", label: "Lugares" },
   { href: "#suporte", label: "Suporte" },
   { href: "#creditos", label: "Créditos" },
-]);
+];
 
 // ── Hero: an IN-PLACE lens (geometry + children), the fork's docs hero
 //    (site/src/views/Docs.tsx › LiveHero): it bends its own children in every

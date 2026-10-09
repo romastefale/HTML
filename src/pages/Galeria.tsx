@@ -4,7 +4,6 @@ import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
 import { GlassCaption, GlassPanel, Picture, CREDITS_URL, WIDTHS, asset } from "../components/Surfaces";
 import { FROST, NO_SHINE, PANEL } from "../lib/optics";
-import { pageNav } from "../lib/pages";
 import { useReducedMotion } from "../lib/useMedia";
 import { softwareGL, useBox, useFilterResolution, useOnScreen } from "../lib/device";
 import "./Galeria.css";
@@ -30,7 +29,7 @@ const SECTIONS = [
   { href: "#como", label: "Como funciona" },
   { href: "#creditos", label: "Créditos" },
 ];
-const NAV: NavItem[] = pageNav("galeria", SECTIONS);
+const NAV: NavItem[] = SECTIONS;
 
 type Tag = "brasil" | "mundo" | "noite";
 interface Photo {

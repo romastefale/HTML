@@ -35,8 +35,8 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 ## Estrutura
 
 - `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
-- `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰) e `pageNav()`, que monta as seções do menu de cada página.
-- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa), com o vidro do `liquid-glass2`; ele também renderiza o fundo da página e a faixa de cima, que o vidro refrata.
+- `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰).
+- `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa), com o vidro do `liquid-glass2`.
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
