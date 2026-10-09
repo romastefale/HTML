@@ -229,15 +229,14 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): um elemento de vidro do `liquid-glass2`, filho direto da raiz, sempre no DOM e mostrado com `data-open`, posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro** da pílula e da lista ☰ é o `LiquidGlass` de `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve quatro filhos da raiz do React (`#root`), nesta ordem: `<img class="page-bg">`, `<div class="page-fade-top">`, `<header class="site-header">` (a pílula) e `<div class="sh-picker">` (a lista). Num `useEffect`:
+**O vidro:** `@ybouane/liquidglass` (DESIGN-CONTRATO D9.1). O `SiteHeader` devolve como filhos da raiz do React (`#root`): `<img class="page-bg">` e `<div class="page-fade-top">` de cada modo, o botão ☰, a pílula (`<header class="site-header">`), a seleção (`.sh-indicator`), os botões de tema e lupa e a lista (`.sh-picker`). Num `useEffect`, depois de `document.fonts.ready`:
 
 ```ts
-LiquidGlass.init({ root: pílula.parentElement, glassElements: [pílula, lista] });   // cleanup: destroy()
+LiquidGlass.init({ root: pílula.parentElement, glassElements: [☰, pílula, seleção, tema, lupa, lista] });
 ```
 
-- `data-config`: `BAR_GLASS.light` = "Frosted Panel" `{ blurAmount: 0.25, cornerRadius: 30 }`, `BAR_GLASS.dark` = "Dark Glass" `{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`.
-- Troca de tema: `destroy()` e `init()` de novo.
-- A biblioteca injeta um `<canvas>` como primeiro filho de cada elemento de vidro e põe `overflow: visible` neles.
+- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (`#glass-btn-1`). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25 }` (`#glass-tab-indicator`).
+- Troca de tema: `markChanged()` no fundo e na faixa de cima do modo novo.
 
 | Página | Seções na pílula |
 |---|---|
@@ -255,7 +254,7 @@ Estado interno:
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
 | `pickerOpen` | mostra a lista de páginas (`data-open`, `inert` quando fechada). Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
 | `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
-| `indicator {x, w}` e `animate` | posição e largura da pílula de seleção; não anima na primeira colocação |
+| `active` → `.sh-indicator` | a seleção de vidro recebe a largura, a altura e o `transform` do link atual |
 | `fade {start, end}` | degradê só no lado em que há mais links |
 | `pinned` (ref) | depois de um toque em um link, pausa o scroll-spy por 700 ms. O prazo se renova por 220 ms enquanto a página rola, para a seleção não voltar no meio da rolagem |
 
@@ -374,7 +373,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
 | Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | "Frosted Panel" (claro) / "Dark Glass" (escuro) | todas |
-| Botões redondos do menu (tema, lupa) | `button.sh-pill` | CSS próprio, sem `backdrop-filter` | tinta `--chip-bg` | todas |
+| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `#glass-btn-1` do fork | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |

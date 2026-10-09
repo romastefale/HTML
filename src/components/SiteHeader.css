@@ -1,7 +1,8 @@
-/* The top menu: the pill, its buttons, the selection and the page picker are
-   @ybouane/liquidglass glass elements (SiteHeader.tsx); each one's glass is
-   the canvas the library injects as its first child. */
 :root{
+    --bar-l:max(12px, env(safe-area-inset-left, 0px), calc((100% - 1040px) / 2));
+  --bar-r:max(12px, env(safe-area-inset-right, 0px), calc((100% - 1040px) / 2));
+  --bar-top:calc(12px + env(safe-area-inset-top, 0px));
+  --bar-pad:9px;
   --bar-text:#0a0b0d;
   --bar-sub:rgba(0,0,0,.6);
 }
@@ -9,21 +10,14 @@
   --bar-text:#fff;
   --bar-sub:rgba(255,255,255,.6);
 }
-/* The pill: fixed, centred between the side insets, as wide as its content
-   up to 1040px. */
 .site-header{
   --pill-gap:6px;
-  position:fixed;z-index:70;
-  top:calc(12px + env(safe-area-inset-top, 0px));
-  left:max(12px, env(safe-area-inset-left, 0px));
-  right:max(12px, env(safe-area-inset-right, 0px));
-  width:fit-content;max-width:1040px;margin:0 auto;
+  position:fixed;z-index:70;top:var(--bar-top);left:var(--bar-l);right:var(--bar-r);
   transform:translateY(var(--vv-top, 0px));
   display:flex;align-items:center;gap:var(--pill-gap);min-width:0;height:52px;
-  padding:0 9px;border-radius:26px;
+  padding:0 var(--bar-pad);border-radius:26px;
   color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
 }
-/* Room in the pill for each glass button (placed over it by SiteHeader). */
 .sh-slot{flex:0 0 auto;width:34px;height:34px}
 .sh-nav{
   position:relative;flex:0 1 auto;min-width:0;
@@ -49,33 +43,31 @@
 .sh-nav a:hover{opacity:.85}
 .sh-nav a[aria-current]{color:var(--bar-text);font-weight:600}
 .sh-actions{flex:0 0 auto;display:flex;align-items:center;gap:var(--pill-gap);margin-left:auto}
-/* The selection: #glass-tab-indicator of the fork (moved with a transform). */
 .sh-indicator{
   position:fixed;z-index:71;left:0;top:0;width:0;height:0;pointer-events:none;
   transform:translate(-9999px, -9999px);
   transition:transform .45s cubic-bezier(.65,0,.35,1);will-change:transform;
 }
-/* The ☰, theme and search buttons: .hero-btn of the fork (button: true). */
 .sh-btn{
-  position:fixed;z-index:72;left:0;top:0;width:34px;height:34px;padding:0;border:0;background:none;
+  position:fixed;z-index:72;top:calc(var(--bar-top) + 9px);width:34px;height:34px;padding:0;border:0;background:none;
+  transform:translateY(var(--vv-top, 0px));
   display:inline-flex;align-items:center;justify-content:center;
   color:var(--bar-text);cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
+.sh-btn-pages{left:calc(var(--bar-l) + var(--bar-pad))}
+.sh-btn-search{right:calc(var(--bar-r) + var(--bar-pad))}
+.sh-btn-theme{right:calc(var(--bar-r) + var(--bar-pad) + 34px + 6px)}
 .sh-btn .label{position:relative;z-index:2;pointer-events:none;display:flex;align-items:center}
 .sh-btn[data-hidden]{visibility:hidden}
 .site-header a:focus-visible,.sh-btn:focus-visible{outline:1.5px solid var(--bar-sub);outline-offset:-1.5px}
-/* Search mode: the pill becomes the search bar (PageSearch.css); the links
-   fade out but keep their room. */
 .sh-nav{transition:opacity .2s ease, transform .34s var(--glass-ease), visibility 0s}
 .site-header[data-mode="search"] .sh-nav{
   opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-12px);
   transition:opacity .16s ease, transform .3s var(--glass-ease), visibility 0s linear .16s;
 }
 .site-header[data-mode="search"],.page-search input:focus,.page-search input:focus-visible{outline:none}
-/* The page picker (☰): under the pill's left end (left set by SiteHeader),
-   always in the DOM, shown with data-open. */
 .sh-picker{
-  position:fixed;z-index:73;top:calc(72px + env(safe-area-inset-top, 0px));
+  position:fixed;z-index:73;top:calc(var(--bar-top) + 60px);left:var(--bar-l);
   width:max-content;max-width:calc(100% - 24px);min-width:180px;
   padding:6px;border-radius:22px;box-sizing:border-box;
   color:var(--bar-text);font-family:system-ui,-apple-system,sans-serif;
@@ -95,7 +87,7 @@
 .sh-picker a:focus-visible{outline:1.5px solid var(--bar-sub);outline-offset:-1.5px}
 .sh-pick-here{display:inline-flex;align-items:center;width:15px;height:15px;color:var(--bar-sub)}
 @media (max-width:760px){
-  .site-header{width:auto;padding:0 8px}
+  :root{--bar-pad:8px}
   .sh-nav a{padding:0 12px}
 }
 @media (prefers-reduced-motion:reduce){

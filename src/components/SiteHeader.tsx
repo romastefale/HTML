@@ -13,14 +13,10 @@ export interface NavItem {
   href: string;
   label: string;
   ariaLabel?: string;
-  /** Section items ("#id") follow the scroll (aria-current="location") and are
-   *  the only ones that get the selected pill; set false for an item that
-   *  isn't a section. Links to other pages live in the ☰ picker, not here. */
   spy?: boolean;
   onSelect?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-// The page-picker (☰) glyph and its check mark, in the stroke style of the theme icons.
 const Burger = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
     <path d="M4.5 7h15M4.5 12h15M4.5 17h15" />
@@ -31,7 +27,6 @@ const Check = () => (
     <path d="m5 12.5 4.4 4.4L19 7.3" />
   </svg>
 );
-// Theme icons: exactly the fork site's (site/src/components/SiteHeader.tsx).
 const Sun = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="4" />
@@ -44,9 +39,6 @@ const Moon = () => (
   </svg>
 );
 
-/** Glass configs of romastefale/liquid-glass2 (site/index.html). Panels
- *  (pill, page picker): "Frosted Panel" in light mode, "Dark Glass" in dark
- *  mode. Buttons: #glass-btn-1. Selection: #glass-tab-indicator. */
 const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
   light: { blurAmount: 0.25, cornerRadius: 30 },
   dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
@@ -56,15 +48,8 @@ const INDICATOR_GLASS: Partial<GlassConfig> = {
   cornerRadius: 16, zRadius: 16, blurAmount: 0, edgeHighlight: 0.2, shadowOpacity: 0.25,
 };
 
-const EDGE = 12; // px kept clear around an item scrolled into view
+const EDGE = 12;
 
-/**
- * The shared top menu (every page): a fixed pill with the ☰ page picker, the
- * page's section links (scrolling sideways when they don't fit; the current
- * one on a selected pill), the light/dark button and the magnifier, which
- * turns the pill into the page search. The pill and the picker are
- * @ybouane/liquidglass glass elements.
- */
 export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: string; searchScope?: string }> = ({
   items,
   current,
@@ -75,27 +60,21 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   const barRef = useRef<HTMLElement>(null);
   const indRef = useRef<HTMLDivElement>(null);
   const themeBtn = useRef<HTMLButtonElement>(null);
-  const slots = useRef<Record<"pages" | "theme" | "search", HTMLSpanElement | null>>({ pages: null, theme: null, search: null });
   const glass = useRef<LiquidGlass | null>(null);
   const searchBtn = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchId = `busca-${useId().replace(/:/g, "")}`;
   const [searchOpen, setSearchOpen] = useState(false);
-  // The page picker (☰): a glass popover under the pill listing every page.
   const pickerId = `paginas-${useId().replace(/:/g, "")}`;
   const [pickerOpen, setPickerOpen] = useState(false);
   const pickerBtn = useRef<HTMLButtonElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const [pickerLeft, setPickerLeft] = useState(12);
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [active, setActive] = useState(-1);
   const [fade, setFade] = useState({ start: false, end: false });
   const reduceMotion = useReducedMotion();
   const first = useRef(true);
-  // A tapped section stays selected through its own smooth scroll: the spy is
-  // paused until the page has been still for a moment (then the next real
-  // scroll takes over again).
   const pinned = useRef(false);
   const pinTimer = useRef(0);
   const pin = useCallback((ms: number) => {
@@ -105,7 +84,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   }, []);
   useEffect(() => () => clearTimeout(pinTimer.current), []);
 
-  // Scroll one link into view INSIDE the bar only (never the page).
   const reveal = useCallback(
     (i: number, smooth: boolean) => {
       const sc = navRef.current;
@@ -119,7 +97,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     [reduceMotion],
   );
 
-  // Fade only the side(s) that have more links.
   const syncFade = useCallback(() => {
     const sc = navRef.current;
     if (!sc) return;
@@ -136,8 +113,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     return () => ro.disconnect();
   }, [syncFade]);
 
-  // Shift + wheel scrolls the links sideways in every engine (Chromium does it
-  // natively; WebKit/Gecko builds don't always). Non-passive to own the event.
   useEffect(() => {
     const sc = navRef.current;
     if (!sc) return;
@@ -151,7 +126,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     return () => sc.removeEventListener("wheel", onWheel);
   }, []);
 
-  // Scroll-spy: the last section whose top has passed under the bar.
   useEffect(() => {
     const targets = items.map((it) =>
       it.spy !== false && it.href.startsWith("#") ? document.getElementById(it.href.slice(1)) : null,
@@ -170,7 +144,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       setActive(idx);
     };
     const onScroll = () => {
-      if (pinned.current) return pin(220); // still scrolling to a tapped section
+      if (pinned.current) return pin(220);
       if (!raf) raf = requestAnimationFrame(compute);
     };
     compute();
@@ -183,7 +157,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [items, pin]);
 
-  // Keep the current link visible in the bar: instantly on load, smoothly after.
   useLayoutEffect(() => {
     if (active < 0) return;
     reveal(active, !first.current);
@@ -191,20 +164,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   }, [active, reveal]);
 
 
-  // The glass buttons sit over their slots in the pill, and the selection
-  // glass over the current link (#glass-tab-indicator: sized and moved with
-  // a transform by JS).
   const placed = useRef(false);
   const layout = useCallback(() => {
-    const place = (el: HTMLElement | null, slot: HTMLElement | null) => {
-      if (!el || !slot) return;
-      const r = slot.getBoundingClientRect();
-      el.style.left = `${r.left}px`;
-      el.style.top = `${r.top}px`;
-    };
-    place(pickerBtn.current, slots.current.pages);
-    place(themeBtn.current, slots.current.theme);
-    place(searchBtn.current, slots.current.search);
     const ind = indRef.current;
     const nav = navRef.current;
     const a = active >= 0 ? linkRefs.current[active] : null;
@@ -242,8 +203,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [layout]);
 
-  // Open synchronously inside the tap (flushSync) so focus() still counts as
-  // user-initiated and iOS brings the keyboard up.
   const openSearch = () => {
     setPickerOpen(false);
     flushSync(() => setSearchOpen(true));
@@ -254,8 +213,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     if (refocus) searchBtn.current?.focus({ preventScroll: true });
   }, []);
 
-  // While open: Esc anywhere, or a tap/click outside the pill, closes it (a
-  // scroll gesture isn't a click, so reading the results is fine).
   useEffect(() => {
     if (!searchOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -278,9 +235,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     setPickerOpen(false);
     if (refocus) pickerBtn.current?.focus({ preventScroll: true });
   }, []);
-  // Open: focus moves to the current page's item. Esc (focus back on ☰), a tap
-  // outside the pill and picker, or focus leaving them closes it; ↑/↓, Home and
-  // End move between the items.
   useEffect(() => {
     if (!pickerOpen) return;
     const root = pickerRef.current;
@@ -315,23 +269,16 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       const to = e.relatedTarget as Node | null;
       if (to && !inside(to)) closePicker(false);
     };
-    // The picker sits under the pill's left end.
-    const place = () => setPickerLeft(barRef.current?.getBoundingClientRect().left ?? 12);
-    place();
     document.addEventListener("keydown", onKey);
     document.addEventListener("click", onClick);
-    addEventListener("resize", place);
     root?.addEventListener("focusout", onFocusOut);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("click", onClick);
-      removeEventListener("resize", place);
       root?.removeEventListener("focusout", onFocusOut);
     };
   }, [pickerOpen, closePicker]);
 
-  // With the on-screen keyboard up, iOS can pan the visual viewport inside the
-  // layout one; keep the menu (and the open field) pinned to what's visible.
   useEffect(() => {
     const vv = window.visualViewport;
     const el = document.documentElement;
@@ -350,9 +297,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     };
   }, [searchOpen, layout]);
 
-  // LiquidGlass.init, as in romastefale/liquid-glass2 (site/index.html): the
-  // glass elements are direct children of the React root; fonts are ready
-  // and the elements are sized before init.
   useEffect(() => {
     const bar = barRef.current;
     const root = bar?.parentElement;
@@ -372,11 +316,8 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       glass.current?.destroy();
       glass.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Theme: the visible background and fade swap (CSS display), and the glass
-  // is told with markChanged(), as the fork's background tabs do.
   useEffect(() => {
     const g = glass.current;
     if (!g) return;
@@ -388,8 +329,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
   const dark = theme === "dark";
   return (
     <>
-      {/* Root children the glass refracts: the background and the top fade of
-          each mode (the other mode's pair is display: none). */}
       <img className="page-bg page-bg-claro" src={fundoClaro} alt="" aria-hidden="true" />
       <img className="page-bg page-bg-escuro" src={fundoEscuro} alt="" aria-hidden="true" />
       <div className="page-fade-top page-fade-claro" aria-hidden="true" />
@@ -397,7 +336,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       <button
         ref={pickerBtn}
         type="button"
-        className="sh-btn"
+        className="sh-btn sh-btn-pages"
         onClick={() => (pickerOpen ? closePicker() : setPickerOpen(true))}
         aria-label={pickerOpen ? "Fechar lista de páginas" : "Abrir lista de páginas"}
         aria-expanded={pickerOpen}
@@ -417,12 +356,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         data-mode={searchOpen ? "search" : "menu"}
         data-config={JSON.stringify(BAR_GLASS[theme])}
       >
-        <span
-          className="sh-slot"
-          ref={(el) => {
-            slots.current.pages = el;
-          }}
-        />
+        <span className="sh-slot" />
         <nav
           ref={navRef}
           className="sh-nav"
@@ -444,15 +378,12 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
               onFocus={() => reveal(i, false)}
               onClick={(e) => {
                 it.onSelect?.(e);
-                // A section link is selected at once, before the page scrolls.
                 if (it.spy !== false && it.href.startsWith("#")) {
                   pin(700);
                   setActive(i);
                 }
               }}
             >
-              {/* data-text reserves the bold width: the pill never changes size
-                  when the current link changes. */}
               <span className="sh-label" data-text={it.label}>
                 {it.label}
               </span>
@@ -461,25 +392,15 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         </nav>
         <PageSearch open={searchOpen} id={searchId} scopeId={searchScope} inputRef={searchInput} onClose={closeSearch} />
         <div className="sh-actions">
-          <span
-            className="sh-slot"
-            ref={(el) => {
-              slots.current.theme = el;
-            }}
-          />
-          <span
-            className="sh-slot"
-            ref={(el) => {
-              slots.current.search = el;
-            }}
-          />
+          <span className="sh-slot" />
+          <span className="sh-slot" />
         </div>
       </header>
       <div ref={indRef} className="sh-indicator" aria-hidden="true" data-config={JSON.stringify(INDICATOR_GLASS)} />
       <button
         ref={themeBtn}
         type="button"
-        className="sh-btn"
+        className="sh-btn sh-btn-theme"
         onClick={toggle}
         aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
         title="Alternar modo claro / escuro"
@@ -492,7 +413,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       <button
         ref={searchBtn}
         type="button"
-        className="sh-btn"
+        className="sh-btn sh-btn-search"
         onClick={() => (searchOpen ? closeSearch() : openSearch())}
         aria-label={searchOpen ? "Fechar pesquisa" : "Pesquisar na página"}
         aria-expanded={searchOpen}
@@ -510,7 +431,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         className="sh-picker"
         data-open={pickerOpen || undefined}
         inert={!pickerOpen}
-        style={{ left: pickerLeft }}
         data-config={JSON.stringify(BAR_GLASS[theme])}
       >
         <nav aria-label="Páginas do site">
@@ -530,10 +450,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
                     }}
                   >
                     <span className="sh-pick-title">{p.pick}</span>
-                    {/* Not colour only: the current page is bold, on the selected
-                        pill, with a check (aria-current="page" for readers). */}
-                    {/* The check's slot is on every item, so the list keeps its width
-                        whichever page is current. */}
                     <span className="sh-pick-here">{here && <Check />}</span>
                   </a>
                 </li>

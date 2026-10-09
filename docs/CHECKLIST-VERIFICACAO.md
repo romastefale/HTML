@@ -45,7 +45,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 - [ ] Todo `href="#…"` da página tem um alvo com esse id (inclui os índices de chips dos documentos).
 - [ ] Os links rolam para o lado, e o degradê só aparece no lado em que há mais itens. Shift + roda funciona no Chromium e no WebKit.
 - [ ] A seleção inicial é a primeira seção da página ("Início" no Início, "Lente" na amostra, "Tela" no painel, "Visor" na galeria, "Visão geral" e "Arquitetura" nos contratos).
-- [ ] Ao tocar num link do meio (Fundo / Lugares), `aria-current` fica **só** nele durante toda a rolagem. A pílula de seleção coincide com o link (±1,5px) e fica visível.
+- [ ] Ao tocar num link do meio (Fundo / Lugares), `aria-current` fica **só** nele durante toda a rolagem, e a seleção de vidro fica sobre ele.
 - [ ] A pílula do menu não muda de tamanho quando a seleção troca.
 - [ ] O vidro do menu e da lista ☰ roda: `.site-header` e `.sh-picker` com um `<canvas>` como primeiro filho, em todas as páginas, no claro (Frosted Panel) e no escuro (Dark Glass), sem erro no console. Depois de trocar o tema, o vidro volta.
 - [ ] Tab percorre todos os links com o anel visível, e cada link focado aparece dentro da barra.
