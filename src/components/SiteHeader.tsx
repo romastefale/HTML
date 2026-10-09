@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState
 import { flushSync } from "react-dom";
 import { LiquidGlass, type GlassConfig } from "@ybouane/liquidglass";
 import { useReducedMotion } from "../lib/useMedia";
-import { useTheme, type ThemeName } from "../lib/theme";
+import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
 import fundoClaro from "../assets/fundo-claro.svg";
 import fundoEscuro from "../assets/fundo-escuro.svg";
@@ -36,11 +36,15 @@ const Moon = () => (
   </svg>
 );
 
-const BAR_GLASS: Record<ThemeName, Partial<GlassConfig>> = {
-  light: { blurAmount: 0.25, cornerRadius: 30 },
-  dark: { brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 },
+const BAR_GLASS: Partial<GlassConfig> = {
+  blurAmount: 0.3,
+  chromAberration: 0.2,
+  cornerRadius: 60,
+  zRadius: 60,
+  refraction: 1.2,
+  brightness: -0.2,
 };
-const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 24 };
+const BUTTON_GLASS: Partial<GlassConfig> = { button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 };
 const INDICATOR_GLASS: Partial<GlassConfig> = { cornerRadius: 16, zRadius: 16, blurAmount: 0 };
 
 const EDGE = 12;
@@ -365,7 +369,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           ref={barRef}
           className="site-header"
           data-mode={searchOpen ? "search" : "menu"}
-          data-config={JSON.stringify(BAR_GLASS[theme])}
+          data-config={JSON.stringify(BAR_GLASS)}
         >
           <span className="sh-slot" />
           <nav
@@ -441,7 +445,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
           ref={pickerRef}
           id={pickerId}
           className="sh-picker"
-          data-config={JSON.stringify(BAR_GLASS[theme])}
+          data-config={JSON.stringify(BAR_GLASS)}
         >
           <nav aria-label="Páginas do site">
             <ul>

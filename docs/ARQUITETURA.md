@@ -236,7 +236,7 @@ LiquidGlass.init({ root: barra, glassElements: [☰, pílula, seleção, tema, l
 LiquidGlass.init({ root: lista, glassElements: [listaDeVidro] });
 ```
 
-- `data-config`: Pílula e lista ☰: "Frosted Panel" (`{ blurAmount: 0.25, cornerRadius: 30 }`) no claro, "Dark Glass" (`{ brightness: -0.3, blurAmount: 0.25, cornerRadius: 50 }`) no escuro. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 24 }` (o exemplo "Button Mode" do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }`.
+- `data-config`: Pílula e lista ☰: `{ blurAmount: 0.3, chromAberration: 0.2, cornerRadius: 60, zRadius: 60, refraction: 1.2, brightness: -0.2 }` (o vidro do título `.hero-title` da demo do fork), nos dois modos. Botões ☰, tema e lupa: `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` (os botões `#glass-btn-1`/`#glass-btn-2` da demo do fork). Seleção: `{ cornerRadius: 16, zRadius: 16, blurAmount: 0 }`.
 - Fundo das raízes: `.sh-bg` tem o tamanho da viewport e fica na posição dela (`--root-x`, `--root-y`, `--vw`, gravadas por `alignBg`), como o `html::before`; na raiz da barra, `.sh-fade` repete o `body::before` (`--top-fade`).
 - Troca de tema: as duas instâncias são destruídas e criadas de novo (o `init` recaptura o texto com as cores do modo), depois de `decode()` da imagem nova.
 
@@ -374,8 +374,8 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 
 | Superfície | Componente | Implementação | Ótica / valores | Página |
 |---|---|---|---|---|
-| Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | "Frosted Panel" (claro) / "Dark Glass" (escuro) | todas |
-| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `{ button: true, cornerRadius: 24 }` | todas |
+| Pílula do menu | `SiteHeader` | `LiquidGlass` (`@ybouane/liquidglass`, WebGL), sem `<Frost>` | vidro do `.hero-title` da demo | todas |
+| Botões ☰, tema e lupa | `.sh-btn` | `LiquidGlass` (`button: true`) | `{ button: true, cornerRadius: 28, blurAmount: 0.3, brightness: -0.1 }` | todas |
 | Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
