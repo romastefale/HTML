@@ -1,0 +1,225 @@
+/* Shared look for both pages. Edges come from the glass itself (frost, tint),
+   one uniform, very thin, mostly transparent hairline (--rim-w / --rim, drawn
+   by .glass::after) and a soft float shadow.
+
+   ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
+   • The page background (html::before, a fixed, viewport-tall static SVG of
+     blurred organic colour fields) STARTS and ENDS on --page-edge, and the
+     canvas colour (body background-color, propagated) is --page-edge too (also
+     set inline in the HTML head, so it holds before this file loads and in the
+     rubber-band overscroll). Whether the browser shows live page pixels behind
+     its bars or its fallback tint, it's the same colour: the bars read as the page.
+   • One fixed fade at the top (body::before) takes the scrolling content from
+     transparent to solid --page-edge at the viewport's top edge; it sits above
+     the content and BELOW the menu (z 70), so that stays crisp. At the bottom
+     there is NO fixed fade (PR #18): body::after is in flow, after the last
+     content, and blends the page's end into solid --page-edge only when you
+     scroll all the way down. Gradient only, no background-color and
+     no backdrop-filter: at the edge their pixels are --page-edge, the same
+     colour Safari would pick up or show (docs/TELA-CHEIA-E-BARRAS.md T11).
+   • No fixed/sticky element with background-color or backdrop-filter touches
+     a viewport edge (Safari 26 samples those into its bars): the floating
+     menu (SiteHeader.css) is inset 12px under the safe area and from the
+     sides (it is also the search bar: the magnifier turns it into the field,
+     no separate panel).
+   • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
+     toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
+:root{
+  --page-edge:#8b82e6;
+  --page-edge-0:rgba(139,130,230,0); /* --page-edge, transparent: the fades end on it */
+  --page-bg:url("../assets/fundo-claro.svg");
+  /* The cards band's own smooth multi-colour field (the cards refract a copy). */
+  --band-bg:
+    radial-gradient(70% 90% at 0% 0%, #ffb3d9 0%, rgba(255,179,217,0) 70%),
+    radial-gradient(70% 90% at 100% 0%, #9ecbff 0%, rgba(158,203,255,0) 70%),
+    radial-gradient(70% 90% at 100% 100%, #c9a4ff 0%, rgba(201,164,255,0) 70%),
+    radial-gradient(70% 90% at 0% 100%, #8ff0d0 0%, rgba(143,240,208,0) 70%),
+    radial-gradient(50% 60% at 50% 50%, #ffe1a8 0%, rgba(255,225,168,0) 75%),
+    linear-gradient(135deg, #fbe3f1 0%, #e4dcff 100%);
+  --band-edge:#eadcf6;
+  --fade-top:64px;
+  --fade-end:88px; /* the in-flow end fade (body::after) */
+  --text:#1c1c1e;
+  --text-dim:#3a3a3c;
+  --faint:#5d5b6e;
+  --link:#0a6cff;
+  /* Keyboard focus: never blue (docs/DESIGN-CONTRATO.md N10). A neutral,
+     translucent ring in the text colour, like the selected pill's edge. */
+  --focus:rgba(28,28,30,.5);
+  --gutter-l:max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(20px, env(safe-area-inset-right, 0px));
+  --glass-float:0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08);
+  /* The one hairline on every glass edge: a single uniform colour all round
+     (no brighter top), very thin, mostly transparent. 0.5px on 2x+ screens
+     (= one device pixel), 1px on 1x. */
+  --rim-w:1px;
+  --rim:rgba(255,255,255,.18);
+  /* The library's own spring curve (glassEase in @samasante/liquid-glass). */
+  --glass-ease:cubic-bezier(.34,1.36,.42,1);
+}
+:root{color-scheme:light}
+/* Dark mode follows <html data-theme> (set before first paint by the inline
+   script in each HTML head; the toggle in the top bar flips it). */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page-edge:#1b1646;
+  --page-edge-0:rgba(27,22,70,0);
+  --page-bg:url("../assets/fundo-escuro.svg");
+  --text:#f5f5f7;
+  --text-dim:#d1d1d6;
+  --faint:#b3b0c8;
+  --link:#64d2ff;
+  --focus:rgba(245,245,247,.62);
+  --rim:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box}
+/* html has NO background, so body's background-color becomes the canvas
+   colour (it fills the overscroll too) and html::before paints above it. */
+html{
+  touch-action:pan-x pan-y;
+  scroll-padding-top:calc(84px + env(safe-area-inset-top, 0px));
+  scroll-padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+}
+body{
+  margin:0;
+  /* Text wraps on every page (PR #13): long words, URLs and paths break
+     instead of overflowing; code, which has no break points, can break anywhere. */
+  overflow-wrap:break-word;
+  min-height:100vh;
+  min-height:100dvh;
+  color:var(--text);
+  background-color:var(--page-edge);
+  /* system-ui first: SF Pro on Apple, Roboto/Segoe elsewhere, and it always
+     resolves, so no missing family is looked up (docs/DESEMPENHO.md P7). */
+  font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  touch-action:manipulation;
+}
+:root{--sel-bg:rgba(255,255,255,.9);--sel-shadow:0 1px 2px rgba(20,16,60,.08),0 2px 6px rgba(20,16,60,.08)}
+:root[data-theme="dark"]{--sel-bg:rgba(255,255,255,.16);--sel-shadow:0 1px 6px rgba(0,0,0,.28)}
+/* The page background: static, no animation, no JS. Fixed and one large
+   viewport tall (100lvh), so it's rasterised once and never resized when the
+   iPhone toolbars collapse; scrolling only moves the content over it. */
+html::before{
+  content:"";position:fixed;z-index:-1;left:0;right:0;top:0;height:100vh;height:100lvh;
+  pointer-events:none;
+  background:var(--page-bg) center/100% 100% no-repeat;
+}
+/* Edge fades over the scrolling content (see the header note). Solid through
+   the safe area, then an eased ramp to transparent.
+   --fade-under: how far each fade reaches PAST its viewport edge (off-screen when the fixed
+   layer already meets the glass). Safari 26 on iPhone lets the page scroll
+   under its translucent bottom toolbar, but position:fixed bottom:0 can end at
+   the small viewport, above that toolbar: content below the fade showed crisp
+   under the URL pill (PR #17). So the solid end colour runs on past the edge by
+   at least the toolbar's height (100lvh - 100svh) and never less than 120px. */
+:root{--fade-under:120px}
+@supports (height:100lvh){:root{--fade-under:max(120px, 100lvh - 100svh)}}
+body::before{
+  content:"";position:fixed;z-index:50;left:0;right:0;pointer-events:none;
+  top:calc(-1 * var(--fade-under));
+  height:calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top));
+  background:linear-gradient(180deg, var(--page-edge) 0, var(--page-edge) calc(var(--fade-under) + env(safe-area-inset-top, 0px)),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .3),
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(var(--fade-under) + env(safe-area-inset-top, 0px) + var(--fade-top) * .65),
+    var(--page-edge-0) 100%);
+}
+/* The end of the page (PR #18): in flow after the last content, not fixed, so
+   mid-page the content runs to the bottom of the screen with no overlay. It
+   eases from transparent to solid --page-edge, solid through the bottom safe
+   area and the last 24px; below it the canvas (body background) is the same
+   colour, so the Safari toolbar and the overscroll sit on solid chrome colour. */
+body::after{
+  content:"";display:block;pointer-events:none;
+  height:calc(var(--fade-end) + env(safe-area-inset-bottom, 0px));
+  background:linear-gradient(180deg, var(--page-edge-0) 0,
+    color-mix(in srgb, var(--page-edge) 30%, transparent) calc(var(--fade-end) * .3),
+    color-mix(in srgb, var(--page-edge) 72%, transparent) calc(var(--fade-end) * .55),
+    var(--page-edge) calc(var(--fade-end) - 24px), var(--page-edge) 100%);
+}
+a{color:inherit}
+/* <picture> is only a source picker: the <img> inside is what gets laid out. */
+picture{display:contents}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:10px}
+/* Over a photo (galeria viewer): white, the neutral that reads there. */
+:root{--focus-on-photo:rgba(255,255,255,.85)}
+code{font-family:ui-monospace,monospace;font-size:.9em} /* SF Mono in Safari; the default mono elsewhere (P7) */
+.skip{
+  position:absolute;left:12px;top:-60px;z-index:100;
+  padding:10px 14px;border-radius:12px;background:#111;color:#fff;text-decoration:none;
+}
+.skip:focus{top:calc(12px + env(safe-area-inset-top, 0px))}
+.noscript{
+  max-width:560px;margin:calc(40px + env(safe-area-inset-top, 0px)) auto;padding:22px 24px;border-radius:22px;
+  background:rgba(255,255,255,.55);box-shadow:var(--glass-float);color:#1c1c1e;
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+
+@media (min-resolution:2dppx){:root{--rim-w:.5px}}
+
+/* ── Glass surfaces: <Frost> (CSS frost) and <Glass> (@samasante/liquid-glass) ─
+   Every surface carries .glass. The library's edge layer is `specular`-driven and always pairs a brighter
+   1px top highlight with the all-round rim (src/GlassMaterial.tsx: .55·g on
+   top, .12·g all round), and `specular` is its only knob. So our optics set
+   specular: 0 (src/lib/optics.ts) and the hairline is drawn here, uniform, on
+   its OWN layer (::after, above the content, below nothing), the same way the
+   library keeps its edge "as its own inset layer so it never fights a
+   box-shadow": the float shadow stays on the element's box-shadow. The line
+   sits just OUTSIDE the edge; the one inset exception is the lens ring
+   (.hero-ring in Sample.css), since a box that clips its overflow would cut
+   an outside line. */
+.glass{box-shadow:var(--glass-float)}
+.glass::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  /* Just OUTSIDE the edge (spread follows the radius): there it reads against
+     the page in both schemes; inside, a white line vanishes on the light,
+     white-frosted fills. */
+  box-shadow:0 0 0 var(--rim-w) var(--rim);
+}
+
+code,kbd{overflow-wrap:anywhere}
+/* Flex and grid children may shrink below their content, so their text wraps. */
+:where(p, li, dd, dt, h1, h2, h3, h4, figcaption){min-width:0}
+
+/* Tints: always TRANSLUCENT (the library rule: the background is the tint). */
+:root{--vidro-tint:var(--vidro-tint-claro)}
+:root[data-theme="dark"]{--vidro-tint:var(--vidro-tint-escuro)}
+.tint-ink{background:rgba(24,20,56,.46);color:#fff}
+.tint-blue{background:rgba(10,132,255,.52);color:#fff}
+.tint-red{background:rgba(248,113,113,.40);color:#1c1c1e}
+.tint-green{background:rgba(48,209,88,.36);color:#1c1c1e}
+.tint-white{background:var(--vidro-tint);color:#1c1c1e}
+.tint-soft{background:var(--vidro-tint);color:#1c1c1e}
+.tint-frost{background:var(--vidro-tint);color:#1c1c1e}
+.tint-control{background:var(--vidro-tint);color:#111}
+.tint-bar{background:var(--vidro-tint);color:var(--bar-text)}
+:root[data-theme="dark"] .tint-white{color:#f5f5f7}
+:root[data-theme="dark"] .tint-soft{color:#f5f5f7}
+:root[data-theme="dark"] .tint-frost{color:#f5f5f7}
+:root[data-theme="dark"] .tint-control{color:#f5f5f7}
+@media (prefers-reduced-transparency:reduce){
+  .tint-ink{background:rgba(24,20,56,.94)}
+  .tint-blue{background:rgba(10,110,230,.96)}
+  .tint-red,.tint-green,.tint-white,.tint-soft,.tint-frost,.tint-control{background:rgba(255,255,255,.95);color:#1c1c1e}
+  .tint-bar{background:#eef0f5}
+  :root[data-theme="dark"] .tint-bar{background:#060607}
+}
+@media (prefers-reduced-transparency:reduce){
+  :root[data-theme="dark"] :is(.tint-soft,.tint-frost,.tint-control){background:rgba(28,24,60,.96);color:#f5f5f7}
+}
+
+/* Pills (buttons/links inside a GlassPill: a material <Glass> in Blink,
+   the same look as <Frost> elsewhere). */
+.pill{border-radius:999px}
+.pill .btn{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 22px;min-height:44px;
+  font:inherit;font-size:15.5px;font-weight:600;letter-spacing:-.1px;
+  color:inherit;text-decoration:none;border-radius:inherit;background:none;border:0;cursor:pointer;
+}
+.pill .btn:active{transform:scale(.975)}
+
+/* Glass caption pill over a photo. */
+.cap-pill{border-radius:16px;max-width:100%}
+.cap-pill a{color:inherit;text-underline-offset:2px}

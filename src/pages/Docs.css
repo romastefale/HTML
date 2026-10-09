@@ -1,0 +1,146 @@
+/* Contract pages: docs/*.md as headings over columns of frosted cards
+   (src/pages/Docs.tsx; the cards are built by scripts/vite-docs.ts). */
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.docs-main{
+  padding:calc(84px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(32px + env(safe-area-inset-bottom, 0px)) var(--gutter-l);
+  display:flex;flex-direction:column;gap:18px;
+}
+.docs-main > *{width:100%;max-width:880px;margin-left:auto;margin-right:auto}
+
+/* Hero: a skyline with the title on an ink-tinted glass panel over it. */
+.doc-hero{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:16/9;min-height:420px;
+  box-shadow:0 18px 44px rgba(20,10,60,.2),0 3px 8px rgba(20,10,60,.1);background:#1b1646}
+.doc-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.doc-hero-over{position:absolute;left:14px;right:14px;bottom:14px;max-width:620px}
+.doc-hero-over[data-at="top"]{top:14px;bottom:auto}
+.doc-hero-glass{border-radius:22px}
+.doc-hero-text{padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px}
+.doc-eyebrow{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.82}
+.doc-hero h1{margin:0;font-size:clamp(30px, 6vw, 46px);letter-spacing:-.035em;line-height:1.05}
+.doc-lead{margin:0;font-size:15.5px;line-height:1.45;opacity:.92}
+.doc-lead code{background:rgba(255,255,255,.16);padding:1px 6px;border-radius:6px}
+.doc-hero-credit{margin:2px 0 0;font-size:11.5px;opacity:.78}
+.doc-hero-credit a{color:inherit;text-underline-offset:2px}
+@media (max-width:700px){.doc-hero{aspect-ratio:auto;min-height:0;height:min(620px, calc(100svh - 120px))}}
+
+/* Skyline between documents, with a glass caption. */
+.doc-fig{position:relative;margin:0;border-radius:24px;overflow:hidden;aspect-ratio:16/9;
+  box-shadow:0 18px 40px rgba(20,10,60,.18),0 3px 8px rgba(20,10,60,.08);background:rgba(255,255,255,.2)}
+.doc-fig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.doc-fig figcaption{position:absolute;left:12px;right:12px;bottom:12px;display:flex}
+.doc-fig .cap-pill{border-radius:16px}
+.doc-fig .cap{display:flex;flex-direction:column;gap:1px;padding:9px 14px 10px}
+.doc-fig .cap strong{font-size:15px}
+.doc-fig .cap small{font-size:11.5px;opacity:.86}
+
+.doc-glass{border-radius:20px}
+.doc{padding:clamp(18px, 3vw, 26px) 0 0}
+.doc-src{margin:0 0 6px;font-size:12px;color:var(--faint)}
+.doc-src a{color:inherit}
+/* The document's sections as chips (a second, in-document menu). */
+.doc-toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px}
+.doc-toc a{
+  display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:16px;
+  font-size:13px;font-weight:500;text-decoration:none;color:var(--text-dim);
+  background:rgba(255,255,255,.5);box-shadow:0 1px 2px rgba(20,16,60,.08);
+}
+:root[data-theme="dark"] .doc-toc a{background:rgba(255,255,255,.08)}
+.doc-toc a:hover{color:var(--text)}
+.md-title{margin:0 0 12px;font-size:clamp(26px, 5vw, 34px);line-height:1.15;letter-spacing:-.03em}
+.md-title code{font-size:.8em}
+
+/* ── Markdown ───────────────────────────────────────────────────────────── */
+.md{font-size:15.5px;line-height:1.6;color:var(--text);overflow-wrap:anywhere}
+.md > :first-child > :first-child{margin-top:0}
+/* The cards (D29): the site's frosted panel (PANEL: blur 22px, saturate 1.4,
+   tint-frost, one uniform hairline from .glass::after), one radius, one padding
+   and one gap for all of them. Section headings (<h3>) sit between them, on the
+   page. Anchors land under the pill (scroll-padding). */
+.md-card{position:relative;margin:0 0 12px;padding:18px clamp(16px, 3.4vw, 24px);border-radius:20px;min-width:0;
+  -webkit-backdrop-filter:blur(var(--vidro-frost)) saturate(1.4);backdrop-filter:blur(var(--vidro-frost)) saturate(1.4)}
+.md-card > :last-child,.md-card > :last-child > :last-child{margin-bottom:0}
+.md-card > :first-child{margin-top:0}
+.md-card .md-h3,.md-card .md-h4{margin-top:0}
+/* A table or a diagram: the card is its frame; the table scrolls inside it. */
+.md-card-wide{padding:12px}
+.md-card-wide > .md-h3,.md-card-wide > .md-h4{margin:6px 8px 10px}
+.md-card-wide .md-table{margin:0;background:none}
+.md-card-wide .md-mermaid{margin:0}
+.md-card-wide .md-mermaid > pre{margin-bottom:10px}
+.md-card-wide .md-mermaid figcaption{margin:0 4px 2px}
+/* One rule per card: the rule's id and verb in bold lead the card. */
+.md-rule > p:first-child > strong:first-child{font-size:15.5px}
+/* One PR per card (HISTORICO): number, time and branch, then the fields. */
+.md-entries{display:grid;gap:12px;margin:0 0 12px}
+.md-entries .md-card{margin:0}
+.md-entry-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 8px}
+.md-entry-head strong{font-size:18px}
+.md-entry-head span{font-size:13px;color:var(--text-dim)}
+.md-entry dl{margin:0;display:grid;gap:2px 0}
+.md-entry dt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+.md-entry dd{margin:0;font-size:14.5px;line-height:1.5}
+.md h2,.md h3,.md h4,.md h5{letter-spacing:-.02em;line-height:1.2}
+.md .md-h2{font-size:clamp(20px, 3.6vw, 24px);margin:30px 4px 12px}
+.md .md-h3{font-size:18px;margin:26px 0 8px}
+.md .md-h4{font-size:16px;margin:20px 0 6px}
+.md p{margin:0 0 12px}
+.md ul,.md ol{margin:0 0 12px;padding-left:22px}
+.md li{margin:3px 0}
+.md li > ul,.md li > ol{margin:4px 0 0}
+.md a{color:var(--link);text-underline-offset:2px}
+.md strong{font-weight:650}
+/* On phones, inline code breaks between any two characters when it must (break-all):
+   WebKit's line breaker, with overflow-wrap:anywhere, let the 6px side padding
+   of a fragment ending a line stick 2–4px out of the card. */
+.md :not(pre) > code{background:rgba(120,110,190,.14);padding:1px 6px;border-radius:6px;font-size:.88em}
+@media (max-width:700px){.md :not(pre) > code{word-break:break-all;overflow-wrap:normal}}
+.md blockquote{margin:0 0 12px;padding:10px 14px;border-radius:14px;background:rgba(120,110,190,.1);color:var(--text-dim)}
+.md blockquote p:last-child{margin:0}
+.md hr{height:0;border:0;margin:22px 0}
+/* Code: a tinted, keyboard-scrollable block (no border). */
+.md-code{margin:0 0 14px;padding:14px 16px;border-radius:14px;overflow:auto;
+  background:rgba(22,18,56,.07);font-size:13px;line-height:1.55;tab-size:2;-webkit-overflow-scrolling:touch}
+/* Code wraps inside its card (PR #13), keeping its indentation; only the
+   text diagrams (```text: the menu drawing, the folder tree) keep their lines
+   and scroll sideways inside the card, like a wide table (never clipped). */
+.md-code code{font-size:inherit;white-space:break-spaces;overflow-wrap:anywhere;word-break:break-word}
+.md-code[data-lang="text"] code{white-space:pre;overflow-wrap:normal;word-break:normal}
+:root[data-theme="dark"] .md-code{background:rgba(0,0,0,.28)}
+/* Tables: zebra rows instead of rules; the wrapper scrolls sideways. */
+.md-table{margin:0 0 14px;overflow-x:auto;border-radius:14px;-webkit-overflow-scrolling:touch;background:rgba(255,255,255,.28)}
+:root[data-theme="dark"] .md-table{background:rgba(255,255,255,.04)}
+.md table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.45;overflow-wrap:break-word}
+.md td code,.md th code{overflow-wrap:anywhere}
+/* Cells wrap; a column never gets narrower than 5.5em, so only a genuinely
+   wide table (5+ columns on a phone) scrolls sideways inside its card. */
+.md th,.md td{padding:8px 10px;text-align:left;vertical-align:top;min-width:5.5em}
+.md th{font-weight:650;background:rgba(120,110,190,.14)}
+.md tbody tr:nth-child(even){background:rgba(120,110,190,.07)}
+.md td:first-child,.md th:first-child{min-width:4.5em}
+/* A table written with an empty header row (| | |): no empty band. */
+.md thead:not(:has(th:not(:empty))){display:none}
+/* Mermaid: the source is the fallback; the drawing replaces it on demand. */
+.md-mermaid{margin:0 0 14px}
+.md-mermaid figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:-4px}
+.md-mermaid[data-drawn] > pre{display:none}
+.md-diagram{margin:0 0 10px;padding:14px;border-radius:14px;background:rgba(255,255,255,.6);overflow-x:auto;text-align:center}
+:root[data-theme="dark"] .md-diagram{background:rgba(0,0,0,.24)}
+.md-diagram svg{max-width:100%;height:auto}
+.md-btn{
+  min-height:36px;padding:0 14px;border-radius:18px;border:0;font-size:13.5px;font-weight:600;
+  color:#fff;background:rgba(10,132,255,.9);box-shadow:0 2px 8px rgba(10,60,160,.2);
+}
+.md-btn:disabled{opacity:.7}
+.md-note{font-size:12.5px;color:var(--faint)}
+
+.doc-foot{padding:20px 22px;font-size:14px;line-height:1.5;color:var(--text-dim)}
+.doc-foot h2{margin:0 0 6px;font-size:18px;color:var(--text)}
+.doc-foot p{margin:0 0 8px}
+.doc-foot ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.doc-foot a{color:var(--text);font-weight:600}
+@media (prefers-reduced-transparency:reduce){
+  .md-table,.md-code{background:rgba(127,127,160,.16)}
+  .md-card{-webkit-backdrop-filter:none;backdrop-filter:none;background:#f4f2fb}
+  :root[data-theme="dark"] .md-card{background:#1d1a3a}
+}

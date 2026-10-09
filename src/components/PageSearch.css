@@ -1,0 +1,46 @@
+/* In-page search, INSIDE the floating menu pill (SiteHeader.css): in search
+   mode the pill itself is the search bar. The form covers the pill from its
+   left edge up to the magnifier (which stays put and closes it again); the
+   links and theme button fade out underneath, still in the layout, so
+   the pill keeps exactly its size and place. */
+.page-search{
+  position:absolute;z-index:1;top:0;bottom:0;left:0;right:var(--ps-right, 49px);
+  display:flex;align-items:center;gap:2px;padding:0 0 0 16px;min-width:0;
+  color:inherit;
+  opacity:0;visibility:hidden;transform:translateX(14px);
+  transition:opacity .18s ease, transform .34s var(--glass-ease), visibility 0s linear .18s;
+}
+.page-search[data-open]{
+  opacity:1;visibility:visible;transform:none;
+  transition:opacity .22s ease .06s, transform .42s var(--glass-ease) .02s, visibility 0s;
+}
+.page-search input{
+  flex:1;min-width:0;height:40px;border:0;outline:0;background:transparent;padding:0;
+  color:inherit;font:inherit;font-size:17px; /* ≥16px: no iOS focus zoom */
+  letter-spacing:-.2px;caret-color:var(--bar-text);-webkit-appearance:none;appearance:none;
+}
+.page-search input::placeholder{color:var(--bar-sub);opacity:1}
+.page-search input::-webkit-search-cancel-button{display:none}
+.page-search output{flex:0 0 auto;padding:0 4px;font-size:13.5px;font-weight:600;color:var(--bar-sub);white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-search output:empty{display:none}
+.ps-sep{flex:0 0 auto;width:1px;height:20px;margin:0 3px;background:currentColor;opacity:.16}
+.ps-btn{
+  width:34px;height:34px;flex:0 0 auto;padding:0;border:0;border-radius:17px;
+  display:grid;place-items:center;background:none;color:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.ps-btn svg{width:19px;height:19px}
+.ps-btn:hover{background:rgba(127,127,160,.16)}
+.ps-btn:disabled{opacity:.35;cursor:default;background:none}
+.ps-btn:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub);border-radius:17px}
+@media (max-width:760px){.page-search{padding-left:14px;--ps-right:48px}}
+
+/* Matches: CSS Custom Highlight API (no DOM changes, safe inside React). */
+::highlight(page-search){background-color:rgba(255,204,0,.5);color:inherit}
+::highlight(page-search-current){background-color:#ff9f0a;color:#1c1c1e}
+/* Fallback for engines without it: translucent boxes drawn over the matches
+   (React owns the text nodes, so we never split them with <mark>). */
+.ps-overlay{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:5}
+.ps-overlay span{position:absolute;border-radius:3px;background:rgba(255,204,0,.45);mix-blend-mode:multiply}
+.ps-overlay span.is-current{background:rgba(255,159,10,.75)}
+@media (prefers-reduced-motion:reduce){.page-search,.page-search[data-open]{transition:none;transform:none}}
