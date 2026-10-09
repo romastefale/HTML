@@ -88,7 +88,7 @@ Cada combinação roda em **claro e escuro**, em `index.html`, `liquid-glass-sam
 
 ### Painel
 - [ ] O segmentado troca o papel de parede; setas movem a seleção; a lente acompanha com a mola.
-- [ ] As chaves escondem os widgets e a legenda; o controle deslizante muda o brilho da foto e da refração dos widgets.
+- [ ] A chave esconde os widgets; o controle deslizante muda o brilho da foto e da refração dos widgets.
 - [ ] "Limpar avisos" esvazia a lista; a barra de abas marca a seção atual e fica acima da safe area de baixo.
 
 ### Galeria

@@ -86,7 +86,7 @@ Depois, abra as seis páginas num navegador com cache limpo e o console aberto: 
 Quando uma foto entrar ou for trocada:
 
 1. Coloque o JPEG original em `public/img/{nome}.jpg`, com no máximo 1600 px de largura (é o fallback).
-2. Registre autor, licença e fonte em `public/img/CREDITS.md`, e o crédito na legenda.
+2. Registre autor, licença e fonte em `public/img/CREDITS.md`.
 3. Gere as variantes:
 
    ```bash

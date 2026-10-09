@@ -319,8 +319,8 @@ const BandCard: React.FC<{ band: React.RefObject<HTMLDivElement | null>; childre
 // landscape photo is drawn wider than its box: ~1.875× the column on desktop,
 // ~1.125× the full width on phones. `sizes` says so, so 2x/3x screens get enough pixels.
 const PLACE_SIZES = "(max-width: 860px) calc(112.5vw - 45px), 650px";
-const Place: React.FC<{ name: string; alt: string; w: number; h: number; title: string; children: React.ReactNode }> = ({
-  name, alt, w, h, title, children,
+const Place: React.FC<{ name: string; alt: string; w: number; h: number; title: string }> = ({
+  name, alt, w, h, title,
 }) => (
   <figure className="place">
     <Picture name={name} alt={alt} w={w} h={h} lazy sizes={PLACE_SIZES} />
@@ -328,7 +328,6 @@ const Place: React.FC<{ name: string; alt: string; w: number; h: number; title: 
       <GlassCaption>
         <span className="cap">
           <strong>{title}</strong>
-          <small>{children}</small>
         </span>
       </GlassCaption>
     </figcaption>
@@ -403,16 +402,9 @@ export const Sample: React.FC = () => {
               tonalizada, igual em todos os navegadores. Como uma legenda pode ser larga, ela usa só o fosco, sem curvatura.
             </p>
             <div className="places">
-              <Place name="santorini-oia" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" w={1600} h={1067} title="Oia, Santorini">
-                Foto: <a href="https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg">Giles Laurent</a>,{" "}
-                <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
-              </Place>
-              <Place name="cataratas-do-iguacu" alt="Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde" w={1600} h={1200} title="Cataratas do Iguaçu">
-                Foto: <a href="https://commons.wikimedia.org/wiki/File:Iguazu_Falls_with_Rainbow.JPG">Tabetabe</a>, domínio público
-              </Place>
-              <Place name="lencois-maranhenses" alt="Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul" w={1600} h={1200} title="Lençóis Maranhenses">
-                Foto: <a href="https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg">Gerda Arendt</a>, CC0
-              </Place>
+              <Place name="santorini-oia" alt="Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro" w={1600} h={1067} title="Oia, Santorini" />
+              <Place name="cataratas-do-iguacu" alt="Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde" w={1600} h={1200} title="Cataratas do Iguaçu" />
+              <Place name="lencois-maranhenses" alt="Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul" w={1600} h={1200} title="Lençóis Maranhenses" />
             </div>
           </div>
         </section>

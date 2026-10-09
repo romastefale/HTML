@@ -10,7 +10,7 @@ Este documento fixa a linguagem visual do projeto. Os valores foram copiados de 
 2. **O fundo é cor desfocada:** campos de cor orgânicos e muito desfocados, sem bordas nítidas, discos ou fotos de fundo. Ele termina, em cima e embaixo, na cor das barras do navegador.
 3. **Os controles flutuam:** nada sólido encosta nas bordas da tela.
 4. **Uma coisa por lugar:** o menu é a pesquisa, e a lupa abre e fecha. Não há painéis extras, "…", barra de baixo nem marca. Componentes de exemplo dentro de uma página (a barra de abas do painel, os chips da galeria) são conteúdo: eles não substituem a pílula, que continua igual no topo.
-5. **O texto é em pt-BR,** e o texto das fotos é creditado.
+5. **O texto é em pt-BR.**
 
 ## 2. Fundo
 
@@ -214,8 +214,8 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 ## 8. Fotos
 
-- **D24. As fotos DEVEM ter licença livre** (CC0, domínio público, CC BY ou CC BY-SA; nas duas últimas, autor e licença na legenda) e vir de uma fonte verificável (Wikimedia Commons). Cada foto DEVE ter uma linha em `public/img/CREDITS.md` (arquivo, onde aparece, lugar, autor, licença e fonte) e crédito na legenda.
-  *Por quê:* a CC BY-SA 4.0 (Santorini) exige atribuição, e a versão redimensionada continua sob a mesma licença. As outras também recebem crédito, por consistência.
+- **D24. As fotos DEVEM ter licença livre** (CC0, domínio público, CC BY ou CC BY-SA) e vir de uma fonte verificável (Wikimedia Commons). Cada foto DEVE ter uma linha em `public/img/CREDITS.md` (arquivo, onde aparece, lugar, autor, licença e fonte).
+  *Por quê:* a CC BY-SA 4.0 (Santorini) exige atribuição, e a versão redimensionada continua sob a mesma licença.
 - **D25. O `alt` DEVE ser descritivo e em pt-BR.**
 - **D26. As fotos DEVEM ser servidas como `<picture>` responsivo** (AVIF, WebP e o JPEG de fallback). Veja [DESEMPENHO.md](DESEMPENHO.md).
 

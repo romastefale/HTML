@@ -2,7 +2,7 @@ import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } f
 import { Glass, animateGlassValue, cubicBezier, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
-import { GlassCaption, GlassPanel, Picture } from "../components/Surfaces";
+import { GlassPanel, Picture } from "../components/Surfaces";
 import { GlassSwitch } from "../components/examples/GlassSwitch";
 import { GlassSlider } from "../components/examples/GlassSlider";
 import { FROST, NO_SHINE } from "../lib/optics";
@@ -40,16 +40,14 @@ const PERIODS: { key: Period; label: string }[] = [
   { key: "noite", label: "Noite" },
 ];
 interface Wall {
-  name: string; w: number; h: number; alt: string; place: string; credit: React.ReactNode;
+  name: string; w: number; h: number; alt: string; place: string;
   time: string; temp: string; cond: string; range: string; edge: string; note: string;
 }
-const CC0 = <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>;
 const WALLS: Record<Period, Wall> = {
   manha: {
     name: "lencois-maranhenses", w: 1600, h: 1200,
     alt: "Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul",
     place: "Lençóis Maranhenses",
-    credit: <>Foto: <a href="https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg">Gerda Arendt</a>, {CC0}</>,
     time: "07:40", temp: "27°", cond: "Ensolarado", range: "Máx. 31° · Mín. 24°", edge: "#9fb8cf",
     note: "Maré baixa às 10h: bom horário para as lagoas.",
   },
@@ -57,7 +55,6 @@ const WALLS: Record<Period, Wall> = {
     name: "rio-pao-de-acucar", w: 1600, h: 990,
     alt: "Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul",
     place: "Pão de Açúcar, Rio de Janeiro",
-    credit: <>Foto: <a href="https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg">Wilfredor</a>, {CC0}</>,
     time: "15:20", temp: "29°", cond: "Poucas nuvens", range: "Máx. 30° · Mín. 22°", edge: "#7d97a8",
     note: "Último bondinho às 19h50.",
   },
@@ -65,7 +62,6 @@ const WALLS: Record<Period, Wall> = {
     name: "aurora-boreal-alasca", w: 1600, h: 1043,
     alt: "Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca",
     place: "Aurora boreal, Alasca",
-    credit: <>Foto: <a href="https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg">Senior Airman Joshua Strang (USAF)</a>, domínio público</>,
     time: "22:45", temp: "−12°", cond: "Céu limpo", range: "Máx. −6° · Mín. −15°", edge: "#1d3a3a",
     note: "Índice de aurora alto até a meia-noite.",
   },
@@ -283,8 +279,7 @@ const Stage: React.FC<{
   setPeriod: (p: Period) => void;
   dim: number;
   showWidgets: boolean;
-  showCaption: boolean;
-}> = ({ period, setPeriod, dim, showWidgets, showCaption }) => {
+}> = ({ period, setPeriod, dim, showWidgets }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const wall = WALLS[period];
   // The refract copies use exactly the image the browser picked from the srcset.
@@ -316,13 +311,6 @@ const Stage: React.FC<{
         <span className="stage-time">{wall.time}</span>
         <span className="stage-date">{wall.place}</span>
       </div>
-      {showCaption && (
-        <div className="stage-cap">
-          <GlassCaption>
-            <span className="cap">{wall.credit}</span>
-          </GlassCaption>
-        </div>
-      )}
       {showWidgets && (
         <div className="stage-widgets">
           <RefractCard stage={stageRef} src={src} wall={wall} dim={dim} className="w-weather" label="Clima">
@@ -377,9 +365,8 @@ const StandIn: React.FC<{ on: boolean; color: string; label: string; onToggle: (
 
 const ControlCenter: React.FC<{
   showWidgets: boolean; setShowWidgets: (v: boolean) => void;
-  showCaption: boolean; setShowCaption: (v: boolean) => void;
   bright: number; setBright: (v: number) => void;
-}> = ({ showWidgets, setShowWidgets, showCaption, setShowCaption, bright, setBright }) => {
+}> = ({ showWidgets, setShowWidgets, bright, setBright }) => {
   const dark = useThemeName() === "dark";
   const fr = useFilterResolution();
   const sliderTile = useRef<HTMLDivElement>(null);
@@ -393,7 +380,6 @@ const ControlCenter: React.FC<{
   const near = useNear(panelRef);
   const on1 = useDeferredMount(near);
   const on2 = useDeferredMount(near);
-  const on3 = useDeferredMount(near);
   const common = {
     scheme: (dark ? "dark" : "light") as "dark" | "light",
     surface: dark ? "#221e4c" : "#f3eefb",
@@ -412,13 +398,6 @@ const ControlCenter: React.FC<{
           {on1 ? <GlassSwitch {...common} checked={showWidgets} onCheckedChange={setShowWidgets} ariaLabel="Widgets na tela" activeColor="#30d158" /> : <StandIn on={showWidgets} color="#30d158" label="Widgets na tela" onToggle={setShowWidgets} />}
         </Tile>
         <Tile
-          icon={<svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M7 14.5h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>}
-          title="Crédito da foto"
-          sub={showCaption ? "Legenda sobre a foto" : "Texto de crédito no repositório, se quiser ler"}
-        >
-          {on2 ? <GlassSwitch {...common} checked={showCaption} onCheckedChange={setShowCaption} ariaLabel="Crédito da foto na tela" activeColor="#0a84ff" /> : <StandIn on={showCaption} color="#0a84ff" label="Crédito da foto na tela" onToggle={setShowCaption} />}
-        </Tile>
-        <Tile
           wide
           tileRef={sliderTile}
           icon={<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor" /><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2 7 7M17 17l1.8 1.8M5.2 18.8 7 17M17 7l1.8-1.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>}
@@ -426,7 +405,7 @@ const ControlCenter: React.FC<{
           sub="Os widgets refratam a foto com o mesmo brilho"
         >
           <div className="cc-slider">
-            {on3 ? <GlassSlider {...common} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor="#0a84ff" name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
+            {on2 ? <GlassSlider {...common} value={bright} onValueChange={setBright} min={40} max={100} step={1} width={sliderW} ariaLabel="Brilho do papel de parede" activeColor="#0a84ff" name={brightId} /> : <span className="cc-standin cc-standin-slider" style={{ width: sliderW }} aria-hidden="true" />}
             <output className="cc-out" aria-live="polite">{bright}%</output>
           </div>
         </Tile>
@@ -584,7 +563,6 @@ const TabBar: React.FC = () => {
 export const Painel: React.FC = () => {
   const [period, setPeriod] = useState<Period>("manha");
   const [showWidgets, setShowWidgets] = useState(true);
-  const [showCaption, setShowCaption] = useState(true);
   const [bright, setBright] = useState(100);
   return (
     <>
@@ -603,20 +581,19 @@ export const Painel: React.FC = () => {
               central de controle.
             </p>
           </div>
-          <Stage period={period} setPeriod={setPeriod} dim={bright / 100} showWidgets={showWidgets} showCaption={showCaption} />
+          <Stage period={period} setPeriod={setPeriod} dim={bright / 100} showWidgets={showWidgets} />
         </section>
 
         <section id="controles" className="pn-section" aria-labelledby="cc-title">
           <h2 id="cc-title">Central de controle</h2>
           <p className="sub">
-            Chaves e controle deslizante das receitas do fork (<code>examples/GlassSwitch</code> e{" "}
+            A chave e o controle deslizante das receitas do fork (<code>examples/GlassSwitch</code> e{" "}
             <code>examples/GlassSlider</code>): em repouso, uma pastilha branca; ao tocar ou arrastar, ela vira uma lente
             que refrata a trilha. Por baixo há um <code>checkbox</code> e um <code>range</code> de verdade, para teclado
             e leitor de tela. O painel em volta é vidro fosco em CSS.
           </p>
           <ControlCenter
             showWidgets={showWidgets} setShowWidgets={setShowWidgets}
-            showCaption={showCaption} setShowCaption={setShowCaption}
             bright={bright} setBright={setBright}
           />
         </section>

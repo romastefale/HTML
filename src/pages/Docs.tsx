@@ -14,8 +14,6 @@ export interface Skyline {
   name: string;
   alt: string;
   place: string;
-  /** Author + licence, as JSX (links). */
-  credit: React.ReactNode;
   /** object-position of the hero crop (the phone box is taller than 16:9). */
   pos?: string;
   /** Where the hero's glass panel sits: over the sky ("top") or the default bottom. */
@@ -35,7 +33,6 @@ const Figure: React.FC<{ s: Skyline }> = ({ s }) => (
       <GlassCaption>
         <span className="cap">
           <strong>{s.place}</strong>
-          <small>{s.credit}</small>
         </span>
       </GlassCaption>
     </figcaption>
@@ -146,9 +143,7 @@ export const DocsPage: React.FC<{
               <p className="doc-eyebrow">{eyebrow}</p>
               <h1>{info.title}</h1>
               <p className="doc-lead">{lead}</p>
-              <p className="doc-hero-credit">
-                {hero.place} · {hero.credit}
-              </p>
+              <p className="doc-hero-credit">{hero.place}</p>
             </div>
           </GlassPanel>
           </div>

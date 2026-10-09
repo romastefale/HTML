@@ -24,7 +24,6 @@ Os fundos das páginas são gradientes CSS (`src/styles/global.css`), sem imagen
 | `singapura-entardecer.jpg` | `contrato-arquitetura.html`, `galeria.html` | Centro financeiro de Singapura ao entardecer | Basile Morin | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [File:Skylines of the Central Business District, Singapore at dusk.jpg](https://commons.wikimedia.org/wiki/File:Skylines_of_the_Central_Business_District,_Singapore_at_dusk.jpg) |
 | `hong-kong-noite-tufao.jpg` | `contrato-arquitetura.html` | Arranha-céus de Hong Kong numa noite de tufão | Wilfredor | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [File:Hong Kong skyscrapers in a night of typhoon.jpg](https://commons.wikimedia.org/wiki/File:Hong_Kong_skyscrapers_in_a_night_of_typhoon.jpg) |
 
-As fotos CC BY e CC BY-SA (Santorini, São Paulo, Nova York, Tóquio, Chicago e Singapura) exigem atribuição: autor e licença
-aparecem na legenda de vidro da própria foto. O texto de crédito está neste arquivo, no repositório, se quiser ler. As versões recortadas e
+As fotos CC BY e CC BY-SA (Santorini, São Paulo, Nova York, Tóquio, Chicago e Singapura) exigem atribuição. As versões recortadas e
 redimensionadas (JPEG, AVIF e WebP) continuam sob a mesma licença da original (CC BY-SA 3.0/4.0 ou CC BY 4.0).
-As demais (CC0 e domínio público) não exigem atribuição, mas também têm crédito nas legendas.
+As demais (CC0 e domínio público) não exigem atribuição.

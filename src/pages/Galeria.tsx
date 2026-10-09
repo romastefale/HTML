@@ -33,56 +33,39 @@ const NAV: NavItem[] = SECTIONS;
 type Tag = "brasil" | "mundo" | "noite";
 interface Photo {
   name: string; w: number; h: number; title: string; alt: string; tags: Tag[];
-  author: string; page: string; lic: string; licHref?: string; note: string;
+  note: string;
 }
-const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
-const BYSA4 = "https://creativecommons.org/licenses/by-sa/4.0/";
 const PHOTOS: Photo[] = [
   { name: "santorini-oia", w: 1600, h: 1067, title: "Oia, Santorini", tags: ["mundo"],
     alt: "Três cúpulas azuis de igrejas brancas em Oia, Santorini, acima do mar Egeu azul-escuro",
-    author: "Giles Laurent", page: "https://commons.wikimedia.org/wiki/File:1000_Three_domes_of_Oia_in_Santorini_Photo_by_Giles_Laurent.jpg", lic: "CC BY-SA 4.0", licHref: BYSA4,
     note: "Cúpulas azuis sobre a caldeira, no norte da ilha." },
   { name: "cataratas-do-iguacu", w: 1600, h: 1200, title: "Cataratas do Iguaçu", tags: ["brasil"],
     alt: "Arco-íris sobre as Cataratas do Iguaçu, vistas do lado argentino, cercadas de mata verde",
-    author: "Tabetabe", page: "https://commons.wikimedia.org/wiki/File:Iguazu_Falls_with_Rainbow.JPG", lic: "domínio público",
     note: "Na fronteira do Brasil com a Argentina; a foto é do lado argentino." },
   { name: "sao-paulo-copan-italia", w: 1600, h: 900, title: "Centro de São Paulo", tags: ["brasil", "noite"],
     alt: "Centro de São Paulo à noite, com o Edifício Itália e o Copan entre prédios iluminados sob um céu rosado de nuvens",
-    author: "Webysther Nunes", page: "https://commons.wikimedia.org/wiki/File:Webysther_20150427002640_-_Edif%C3%ADcios_Terra%C3%A7o_It%C3%A1lia_e_Copan.jpg", lic: "CC BY-SA 4.0", licHref: BYSA4,
     note: "O Edifício Itália e o Copan à noite." },
   { name: "hong-kong-victoria-harbour", w: 1600, h: 1063, title: "Porto de Victoria, Hong Kong", tags: ["mundo", "noite"],
     alt: "Arranha-céus iluminados às margens do Porto de Victoria, em Hong Kong, ao entardecer",
-    author: "Wilfredor", page: "https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg", lic: "CC0", licHref: CC0,
     note: "A orla da Ilha de Hong Kong, vista de Kowloon." },
   { name: "lencois-maranhenses", w: 1600, h: 1200, title: "Lençóis Maranhenses", tags: ["brasil"],
     alt: "Lagoa azul entre dunas brancas e curvas nos Lençóis Maranhenses, sob céu azul",
-    author: "Gerda Arendt", page: "https://commons.wikimedia.org/wiki/File:Lagoon_in_curved_sanddunes,_Len%C3%A7%C3%B3is_Maranhenses.jpg", lic: "CC0", licHref: CC0,
     note: "Lagoas de chuva entre as dunas, no Maranhão." },
   { name: "toquio-torre-minato", w: 1600, h: 900, title: "Torre de Tóquio", tags: ["mundo", "noite"],
     alt: "Tóquio à noite vista do alto, com a Torre de Tóquio iluminada em laranja entre os prédios de Minato",
-    author: "David Kernan", page: "https://commons.wikimedia.org/wiki/File:Tokyo_Tower,_Minato_City.jpg", lic: "CC BY 4.0", licHref: "https://creativecommons.org/licenses/by/4.0/",
     note: "A torre iluminada no bairro de Minato." },
   { name: "rio-pao-de-acucar", w: 1600, h: 990, title: "Pão de Açúcar, Rio de Janeiro", tags: ["brasil"],
     alt: "Pão de Açúcar sobre a Baía de Guanabara, no Rio de Janeiro, com mata verde e céu azul",
-    author: "Wilfredor", page: "https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg", lic: "CC0", licHref: CC0,
     note: "O morro sobre a Baía de Guanabara." },
   { name: "singapura-entardecer", w: 1600, h: 900, title: "Marina Bay, Singapura", tags: ["mundo", "noite"],
     alt: "Centro financeiro de Singapura ao entardecer, com a Marina Bay, o museu em forma de flor de lótus e prédios iluminados",
-    author: "Basile Morin", page: "https://commons.wikimedia.org/wiki/File:Skylines_of_the_Central_Business_District,_Singapore_at_dusk.jpg", lic: "CC BY-SA 4.0", licHref: BYSA4,
     note: "O centro financeiro e a baía, ao entardecer." },
   { name: "aurora-boreal-alasca", w: 1600, h: 1043, title: "Aurora boreal, Alasca", tags: ["mundo", "noite"],
     alt: "Aurora boreal verde e roxa no céu noturno sobre a neve, no Alasca",
-    author: "Senior Airman Joshua Strang (USAF)", page: "https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg", lic: "domínio público",
     note: "Sobre a Base Aérea de Eielson." },
 ];
 const SLIDE_MS = 6000;
 const FADE_MS = 700;
-
-const Credit: React.FC<{ p: Photo }> = ({ p }) => (
-  <>
-    Foto: <a href={p.page}>{p.author}</a>, {p.licHref ? <a href={p.licHref}>{p.lic}</a> : p.lic}
-  </>
-);
 
 // ── 1. The viewer ─────────────────────────────────────────────────────────
 // examples/GlassVideoControls.tsx › PLAYER_OPTICS / SCRUB_OPTICS, with
@@ -341,7 +324,6 @@ const Viewer: React.FC<{ index: number; setIndex: (i: number) => void }> = ({ in
         <GlassCaption>
           <span className="cap">
             <strong>{photo.title}</strong>
-            <small><Credit p={photo} /></small>
           </span>
         </GlassCaption>
         <span className="vw-count" aria-live="polite">
@@ -517,7 +499,6 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
       <div className="sheet-body">
         <h2 id="sheet-title">{photo.title}</h2>
         <p>{photo.note}</p>
-        <p className="sheet-credit"><Credit p={photo} /></p>
         <div className="sheet-actions">
           <Frost className="glass pill-btn tint-blue" optics={FROST}>
             <button type="button" onClick={onView}>Ver no visor</button>

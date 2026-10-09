@@ -310,7 +310,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 - **Palco `#tela`:** um papel de parede (`Picture`) que muda com a hora do dia (manhã: Lençóis; tarde: Rio; noite: aurora), com brilho ajustável.
 - **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`SEG_LENS`, `NO_SHINE`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
 - **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `WIDGET_LENS` (receita do `examples/GlassNotification.tsx`, `NO_SHINE`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
-- **Central de controles `#controles`:** duas `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={NO_SHINE}` e `filterResolution` do aparelho.
+- **Central de controles `#controles`:** uma `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados sem mudança, com o cabeçalho MIT), com `lens={NO_SHINE}` e `filterResolution` do aparelho.
 - **Avisos e widgets:** tudo fosco em CSS (`GlassPanel`): notificações com "Limpar avisos", calendário, baterias, tarefas e previsão de 5 dias.
 - **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com indicador deslizante e `useSectionSpy`. Ela repete as seções; a pílula do topo continua igual à das outras páginas.
 - **Montagem adiada (P6):** a lente do segmentado e os widgets montam um por vez depois da primeira pintura (`useDeferredMount`); as chaves e o controle deslizante montam quando a central chega perto da tela (`useNear`), sobre chaves planas do mesmo tamanho, que já funcionam (`role="switch"`).
@@ -328,10 +328,10 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 ### 4.9 Páginas de contrato (`pages/Docs.tsx`)
 
 - `ContratoDesign.tsx` e `ContratoArquitetura.tsx` só escolhem os documentos, os rótulos da pílula e as fotos; `DocsPage` renderiza.
-- **Topo:** uma foto de skyline (`Picture` com `fetchpriority="high"`) com um `GlassPanel` escuro por cima (título, resumo e crédito).
+- **Topo:** uma foto de skyline (`Picture` com `fetchpriority="high"`) com um `GlassPanel` escuro por cima (título, resumo e o lugar).
 - **Cada documento** é um `GlassPanel` com o link "Fonte", o título (`h2`, id = prefixo, alvo da pílula), um índice de chips das seções e o corpo.
 - **O corpo** é dividido nas seções do documento; cada parte monta num intervalo ocioso, na ordem da página (`useDeferredMount`), com a altura estimada reservada até lá. Um link direto para uma seção (`#arquitetura-…`) rola até ela quando a parte monta.
-- **Entre documentos**, fotos de skylines com `GlassCaption` (autor e licença).
+- **Entre documentos**, fotos de skylines com `GlassCaption`.
 - Nenhum `<Glass>`: a biblioteca não é baixada.
 
 ## 5. Como a biblioteca é consumida
@@ -375,7 +375,7 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 | Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
 | Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
 | Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |
-| Chaves (2) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: NO_SHINE` | Painel |
+| Chave (1) e controle deslizante (1) | `GlassSwitch`, `GlassSlider` | receitas do fork | `lens: NO_SHINE` | Painel |
 | Controles do visor (4 lentes) | `Viewer` | `<Glass draw lenses>` (WebGL, 1 renderizador) | `PLAYER_OPTICS`, `SCRUB_OPTICS` | Galeria |
 | Controles do visor sem lentes | `.vw-disc`, `.vw-bar` | `<Frost>` + `.tint-ink` | `FROST` | Galeria |
 | Lupa da folha | `SheetBody` | `<Glass refract>` | `LOUPE_LENS` | Galeria |

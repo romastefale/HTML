@@ -126,7 +126,7 @@ stateDiagram-v2
 | Componente | Papel e rótulos | Teclado |
 |---|---|---|
 | Segmentado do painel ("Hora do dia") | `role="radiogroup"` com `aria-label`; cada opção é `role="radio"` com `aria-checked`; só a marcada tem `tabIndex=0` (roving tabindex) | setas ← → ↑ ↓ trocam a opção e movem o foco |
-| Chaves e controle deslizante (examples/ do fork) | `role="switch"` / `input type="range"` da receita, com `aria-label` em pt-BR ("Widgets na tela", "Crédito da foto na tela", "Brilho do papel de parede"); o valor aparece num `<output aria-live="polite">` | Espaço / setas, como na receita |
+| Chave e controle deslizante (examples/ do fork) | `role="switch"` / `input type="range"` da receita, com `aria-label` em pt-BR ("Widgets na tela", "Brilho do papel de parede"); o valor aparece num `<output aria-live="polite">` | Espaço / setas, como na receita |
 | Barra de abas do painel | `<nav aria-label="Seções do painel (barra de abas)">`, links `#âncora`, `aria-current="location"` na aba atual; `data-search-skip` | Tab entre as abas; o spy segue a rolagem |
 | Visor da galeria | botões "Foto anterior", "Pausar/Reproduzir a apresentação" (`aria-pressed`), "Próxima foto"; contador "N de 9" em `aria-live="polite"`; o canvas e os discos são `aria-hidden` | ← → trocam a foto quando o foco está no visor |
 | Chips da coleção | `role="toolbar"` com `aria-label="Filtrar a coleção"`; cada chip é um botão com `aria-pressed`; a contagem é `aria-live` | Tab |

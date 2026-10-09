@@ -122,8 +122,7 @@ export const Home: React.FC = () => {
             h={1063}
             lazy
           >
-            Porto de Victoria, Hong Kong · Foto:{" "}
-            <a href="https://commons.wikimedia.org/wiki/File:Victoria_Harbour_skyscrapers.jpg">Wilfredor</a>, CC0
+            Porto de Victoria, Hong Kong
           </Photo>
         </Card>
 
@@ -149,8 +148,7 @@ export const Home: React.FC = () => {
             h={990}
             lazy
           >
-            Pão de Açúcar, Rio de Janeiro · Foto:{" "}
-            <a href="https://commons.wikimedia.org/wiki/File:Sugarloaf_Mountain,_Rio_de_Janeiro,_Brazil.jpg">Wilfredor</a>, CC0
+            Pão de Açúcar, Rio de Janeiro
           </Photo>
         </Card>
 
@@ -174,11 +172,7 @@ export const Home: React.FC = () => {
             h={1043}
             lazy
           >
-            Aurora boreal, Alasca · Foto:{" "}
-            <a href="https://commons.wikimedia.org/wiki/File:Aurora_borealis_over_Eielson_Air_Force_Base,_Alaska.jpg">
-              Senior Airman Joshua Strang (USAF)
-            </a>
-            , domínio público
+            Aurora boreal, Alasca
           </Photo>
         </Card>
       </main>
