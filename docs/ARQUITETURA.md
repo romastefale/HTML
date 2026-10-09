@@ -230,8 +230,7 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre
 
 **O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro da `.sh-bar`, atrás dos links.
 
-- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`). Cada seção (`[pilula]`, `[botoes]`, `[lista]`) tem as optics da biblioteca, um parâmetro por linha, e `tintClaro` / `tintEscuro` (o `background` translúcido do `<Glass>` em cada modo); `[selecao]` tem só a tinta. Vírgula decimal é aceita.
-- Entregues: as optics são o `MATERIAL_OPTICS` do fork, com `specular = 0` (sem o hairline e o realce de cima, `src/GlassMaterial.tsx`, `edgeShadow`) e `sheen = 0`, `glow = 0` (P2 do DESEMPENHO); as tintas são as cores do cabeçalho (`headerBg`) e dos chips (`chipBg`) da demo do fork, com alfa 0,4; a seleção usa `--sel-bg`.
+- Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`). Cada seção (`[pilula]`, `[botoes]`, `[lista]`) tem as optics da biblioteca, um parâmetro por linha, e `tintClaro` / `tintEscuro` (o `background` translúcido do `<Glass>` em cada modo); `[selecao]` tem só a tinta. O código não tem valor de vidro próprio: tudo vem do arquivo.
 
 | Página | Seções na pílula |
 |---|---|

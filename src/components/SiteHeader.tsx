@@ -40,14 +40,14 @@ const vidro: Record<string, Vidro> = {};
 let secao = "";
 for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
   const s = linha.match(/^\[(.+)\]$/);
-  if (s) vidro[(secao = s[1])] = { optics: {}, tintClaro: "transparent", tintEscuro: "transparent" };
+  if (s) vidro[(secao = s[1])] = { optics: {} } as Vidro;
   const kv = linha.match(/^(\w+)\s*=\s*(.+)$/);
   if (!kv) continue;
   const [, chave, valor] = kv;
   if (chave === "tintClaro" || chave === "tintEscuro") vidro[secao][chave] = valor;
   else
     (vidro[secao].optics as Record<string, number | boolean>)[chave] =
-      valor === "true" ? true : valor === "false" ? false : Number(valor.replace(",", "."));
+      valor === "true" ? true : valor === "false" ? false : Number(valor);
 }
 
 const EDGE = 12;
