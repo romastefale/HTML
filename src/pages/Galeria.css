@@ -22,17 +22,13 @@ html{scroll-behavior:smooth}
 .vw-frost{position:absolute;inset:0;pointer-events:none}
 .vw-disc{border-radius:50%;transform:translateX(-50%)}
 .vw-bar{left:7%;right:7%;bottom:22px;height:22px;border-radius:7px}
-/* The one uniform hairline on every control (lens or frost): drawn by the
-   crisp overlay, so it is the same in both states. */
-.vw-btn::after,.vw-scrub::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 0 var(--rim-w) var(--rim)}
 .vw-top{position:absolute;z-index:2;left:12px;right:12px;top:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .vw-top .cap-pill{border-radius:16px;min-width:0}
 .vw-top .cap{display:flex;flex-direction:column;gap:1px;padding:8px 13px 9px}
 .vw-top .cap strong{font-size:15px}
 .vw-top .cap small{font-size:11.5px;opacity:.86}
-.vw-count{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:999px;background:rgba(24,20,56,.46);
-  -webkit-backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate));backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate));font-variant-numeric:tabular-nums;
-  box-shadow:0 0 0 var(--rim-w) var(--rim)} /* the same single hairline as .glass::after (it was the only frosted surface without one) */
+.vw-count{flex:0 0 auto;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:999px;background:var(--vidro-tint);
+  -webkit-backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate));backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate));font-variant-numeric:tabular-nums}
 .vw-btn{position:absolute;z-index:3;transform:translateX(-50%);border:0;padding:0;border-radius:50%;background:none;color:#fff;
   display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
 .vw-btn:active{transform:translateX(-50%) scale(.94)}
@@ -47,9 +43,8 @@ html{scroll-behavior:smooth}
 .gl-toolbar::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:18px;background:none;color:var(--bar-sub);font-size:14px;font-weight:600;
   -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,color .2s ease}
-.chip[aria-pressed="true"]{background:var(--sel-bg);color:var(--bar-text);box-shadow:var(--sel-shadow)}
+.chip[aria-pressed="true"]{background:var(--vidro-tint);color:var(--bar-text)}
 .chip:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
-.chip[aria-pressed="true"]:focus-visible{box-shadow:inset 0 0 0 1.5px var(--bar-sub),var(--sel-shadow)}
 .gl-count{flex:0 0 auto;padding:0 10px 0 6px;font-size:12.5px;color:var(--bar-sub);font-variant-numeric:tabular-nums}
 .gl-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:700px){.gl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -97,7 +92,6 @@ html{scroll-behavior:smooth}
    through refs (Galeria.tsx › SheetBody): no React render. The transform is on
    the wrapper, never on the filtered element. */
 .loupe{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform;box-shadow:0 10px 26px rgba(0,0,0,.35)}
-.loupe-ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 var(--rim-w) var(--rim)}
 .sheet-body{padding:14px 8px 0}
 .sheet-body h2{margin:0 0 4px;font-size:22px;letter-spacing:-.02em}
 .sheet-body p{margin:0 0 6px;color:var(--text-dim);font-size:15px}

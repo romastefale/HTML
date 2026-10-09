@@ -38,33 +38,24 @@ html{scroll-behavior:smooth;scroll-padding-bottom:calc(96px + env(safe-area-inse
   .stage-widgets{left:auto;width:360px}
 }
 
-/* Segmented control: frost pill; the selection is the in-place lens (+ ring). */
+/* Segmented control: frost pill; the selection is the in-place lens. */
 .seg{border-radius:22px;padding:4px;width:min(100%, 320px)}
 .seg-row{position:relative;height:38px}
 .seg-scene{position:relative;display:grid;grid-template-columns:repeat(3,1fr);align-items:center}
-/* The selected pill is the menu's (--sel-bg): a near-opaque fill inside the
-   lens (a thin translucent fill came out grey through the lens filter), and
-   its soft float shadow on the ring OUTSIDE the lens, where the lens clip
-   can't cut it into a hard dark edge. */
-.seg-ind{position:absolute;left:0;top:3px;border-radius:999px;background:rgba(255,255,255,.94);
+/* The selected pill is the top bar's: the same tint, no shadow, no line. */
+.seg-ind{position:absolute;left:0;top:3px;border-radius:999px;background:var(--vidro-tint);
   pointer-events:none;will-change:transform}
-:root[data-theme="dark"] .seg-ind{background:rgba(255,255,255,.22)}
-.seg-ring{position:absolute;left:0;top:3px;border-radius:999px;pointer-events:none;will-change:transform;
-  box-shadow:inset 0 0 0 var(--rim-w) var(--rim),0 1px 2px rgba(20,16,60,.1),0 3px 10px rgba(20,16,60,.1)}
-:root[data-theme="dark"] .seg-ring{box-shadow:inset 0 0 0 var(--rim-w) var(--rim),0 2px 10px rgba(0,0,0,.3)}
 .seg-btn{position:relative;z-index:1;height:38px;border:0;background:none;padding:0 6px;border-radius:999px;
   font-size:14.5px;font-weight:600;color:inherit;opacity:.72;-webkit-tap-highlight-color:transparent}
-.seg-btn[aria-checked="true"]{opacity:1}
+.seg-btn[aria-checked="true"]{opacity:1;color:var(--bar-text)}
 .seg-btn:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
 
-/* Widgets over the photo: <Glass refract> below, the crisp body on top (the
-   sample's .gcard-body: a top-lit white gradient + ONE uniform hairline). */
-.rcard{position:relative;border-radius:24px;color:#1c1c1e}
+/* Widgets over the photo: <Glass refract> below, the crisp body on top.
+   The fill is the top bar's tint. */
+.rcard{position:relative;border-radius:24px;color:var(--bar-text)}
 .rcard-body{position:relative;z-index:1;border-radius:inherit;padding:14px 16px;
-  background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.14) 100%);
-  box-shadow:0 0 0 var(--rim-w) var(--rim),0 14px 36px rgba(0,0,0,.2),0 2px 5px rgba(0,0,0,.12)}
-:root[data-theme="dark"] .rcard{color:#fff}
-:root[data-theme="dark"] .rcard-body{background:linear-gradient(180deg,rgba(40,36,80,.5) 0%,rgba(40,36,80,.2) 100%)}
+  background:var(--vidro-tint);
+  box-shadow:0 14px 36px rgba(0,0,0,.2),0 2px 5px rgba(0,0,0,.12)}
 @media (prefers-reduced-transparency:reduce){.rcard-body{background:rgba(255,255,255,.94)}:root[data-theme="dark"] .rcard-body{background:rgba(28,24,60,.96)}}
 .wx{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .wx-main{display:flex;align-items:center;gap:8px}
@@ -152,13 +143,13 @@ html{scroll-behavior:smooth;scroll-padding-bottom:calc(96px + env(safe-area-inse
 .tabbar{pointer-events:auto;display:grid;grid-template-columns:repeat(var(--n),1fr);width:min(100%, 420px);
   height:62px;padding:5px;border-radius:31px;font-family:system-ui,-apple-system,sans-serif}
 .tab-ind{position:absolute;left:5px;top:5px;bottom:5px;width:calc((100% - 10px) / var(--n));border-radius:26px;
-  background:var(--sel-bg);box-shadow:var(--sel-shadow);transform:translateX(calc(var(--i) * 100%));
+  background:var(--vidro-tint);transform:translateX(calc(var(--i) * 100%));
   transition:transform .45s var(--glass-ease);pointer-events:none}
 @media (prefers-reduced-motion:reduce){.tab-ind{transition:none}}
 .tabbar a{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   border-radius:26px;text-decoration:none;color:var(--bar-sub);font-size:11px;font-weight:600;-webkit-tap-highlight-color:transparent}
 .tabbar a svg{width:24px;height:24px}
-.tabbar a[aria-current]{color:var(--link)}
+.tabbar a[aria-current]{color:var(--bar-text)}
 .tabbar a:focus-visible{outline:none;box-shadow:inset 0 0 0 1.5px var(--bar-sub)}
 /* P6 stand-ins (same size as the switch 74×28 and the slider row 22) until the lenses mount. */
 .cc-standin{display:inline-block;flex:none;width:74px;height:28px;padding:0;border:0;border-radius:14px;background:var(--cc-track,#d9d4e8);position:relative}

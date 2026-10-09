@@ -102,7 +102,7 @@ stateDiagram-v2
 |---|---|
 | Global | `:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 10px }`, com `--focus` neutro e translúcido: `rgba(28,28,30,.5)` no claro, `rgba(245,245,247,.62)` no escuro (era `#0a84ff` até o PR #14) |
 | Links do menu, itens da lista ☰ e botões ☰, tema e lupa | `outline: 1.5px solid var(--bar-sub); outline-offset: -1.5px` |
-| Chips da galeria e barra de abas do painel | o mesmo aro interno `--bar-sub`; num chip marcado, somado a `--sel-shadow` |
+| Chips da galeria e barra de abas do painel | o mesmo aro interno `--bar-sub` |
 | Controle segmentado, switch e slider do painel, cartões e foto da lupa da galeria | `outline` com `var(--focus)` (2px; 3px nos cartões e na foto). No switch e no slider o anel vai no elemento visível depois do `<input>` (`input:focus-visible + *`) |
 | Botões sobre a foto do visor | `outline: 2px solid var(--focus-on-photo)` (`rgba(255,255,255,.85)`) |
 | **Pílula e campo no modo pesquisa** | **nenhum** (`outline: none`). O cursor (`caret-color: var(--bar-text)`, neutro) mostra o foco, e a pílula aberta já indica a pesquisa |

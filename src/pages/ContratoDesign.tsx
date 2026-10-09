@@ -30,7 +30,7 @@ export const ContratoDesign: React.FC = () => (
     eyebrow="Contrato · docs/"
     lead={
       <>
-        As regras de design desta interface, escritas como contrato: fundo, hairline, fosco, menu, pesquisa, tema, tela
+        As regras de design desta interface, escritas como contrato: fundo, fosco, menu, pesquisa, tema, tela
         cheia e acessibilidade. O texto vem direto da pasta <code>docs/</code> do repositório.
       </>
     }

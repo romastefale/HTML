@@ -89,7 +89,7 @@ HTML/
     │   ├── Docs.tsx/.css         # DocsPage: renderiza os documentos compilados
     │   └── ContratoDesign.tsx · ContratoArquitetura.tsx  # quais documentos e fotos cada página mostra
     └── styles/
-        └── global.css            # fundo orgânico, camadas de borda, hairline, tintas, foco, variáveis
+        └── global.css            # fundo orgânico, camadas de borda, tintas, foco, variáveis
 ```
 
 ## 3. Entradas do Vite e `base`
@@ -167,7 +167,7 @@ Os dois chunks de contrato são quase só o texto de `docs/` já em HTML, então
 - **Títulos:** ids no estilo do GitHub com o prefixo do documento (`arquitetura-6-onde-há-glass-e-onde-há-fosco-em-css`). O `#` do documento vira o `h2` da seção (id = prefixo) e é o link da pílula; os demais níveis descem um (a página tem o próprio `h1`).
 - **Links:** um link para outro documento vira a página do site que o mostra, com a âncora; links para outros arquivos do repositório vão para o GitHub.
 - **Tabelas** ficam em `div.md-table` (rolagem lateral pelo teclado). **Código** fica em `pre.md-code` com `tabindex="0"`.
-- **Cartões (PR #13, DESIGN D29):** o plugin percorre os tokens de primeiro nível do `marked` em ordem (os slugs não mudam) e agrupa o HTML em `div.glass.tint-frost.md-card`. Um `##` (`<h3>`) fica fora, acima dos cartões; um `###` abre um cartão; tabela e mermaid ganham um cartão próprio (`.md-card-wide`); cada item de uma lista de regras (`- **D12. …**`, regex `^\*\*[A-Z]{1,2}\d+(\.\d+)*\.\s`) vira um cartão (`.md-rule`); a tabela do HISTORICO (primeira coluna "PR") vira um cartão por PR (`.md-entry`, com `dl`). O fosco dos cartões é CSS puro (`backdrop-filter` em `Docs.css`), com a hairline de `.glass::after`. `Docs.tsx` continua dividindo o corpo nos `<h3>` para a montagem adiada (P6).
+- **Cartões (PR #13, DESIGN D29):** o plugin percorre os tokens de primeiro nível do `marked` em ordem (os slugs não mudam) e agrupa o HTML em `div.glass.tint-frost.md-card`. Um `##` (`<h3>`) fica fora, acima dos cartões; um `###` abre um cartão; tabela e mermaid ganham um cartão próprio (`.md-card-wide`); cada item de uma lista de regras (`- **D12. …**`, regex `^\*\*[A-Z]{1,2}\d+(\.\d+)*\.\s`) vira um cartão (`.md-rule`); a tabela do HISTORICO (primeira coluna "PR") vira um cartão por PR (`.md-entry`, com `dl`). O fosco dos cartões é CSS puro (`backdrop-filter` em `Docs.css`). `Docs.tsx` continua dividindo o corpo nos `<h3>` para a montagem adiada (P6).
 - **Mermaid:** o bloco vira uma `figure` com o código legível (é o fallback) e um botão "Desenhar diagrama". O botão importa o mermaid (`src/lib/mermaid.ts`, `securityLevel: "strict"`) e desenha no tema atual; ao trocar o tema, o diagrama é redesenhado.
 - Se um documento novo entrar em `docs/`, ele DEVE ganhar uma linha em `DOC_PAGES` (o build falha sem ela) e um lugar em `ContratoDesign.tsx` ou `ContratoArquitetura.tsx`.
 
@@ -289,7 +289,6 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
   - Órbita: centro (0.5, 0.5), raios 0.26 × 0.14, velocidade 0.5 rad/s.
   - O centro fica preso para o disco caber inteiro no palco (como o `clampBox` do `GlassDemo`).
 - **Correção do oval:** `scaleX = s·min(w,h)/w` e `scaleY = s·min(w,h)/h`.
-- **Hairline:** um `.hero-ring`, que acompanha `x`/`y` pelos eventos `change`, desenha a linha uniforme sobre a lente.
 - **Loop de animação:** `requestAnimationFrame`, pausado quando o hero sai da tela (IntersectionObserver) ou a aba fica oculta (`visibilitychange`).
 - **Ponteiro:**
   - o mouse move a lente;
@@ -308,11 +307,11 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 ### 4.7 Painel (`pages/Painel.tsx`)
 
 - **Palco `#tela`:** um papel de parede (`Picture`) que muda com a hora do dia (manhã: Lençóis; tarde: Rio; noite: aurora), com brilho ajustável.
-- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`[segmentado]` do `vidro.ini`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. Um `.seg-ring` desenha a hairline sobre a lente.
-- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `[widget]` do `vidro.ini` (no escuro, `[widget-escuro]`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`.
+- **Controle segmentado** (`role="radiogroup"`): pílula `<Frost>`; a seleção é uma lente **no lugar** (`[segmentado]` do `vidro.ini`, oval corrigido como no hero da amostra) que desliza com `animateGlassValue` e a mola `EASE`. A pílula de cor é a da barra de cima (`--vidro-tint`).
+- **Widgets de clima e lembrete:** `<Glass refract={cópia da foto do palco}>` com `[widget]` do `vidro.ini` (no escuro, `[widget-escuro]`), geometria medida por ResizeObserver; o texto nítido fica em `.rcard-body`, com a tinta da barra de cima.
 - **Central de controles `#controles`:** uma `GlassSwitch` e um `GlassSlider` do `examples/` do fork (copiados, com o cabeçalho MIT). A cor está em `[controles]` do `vidro.ini`, o `lens` lê `[brilho]` e o `filterResolution` segue o aparelho.
 - **Avisos e widgets:** tudo fosco em CSS (`GlassPanel`): notificações com "Limpar avisos", calendário, baterias, tarefas e previsão de 5 dias.
-- **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com indicador deslizante e `useSectionSpy`. Ela repete as seções; a pílula do topo continua igual à das outras páginas.
+- **Barra de abas:** fixa embaixo (`<Frost>`, `bottom: 12px + safe-bottom`), com a mesma tinta da barra de cima e a mesma pílula de seleção (`--vidro-tint`, texto atual `--bar-text`). Ela repete as seções; a pílula do topo continua igual à das outras páginas.
 - **Montagem adiada (P6):** a lente do segmentado e os widgets montam um por vez depois da primeira pintura (`useDeferredMount`); as chaves e o controle deslizante montam quando a central chega perto da tela (`useNear`), sobre chaves planas do mesmo tamanho, que já funcionam (`role="switch"`).
 
 ### 4.8 Galeria (`pages/Galeria.tsx`)
@@ -402,7 +401,7 @@ Medido no DOM do build da amostra (corpo da página, sem o menu), com iPhone 15 
 Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 
 - **A10. Uma superfície só de fosco (sem refração: `strength: 0`, `dispersion: 0`, `specular: 0`) DEVE usar `<Frost>`, NÃO um `<Glass>` material.**
-  *Por quê (PR #9):* o `<Glass>` material gera um mapa de deslocamento no main thread para cada instância (canvas pixel a pixel e `toDataURL`, um PNG de ~110 KB em data URL). Isso acontece até quando a força é 0, e até no WebKit/Gecko, onde o mapa nem é usado. No Chromium, ele ainda aplica um `backdrop-filter: url(#svg)` que não muda nada visualmente, mas é re-rasterizado a cada quadro de rolagem. O `<Frost>` desenha `blur()` e `saturate()` com `frost` e `saturate` de `[vidro]`, a tinta no `background` do elemento e a hairline no `.glass::after`. A comparação pixel a pixel com o site anterior deu diferença máxima de 0–6/255.
+  *Por quê (PR #9):* o `<Glass>` material gera um mapa de deslocamento no main thread para cada instância (canvas pixel a pixel e `toDataURL`, um PNG de ~110 KB em data URL). Isso acontece até quando a força é 0, e até no WebKit/Gecko, onde o mapa nem é usado. No Chromium, ele ainda aplica um `backdrop-filter: url(#svg)` que não muda nada visualmente, mas é re-rasterizado a cada quadro de rolagem. O `<Frost>` desenha `blur()` e `saturate()` com `frost` e `saturate` de `[vidro]` e a tinta no `background` do elemento. A comparação pixel a pixel com o site anterior deu diferença máxima de 0–6/255.
 - **A11. O `<Glass>` material só DEVE ser montado onde a curvatura ao vivo aparece, ou seja, no Blink.** A detecção DEVE ser a mesma da biblioteca (`useSupportsBackdropUrl` em `src/GlassMaterial.tsx`):
 
   ```ts
@@ -424,7 +423,7 @@ export const CONTROL = { ...NO_SHINE, frost, saturate };                   // [v
 export const FROST   = { ...otica("fosco"), frost, saturate };             // [vidro] + [fosco]
 ```
 
-- **A14. Toda ótica DEVE espalhar `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`).** `otica` faz isso. A hairline DEVE vir do CSS (`.glass::after`).
-  *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também é o ganho do brilho direcional e do glow interno, mas a biblioteca só tira as duas primitivas deles do filtro quando `sheen` e `glow` também são 0 (`hasSpecular = glow > 0 || sheen > 0`). No WebGL, o brilho usa `u_sheen = specular`, que já é 0. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3 e D7.
+- **A14. Toda ótica DEVE espalhar `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`).** `otica` faz isso. A borda do vidro é a da barra de cima: fosco e tinta, sem linha (DESIGN D3).
+  *Por quê:* o `edgeShadow` do material sempre junta um realce de 1 px no topo (`.55·g`) com um aro em volta (`.12·g`), e `specular` é o único controle. Nas lentes, `specular` também é o ganho do brilho direcional e do glow interno, mas a biblioteca só tira as duas primitivas deles do filtro quando `sheen` e `glow` também são 0 (`hasSpecular = glow > 0 || sheen > 0`). No WebGL, o brilho usa `u_sheen = specular`, que já é 0. Com os três em 0, a biblioteca não desenha aro. Veja [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) §3 e D7.
 
 `frostFilter(optics)` em `Frost.tsx` converte a ótica em CSS: `blur(${frost}px) saturate(${saturate})`, com os dois números de `[vidro]` quando a ótica não os traz. Um termo é omitido quando o blur é 0 ou a saturação é 1.

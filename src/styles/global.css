@@ -1,6 +1,6 @@
-/* Shared look for both pages. Edges come from the glass itself (frost, tint),
-   one uniform, very thin, mostly transparent hairline (--rim-w / --rim, drawn
-   by .glass::after) and a soft float shadow.
+/* Shared look for both pages. Edges come from the glass itself: frost and a
+   translucent tint, the same treatment as the top bar, plus a soft float
+   shadow. There is no drawn line on the glass.
 
    ── Browser top/bottom bars (Safari 26 / iOS 26, Android Chrome) ──────────
    • The page background (html::before, a fixed, viewport-tall static SVG of
@@ -43,17 +43,14 @@
   --text-dim:#3a3a3c;
   --faint:#5d5b6e;
   --link:#0a6cff;
+  --bar-text:#0a0b0d;
+  --bar-sub:rgba(0,0,0,.6);
   /* Keyboard focus: never blue (docs/DESIGN-CONTRATO.md N10). A neutral,
      translucent ring in the text colour, like the selected pill's edge. */
   --focus:rgba(28,28,30,.5);
   --gutter-l:max(20px, env(safe-area-inset-left, 0px));
   --gutter-r:max(20px, env(safe-area-inset-right, 0px));
   --glass-float:0 10px 28px rgba(30,20,90,.16), 0 2px 6px rgba(30,20,90,.08);
-  /* The one hairline on every glass edge: a single uniform colour all round
-     (no brighter top), very thin, mostly transparent. 0.5px on 2x+ screens
-     (= one device pixel), 1px on 1x. */
-  --rim-w:1px;
-  --rim:rgba(255,255,255,.18);
   /* The library's own spring curve (glassEase in @samasante/liquid-glass). */
   --glass-ease:cubic-bezier(.34,1.36,.42,1);
 }
@@ -69,8 +66,9 @@
   --text-dim:#d1d1d6;
   --faint:#b3b0c8;
   --link:#64d2ff;
+  --bar-text:#fff;
+  --bar-sub:rgba(255,255,255,.6);
   --focus:rgba(245,245,247,.62);
-  --rim:rgba(255,255,255,.14);
 }
 *{box-sizing:border-box}
 /* html has NO background, so body's background-color becomes the canvas
@@ -96,8 +94,6 @@ body{
   line-height:1.5;
   touch-action:manipulation;
 }
-:root{--sel-bg:rgba(255,255,255,.9);--sel-shadow:0 1px 2px rgba(20,16,60,.08),0 2px 6px rgba(20,16,60,.08)}
-:root[data-theme="dark"]{--sel-bg:rgba(255,255,255,.16);--sel-shadow:0 1px 6px rgba(0,0,0,.28)}
 /* The page background: static, no animation, no JS. Fixed and one large
    viewport tall (100lvh), so it's rasterised once and never resized when the
    iPhone toolbars collapse; scrolling only moves the content over it. */
@@ -157,27 +153,11 @@ code{font-family:ui-monospace,monospace;font-size:.9em} /* SF Mono in Safari; th
   font:16px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
 }
 
-@media (min-resolution:2dppx){:root{--rim-w:.5px}}
-
 /* ── Glass surfaces: <Frost> (CSS frost) and <Glass> (@samasante/liquid-glass) ─
-   Every surface carries .glass. The library's edge layer is `specular`-driven and always pairs a brighter
-   1px top highlight with the all-round rim (src/GlassMaterial.tsx: .55·g on
-   top, .12·g all round), and `specular` is its only knob. So our optics set
-   specular: 0 (src/lib/optics.ts) and the hairline is drawn here, uniform, on
-   its OWN layer (::after, above the content, below nothing), the same way the
-   library keeps its edge "as its own inset layer so it never fights a
-   box-shadow": the float shadow stays on the element's box-shadow. The line
-   sits just OUTSIDE the edge; the one inset exception is the lens ring
-   (.hero-ring in Sample.css), since a box that clips its overflow would cut
-   an outside line. */
+   The edge is the top bar's: frost and the translucent tint. The float shadow
+   stays on the element's box-shadow. [brilho] keeps specular, sheen and glow
+   at 0, so the library draws no edge of its own. */
 .glass{box-shadow:var(--glass-float)}
-.glass::after{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  /* Just OUTSIDE the edge (spread follows the radius): there it reads against
-     the page in both schemes; inside, a white line vanishes on the light,
-     white-frosted fills. */
-  box-shadow:0 0 0 var(--rim-w) var(--rim);
-}
 
 code,kbd{overflow-wrap:anywhere}
 /* Flex and grid children may shrink below their content, so their text wraps. */

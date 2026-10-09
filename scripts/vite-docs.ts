@@ -9,7 +9,7 @@ import type { Plugin } from "vite";
  * `{ id, title, titleHtml, file, html, headings }`: docs/ stays the single source of
  * truth and the pages render the result.
  *
- * - Headings get GitHub-style slugs, prefixed per document (`design-3-hairline…`),
+ * - Headings get GitHub-style slugs, prefixed per document (`design-3-a-borda-do-vidro…`),
  *   so the anchors the docs already use (`ARQUITETURA.md#6-onde-há-glass…`)
  *   still resolve; the document's own `#` title gets the bare prefix and is
  *   returned apart (`titleHtml`: the page shows it, then the section chips).

@@ -54,9 +54,9 @@ html{scroll-behavior:smooth}
 .md{font-size:15.5px;line-height:1.6;color:var(--text);overflow-wrap:anywhere}
 .md > :first-child > :first-child{margin-top:0}
 /* The cards (D29): the site's frost (blur and saturate from vidro.ini,
-   tint-frost, one uniform hairline from .glass::after), one radius, one padding
-   and one gap for all of them. Section headings (<h3>) sit between them, on the
-   page. Anchors land under the pill (scroll-padding). */
+   tint-frost), one radius, one padding and one gap for all of them. Section
+   headings (<h3>) sit between them, on the page. Anchors land under the pill
+   (scroll-padding). */
 .md-card{position:relative;margin:0 0 12px;padding:18px clamp(16px, 3.4vw, 24px);border-radius:20px;min-width:0;
   -webkit-backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate));backdrop-filter:blur(var(--vidro-frost)) saturate(var(--vidro-saturate))}
 .md-card > :last-child,.md-card > :last-child > :last-child{margin-bottom:0}

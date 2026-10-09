@@ -6,7 +6,7 @@ Este documento fixa a linguagem visual do projeto. Os números do vidro estão e
 
 **A translucidez e o vídeo são o foco do projeto** (decisão do usuário, registrada no PR #15). Quando duas escolhas disputarem, vence a que deixa o vidro mais translúcido e a refração mais viva sobre imagem em movimento. Hoje o vídeo aparece como a apresentação da Galeria (fotos com zoom lento desenhadas pelo WebGL); um recurso de vídeo de verdade (`<Glass src>` com um arquivo de vídeo) fica para um PR próprio.
 
-1. **As bordas vêm do vidro,** não de linhas desenhadas: fosco, tinta translúcida, refração onde ela aparece e uma sombra de flutuação suave. A única linha é uma hairline uniforme, fina e quase transparente.
+1. **As bordas vêm do vidro,** não de linhas desenhadas: fosco, tinta translúcida, refração onde ela aparece e uma sombra de flutuação suave. O vidro não leva linha.
 2. **O fundo é cor desfocada:** campos de cor orgânicos e muito desfocados, sem bordas nítidas, discos ou fotos de fundo. Ele termina, em cima e embaixo, na cor das barras do navegador.
 3. **Os controles flutuam:** nada sólido encosta nas bordas da tela.
 4. **Uma coisa por lugar:** o menu é a pesquisa, e a lupa abre e fecha. Não há painéis extras, "…", barra de baixo nem marca. Componentes de exemplo dentro de uma página (a barra de abas do painel, os chips da galeria) são conteúdo: eles não substituem a pílula, que continua igual no topo.
@@ -44,36 +44,26 @@ Este documento fixa a linguagem visual do projeto. Os números do vidro estão e
 
 A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radiais (`#ffb3d9`, `#9ecbff`, `#c9a4ff`, `#8ff0d0`, `#ffe1a8`) sobre `linear-gradient(135deg, #fbe3f1, #e4dcff)`. A cor de borda é `--band-edge: #eadcf6`, e é ela que entra no `behind` do `refract`.
 
-## 3. Hairline (a única linha do vidro)
+## 3. A borda do vidro
+
+A borda é a da barra de cima: fosco (`blur` e `saturate` de `[vidro]`) e a tinta translúcida (`--vidro-tint`). A sombra de flutuação fica no `box-shadow` do elemento. Não há linha desenhada no vidro.
 
 ```css
-:root { --rim-w: 1px; --rim: rgba(255,255,255,.18); }
-:root[data-theme="dark"] { --rim: rgba(255,255,255,.14); }
-@media (min-resolution: 2dppx) { :root { --rim-w: .5px; } }
-
 .glass { box-shadow: var(--glass-float); }
-.glass::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  box-shadow: 0 0 0 var(--rim-w) var(--rim);   /* logo FORA da borda */
-}
 ```
 
-- **D3. Todo vidro DEVE ter exatamente uma hairline, com uma cor só em volta toda,** desenhada em camada própria (`::after`). O `box-shadow` do elemento fica reservado para a sombra de flutuação.
-  - **Exceção: o menu (pílula, lista ☰ e os três botões).** Não levam `.glass::after`. O fosco deles é `blur()` e `saturate()` (D9.1).
-  *Por quê:* é o mesmo princípio do fork, que desenha a borda "as its own inset layer so it never fights a box-shadow". O PR #6 fixou a linha uniforme.
-- **D4. A espessura DEVE ser `1px` em telas 1× e `0.5px` em telas ≥ 2dppx** (um pixel físico).
-- **D5. A linha DEVE ficar logo fora da borda** (`0 0 0 var(--rim-w)`, sem `inset`).
-  *Por quê:* por fora, ela aparece contra o fundo nos dois temas. Por dentro, uma linha branca some nos preenchimentos claros e foscos.
-  - **Exceção:** um elemento que recorta o próprio conteúdo (`overflow: hidden` ou `clip-path`) cortaria a linha de fora. Nesse caso, a mesma linha DEVE ir por dentro (`inset`). Hoje isso acontece só no `.hero-ring` (`box-shadow: inset 0 0 0 var(--rim-w) var(--rim)`), o anel que acompanha a lente.
-- **D6. É PROIBIDO:**
+- **D3. O vidro NÃO DEVE ter linha.** A forma vem do fosco, da tinta e da sombra de flutuação. O `box-shadow` do elemento fica reservado para essa sombra.
+  *Por quê:* é a borda da barra de cima, e vale para o vidro do site.
+- **D4. A seleção DEVE ser a pílula da barra de cima:** `background: var(--vidro-tint)`, sem sombra e sem linha. O item atual usa `--bar-text` em peso 600; os outros usam `--bar-sub`. Vale para `.sh-indicator`, a barra de abas do Painel (`.tab-ind`), o controle segmentado (`.seg-ind`), os chips da Galeria e o corpo nítido dos widgets (`.rcard-body`, `.gcard-body`).
+- **D5. A tinta da seleção é a de `[vidro]`** (`tintClaro` no claro, `tintEscuro` no escuro), a mesma `--vidro-tint` da barra.
+- **D6. É PROIBIDO no vidro:**
+  - uma linha de borda, em volta ou por dentro;
   - um realce mais claro no topo (o `specular` > 0 da biblioteca);
   - "luz interna" em CSS;
   - linha escura ou bisel;
   - pilhas de bordas.
 
-  *Por quê:*
-  - O PR #5 voltou com o aro padrão da biblioteca, mas ele sempre traz o realce de topo (`inset 0 1px 0 rgba(255,255,255,.55·g)`). O PR #6 trocou por uma linha uniforme, que é o pedido de design.
-  - Nos cartões `refract`, a pilha de bordas do `GlassNotification` (brilho no topo, realce branco interno, glow e linha escura) foi reduzida à mesma hairline: `.gcard-body { box-shadow: 0 0 0 var(--rim-w) var(--rim), 0 14px 36px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.14) }`.
+  *Por quê:* a borda da barra de cima não tem linha. `[brilho]` deixa `specular`, `sheen` e `glow` em 0, então a biblioteca também não desenha aro.
 - **D7. Toda ótica DEVE usar `[brilho]` do `vidro.ini` (`specular`, `sheen` e `glow`).** `otica` aplica essa seção em `CONTROL`, `FROST` e em cada lente: `[titulo]`, `[faixa]`, `[segmentado]`, `[widget]`, `[visor]`, `[trilha]`, `[lupa]`. A chave e o controle deslizante recebem o mesmo `[brilho]` em `lens`.
   *Por quê:* com `specular: 0` o ganho do brilho já é zero, mas a biblioteca só pula as duas primitivas do brilho (`feColorMatrix` + `feComposite`) quando `glow` e `sheen` também são 0 (`hasSpecular = glow > 0 || sheen > 0`, `src/Glass.tsx`). No PR #15 as 96 capturas de antes e depois (3 contextos, 2 temas, 4 páginas, 4 posições) ficaram idênticas pixel a pixel, o filtro da lente do título da Amostra caiu de 19 para 17 primitivas e o fps dela subiu de 10,3 para 13,7 no iPhone emulado no Chromium ([DESEMPENHO.md](DESEMPENHO.md) §3.4).
 
@@ -149,8 +139,6 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 |---|---|---|
 | `--bar-bg` (`.tint-bar`) | `tintClaro` de `[vidro]` | `tintEscuro` de `[vidro]` |
 | `--bar-text` / `--bar-sub` | `#0a0b0d` / `rgba(0,0,0,.6)` | `#fff` / `rgba(255,255,255,.6)` |
-| `--sel-bg` (barra de abas do Painel, chips da Galeria) | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
-| `--sel-shadow` | `0 1px 2px rgba(20,16,60,.1), 0 3px 10px rgba(20,16,60,.1)` | `0 2px 10px rgba(0,0,0,.3)` |
 
 - **D9. O menu DEVE ser uma pílula flutuante, afastada 12px das laterais e 12px abaixo da safe area. Ela NÃO DEVE encostar no topo.**
   *Por quê:* o Safari 26 leva a cor de elementos fixos que encostam na borda para a barra do navegador. A barra de largura total do PR #7 foi revertida no PR #8. Veja [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md).
@@ -166,7 +154,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - a lupa, que é **o último botão à direita**.
 
   *Por quê:* pedido de design do PR #8.
-- **D11.1. Os itens da pílula DEVEM ter um espaçamento só, `--pill-gap: 6px`** (definido em `.site-header`): entre o ☰ e o primeiro link, entre os links, entre o último link visível e o tema, e entre o tema e a lupa. Os links mantêm o `padding` deles (a pílula de seleção não muda); NÃO use outro `gap` nem `margin` nos itens. A única exceção é o `.sh-nav`, que rola e por isso corta o que passa da borda: ele tem `padding: 9px var(--pill-gap)` com `margin: 0 calc(-1 * var(--pill-gap))`, para ocupar a altura da pílula e deixar espaço para a sombra da pílula de seleção sem mover nenhum item. A sombra (`--sel-shadow`) é curta, até 8px, para caber nesse espaço.
+- **D11.1. Os itens da pílula DEVEM ter um espaçamento só, `--pill-gap: 6px`** (definido em `.site-header`): entre o ☰ e o primeiro link, entre os links, entre o último link visível e o tema, e entre o tema e a lupa. Os links mantêm o `padding` deles (a pílula de seleção não muda); NÃO use outro `gap` nem `margin` nos itens. A única exceção é o `.sh-nav`, que rola e por isso corta o que passa da borda: ele tem `padding: 9px var(--pill-gap)` com `margin: 0 calc(-1 * var(--pill-gap))`, para ocupar a altura da pílula.
   *Por quê:* pedido de design no PR #16: o espaço entre o tema e a lupa era o certo e passou a valer para o menu todo. Antes eram 14px (8px no celular) entre os blocos e 2px entre os links.
 - **D12. Os links da pílula DEVEM ser só as seções da página** (os que rolam dentro dela). Os links para outras páginas NÃO DEVEM ficar na pílula: eles ficam na lista de páginas (D12.2). Cada página passa a lista de seções em `items`; a lista de páginas vem de `PAGES`. Só seções recebem seleção e scroll-spy.
   *Por quê:* no PR #12 as outras páginas ficavam no fim da pílula, depois de um ponto; no PR #13 elas saíram da pílula, a pedido, para que ela role só pelas seções e a navegação entre páginas fique num lugar próprio.
@@ -228,7 +216,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - cada PR do histórico é um cartão (`.md-entry`);
   - o resto entre dois desses fica num cartão só.
 
-  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (`frost` e `saturate` de `[vidro]`) e a hairline de `.glass::after`.
+  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`) e fosco (`frost` e `saturate` de `[vidro]`).
 - **D30. Nenhum texto DEVE passar da largura da tela ou do seu cartão:** ele quebra a linha.
   - `body` tem `overflow-wrap: break-word`; `code` e `kbd`, `overflow-wrap: anywhere`; `p`, `li`, `dd`, `dt`, títulos e `figcaption` têm `min-width: 0` (dentro de flex e grid eles podem encolher).
   - Blocos de código quebram dentro do cartão (`white-space: break-spaces`, `overflow-wrap: anywhere`), mantendo a indentação. No celular (≤ 700px), o código em linha usa `word-break: break-all`, porque o WebKit deixava o padding de 6px de um trecho no fim da linha passar 2–4px do cartão.
@@ -238,7 +226,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 ## 10. Foco de teclado
 
 - **D31. É PROIBIDO foco azul em qualquer lugar.** O foco de teclado DEVE ser uma indicação neutra e translúcida, do mesmo vidro:
-  - na pílula do menu, na lista ☰, na pesquisa (▲▼✕), nos chips da Galeria e na barra de abas do Painel: um aro interno `inset 0 0 0 1.5px var(--bar-sub)`, sem `outline`; num item já selecionado, o aro se soma a `--sel-shadow` (a pílula de seleção);
+  - na pílula do menu, na lista ☰, na pesquisa (▲▼✕), nos chips da Galeria e na barra de abas do Painel: um aro interno `inset 0 0 0 1.5px var(--bar-sub)`, sem `outline`;
   - no resto (links do texto, controle segmentado, switch, slider, cartões da Galeria, foto da lupa, botões): `outline: 2px solid var(--focus)` (3px nos cartões e na foto), com `outline-offset`;
   - sobre foto (os botões do visor da Galeria): `--focus-on-photo`, branco translúcido;
   - o anel só aparece com `:focus-visible` (teclado), nunca num toque.
@@ -259,8 +247,8 @@ O azul que continua no site é preenchimento, não foco: o trilho ligado do swit
 |---|---|---|---|
 | N1 | Script caseiro que "transforma" elementos em vidro, ou bundle vendorizado da biblioteca | Não é o uso que a biblioteca orienta, e é difícil de manter. Use componentes React com `<Glass>` | PRs #1–#3 → #4 |
 | N2 | Dependência GitHub da biblioteca | O fork não versiona `dist/` e não tem `prepare`, então o pacote viria vazio | PR #4 |
-| N3 | Tirar toda a borda do vidro | O vidro perde a forma. Deve haver exatamente uma hairline | PR #2 → #5 |
-| N4 | Realce de topo na hairline (`specular` > 0) ou luz interna em CSS | A linha deve ser uniforme em volta toda | PR #5 → #6 |
+| N3 | Uma linha desenhada na borda do vidro | A borda é o fosco e a tinta da barra de cima (D3) | a barra de cima |
+| N4 | Realce de topo (`specular` > 0) ou luz interna em CSS | `[brilho]` fica em 0. A biblioteca não desenha aro | PR #15 |
 | N5 | Manchas ou discos de **borda nítida**, círculos limpos ou wallpapers no fundo (campos orgânicos desfocados são permitidos desde o PR #14, D1) | Viram formas distorcidas sob o vidro | PRs #1–#2 → #3, revisto no #14 |
 | N6 | Menu que recolhe em "…" com popover | O menu deve ser igual em toda a página | PRs #3–#6 → #7 |
 | N7 | Barra de pesquisa fixa embaixo, ou painel separado de pesquisa | A pesquisa é a própria pílula | PRs #3–#7 → #8 |

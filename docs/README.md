@@ -57,7 +57,7 @@ Um site estático de seis páginas, em pt-BR, feito como app **React 19 + Vite +
 | Documento | Conteúdo |
 |---|---|
 | [ARQUITETURA.md](ARQUITETURA.md) | Stack e versões exatas, estrutura de pastas, entradas do Vite, componentes, fluxo de dados, como a biblioteca entra e onde `<Glass>` é usado |
-| [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) | Linguagem visual com os valores do código: fundo, hairline, fosco, tintas, menu, pesquisa, tema, fotos, texto e o que **não** fazer |
+| [DESIGN-CONTRATO.md](DESIGN-CONTRATO.md) | Linguagem visual com os valores do código: fundo, borda do vidro, fosco, tintas, menu, pesquisa, tema, fotos, texto e o que **não** fazer |
 | [TELA-CHEIA-E-BARRAS.md](TELA-CHEIA-E-BARRAS.md) | Tela de ponta a ponta, safe areas, `dvh`/`svh`, `theme-color`, cor antes da primeira pintura, Safari 26 e Android |
 | [DESEMPENHO.md](DESEMPENHO.md) | Diagnóstico e números dos PRs #9 e #12, regras de desempenho, limites conhecidos e orçamento por página |
 | [DEPLOY.md](DEPLOY.md) | GitHub Pages via Actions, passos do workflow, cache, como verificar um deploy e como regenerar as imagens |

@@ -3,12 +3,6 @@
   --bar-r:max(12px, env(safe-area-inset-right, 0px), calc((100% - 1040px) / 2));
   --bar-top:calc(12px + env(safe-area-inset-top, 0px));
   --bar-pad:9px;
-  --bar-text:#0a0b0d;
-  --bar-sub:rgba(0,0,0,.6);
-}
-:root[data-theme="dark"]{
-  --bar-text:#fff;
-  --bar-sub:rgba(255,255,255,.6);
 }
 .site-header,.sh-glass,.sh-picker,.sh-indicator{background:var(--vidro-tint)}
 .sh-band{

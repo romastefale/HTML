@@ -95,7 +95,6 @@ const Segmented: React.FC<{ value: Period; onChange: (p: Period) => void }> = ({
   const fr = useFilterResolution();
   const btns = useRef<(HTMLButtonElement | null)[]>([]);
   const indRef = useRef<HTMLSpanElement>(null);
-  const ringRef = useRef<HTMLSpanElement>(null);
   // The lens mounts after the first paint (P6); until then the same scene sits flat.
   const lensOn = useDeferredMount();
   const segW = box.w / n;
@@ -112,12 +111,11 @@ const Segmented: React.FC<{ value: Period; onChange: (p: Period) => void }> = ({
     return () => a.stop();
   }, [idx, n, reduce, x]);
 
-  // The flat selected pill and the hairline ring ride the lens centre.
+  // The selected pill rides the lens centre.
   useLayoutEffect(() => {
     const place = () => {
       const left = x.get() * box.w - lensW / 2;
       if (indRef.current) indRef.current.style.transform = `translateX(${left}px)`;
-      if (ringRef.current) ringRef.current.style.transform = `translateX(${left}px)`;
     };
     place();
     return x.on("change", place);
@@ -167,7 +165,6 @@ const Segmented: React.FC<{ value: Period; onChange: (p: Period) => void }> = ({
             </div>
           </SegLens>
         )}
-        {box.w > 0 && <span ref={ringRef} className="seg-ring" aria-hidden="true" style={{ width: lensW, height: lensH }} />}
       </div>
     </Frost>
   );

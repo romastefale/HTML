@@ -61,22 +61,6 @@ const Hero: React.FC = () => {
 
   const size = box.w ? Math.round(Math.max(130, Math.min(200, box.w * 0.42))) : 200;
 
-  // Keep the hairline ring on the lens: same centre fraction × stage box.
-  const ringRef = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const place = () => {
-      const el = ringRef.current;
-      if (el) el.style.transform = `translate(${x.get() * box.w - size / 2}px, ${y.get() * box.h - size / 2}px)`;
-    };
-    place();
-    const offX = x.on("change", place);
-    const offY = y.on("change", place);
-    return () => {
-      offX();
-      offY();
-    };
-  }, [x, y, box, size]);
-
   // De-oval the objectBoundingBox bend on a non-square box (same as the docs hero).
   const optics = useMemo(() => {
     const { w, h } = box;
@@ -221,7 +205,6 @@ const Hero: React.FC = () => {
             </div>
           </div>
         </Glass>
-        {box.w > 0 && <div ref={ringRef} className="hero-ring" aria-hidden="true" style={{ width: size, height: size }} />}
       </div>
       <div className="hero-actions">
         <GlassPill tint="tint-blue">

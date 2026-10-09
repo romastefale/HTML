@@ -321,7 +321,7 @@ const Viewer: React.FC<{ index: number; setIndex: (i: number) => void }> = ({ in
           {index + 1} de {PHOTOS.length}
         </span>
       </div>
-      {/* Crisp controls over the lenses (+ the uniform hairline rings). */}
+      {/* Crisp controls over the lenses. */}
       <button type="button" className="vw-btn" style={ctl(0.5 - GAP, SKIP)} onClick={() => go(-1)} aria-label="Foto anterior">
         {Icon.prev}
       </button>
@@ -479,7 +479,6 @@ const SheetBody: React.FC<{ photo: Photo; onClose: () => void; onView: () => voi
               }
               style={{ position: "absolute", inset: 0, borderRadius: r }}
             />
-            <span className="loupe-ring" aria-hidden="true" />
           </div>
         )}
       </div>
