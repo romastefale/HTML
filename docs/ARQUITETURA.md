@@ -259,7 +259,7 @@ Os detalhes de interação estão em [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILID
 
 - A busca começa a partir de 2 caracteres, com debounce de 160 ms.
 - As ocorrências são destacadas com a CSS Custom Highlight API. Onde ela não existe, caixas são desenhadas por cima do texto (portal em `body`).
-- O rodapé da amostra (o link de voltar) está **fora** do `<main>` e, por isso, não entra na pesquisa. Não há rodapé de créditos: autor e licença ficam na legenda da foto e em `public/img/CREDITS.md`.
+- O rodapé da amostra está **fora** do `<main>` e, por isso, não entra na pesquisa.
 
 ### 4.3 Tema
 
@@ -269,15 +269,15 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 
 ### 4.4 Páginas
 
-- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, a seção `#paginas` ("Páginas do portal", um cartão-link `GlassPanel` para cada página de `PAGES`), seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`). Não há rodapé de créditos.
+- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, a seção `#paginas` ("Páginas do portal", um cartão-link `GlassPanel` para cada página de `PAGES`), seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`).
 - **`Sample`:**
   - um `Hero` com a lente no lugar e duas `GlassPill`;
   - a seção de componentes, com três `BandCard` sobre `.band` e três `GlassPill`;
   - a seção de lugares, com três `Place` (`Picture` + `GlassCaption`);
   - a seção de suporte, com quatro `Note` (`GlassPanel`);
-  - o rodapé em `GlassPanel` (só o link de voltar; sem créditos).
+  - o rodapé em `GlassPanel`.
 
-- **`Painel`** (§4.7), **`Galeria`** (§4.8) e **`DocsPage`** (§4.9) usam o mesmo esqueleto: link de pular, `SiteHeader` e `main#conteudo`. Os créditos das fotos não vão no rodapé.
+- **`Painel`** (§4.7), **`Galeria`** (§4.8) e **`DocsPage`** (§4.9) usam o mesmo esqueleto: link de pular, `SiteHeader` e `main#conteudo`.
 
 ### 4.5 A lente do título (`Hero`)
 

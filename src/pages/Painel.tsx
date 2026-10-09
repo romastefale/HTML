@@ -414,7 +414,7 @@ const ControlCenter: React.FC<{
         <Tile
           icon={<svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M7 14.5h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>}
           title="Crédito da foto"
-          sub={showCaption ? "Legenda sobre a foto" : "Só no rodapé"}
+          sub={showCaption ? "Legenda sobre a foto" : "Texto de crédito no repositório, se quiser ler"}
         >
           {on2 ? <GlassSwitch {...common} checked={showCaption} onCheckedChange={setShowCaption} ariaLabel="Crédito da foto na tela" activeColor="#0a84ff" /> : <StandIn on={showCaption} color="#0a84ff" label="Crédito da foto na tela" onToggle={setShowCaption} />}
         </Tile>
