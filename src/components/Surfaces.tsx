@@ -71,5 +71,3 @@ export const Picture: React.FC<{
 
 export const asset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 export const HOME_URL = import.meta.env.BASE_URL;
-export const SAMPLE_URL = `${import.meta.env.BASE_URL}liquid-glass-sample.html`;
-export const CREDITS_URL = `${import.meta.env.BASE_URL}img/CREDITS.md`;

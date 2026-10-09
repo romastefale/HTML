@@ -126,8 +126,6 @@ export default defineConfig({
   ```ts
   export const asset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
   export const HOME_URL = import.meta.env.BASE_URL;
-  export const SAMPLE_URL = `${import.meta.env.BASE_URL}liquid-glass-sample.html`;
-  export const CREDITS_URL = `${import.meta.env.BASE_URL}img/CREDITS.md`;
   ```
 
   *Por quê:* um site de projeto no Pages fica em `/<repo>/`. Um caminho absoluto `/img/...` daria 404.
@@ -235,12 +233,12 @@ O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre
 
 | Página | Seções na pílula |
 |---|---|
-| Início | Início (`#topo`), Páginas, Menu, Busca, Fundo, Cartões, Céu noturno, Créditos |
-| Amostra | Lente (`#topo`), Componentes, Lugares, Suporte, Créditos |
-| Painel | Tela, Controles, Avisos, Widgets, Créditos |
-| Galeria | Visor, Coleção, Como funciona, Créditos |
-| Contrato de design | Visão geral, Design, Tela cheia, Acessibilidade, Créditos |
-| Arquitetura e operação | Arquitetura, Desempenho, Deploy, Checklist, Histórico, Créditos |
+| Início | Início (`#topo`), Páginas, Menu, Busca, Fundo, Cartões, Céu noturno |
+| Amostra | Lente (`#topo`), Componentes, Lugares, Suporte |
+| Painel | Tela, Controles, Avisos, Widgets |
+| Galeria | Visor, Coleção, Como funciona |
+| Contrato de design | Visão geral, Design, Tela cheia, Acessibilidade |
+| Arquitetura e operação | Arquitetura, Desempenho, Deploy, Checklist, Histórico |
 
 Estado interno:
 
@@ -261,7 +259,7 @@ Os detalhes de interação estão em [ACESSIBILIDADE-E-INTERACAO.md](ACESSIBILID
 
 - A busca começa a partir de 2 caracteres, com debounce de 160 ms.
 - As ocorrências são destacadas com a CSS Custom Highlight API. Onde ela não existe, caixas são desenhadas por cima do texto (portal em `body`).
-- O rodapé da amostra (`footer#creditos`) está **fora** do `<main>` e, por isso, não entra na pesquisa.
+- O rodapé da amostra (o link de voltar) está **fora** do `<main>` e, por isso, não entra na pesquisa. Não há rodapé de créditos: autor e licença ficam na legenda da foto e em `public/img/CREDITS.md`.
 
 ### 4.3 Tema
 
@@ -271,15 +269,15 @@ O estado inicial vem de `<html data-theme>`, já definido pelo script inline. En
 
 ### 4.4 Páginas
 
-- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, a seção `#paginas` ("Páginas do portal", um cartão-link `GlassPanel` para cada página de `PAGES`), seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`) e o rodapé em `GlassPanel`.
+- **`Home`:** um link "Pular para o conteúdo", o `SiteHeader` e `<main class="feed" id="conteudo">`. Dentro do `main` ficam um `GlassPanel` de introdução, a seção `#paginas` ("Páginas do portal", um cartão-link `GlassPanel` para cada página de `PAGES`), seis `Card` (que são `GlassPanel`), três `Photo` (`Picture` + `GlassCaption`). Não há rodapé de créditos.
 - **`Sample`:**
   - um `Hero` com a lente no lugar e duas `GlassPill`;
   - a seção de componentes, com três `BandCard` sobre `.band` e três `GlassPill`;
   - a seção de lugares, com três `Place` (`Picture` + `GlassCaption`);
   - a seção de suporte, com quatro `Note` (`GlassPanel`);
-  - o rodapé em `GlassPanel`.
+  - o rodapé em `GlassPanel` (só o link de voltar; sem créditos).
 
-- **`Painel`** (§4.7), **`Galeria`** (§4.8) e **`DocsPage`** (§4.9) usam o mesmo esqueleto: link de pular, `SiteHeader`, `main#conteudo` e rodapé de créditos.
+- **`Painel`** (§4.7), **`Galeria`** (§4.8) e **`DocsPage`** (§4.9) usam o mesmo esqueleto: link de pular, `SiteHeader` e `main#conteudo`. Os créditos das fotos não vão no rodapé.
 
 ### 4.5 A lente do título (`Hero`)
 
@@ -367,13 +365,13 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 |---|---|---|---|---|
 | Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
 | Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[vidro]` e `[menu]` | todas |
-| Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
+| Introdução e cartões | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
 | Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE`, com o `frost` do `vidro.ini` (`saturate` 1.15) | Amostra |
 | Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
 | Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
-| Cartões do portal, documentos, avisos, widgets, notas e rodapés | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
+| Cartões do portal, documentos, avisos, widgets e notas | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
 | Pílula do segmentado, barra de abas, barra de chips | `<Frost>` | `.tint-control` / `.tint-bar` | `FROST` | Painel, Galeria |
 | Seleção do segmentado | `Segmented` | `<Glass>` no lugar | `SEG_LENS` | Painel |
 | Widgets de clima e lembrete (2) | `RefractCard` | `<Glass refract behind>` | `WIDGET_LENS` | Painel |

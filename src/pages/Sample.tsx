@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { Glass, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { NO_SHINE } from "../lib/optics";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { GlassCaption, GlassPanel, Picture, CREDITS_URL, HOME_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture, HOME_URL } from "../components/Surfaces";
 import { GlassPill } from "../components/GlassPill";
 import { useMediaQuery, useReducedMotion } from "../lib/useMedia";
 import "./Sample.css";
@@ -13,7 +13,6 @@ const NAV: NavItem[] = [
   { href: "#componentes", label: "Componentes" },
   { href: "#lugares", label: "Lugares" },
   { href: "#suporte", label: "Suporte" },
-  { href: "#creditos", label: "Créditos" },
 ];
 
 // ── Hero: an IN-PLACE lens (geometry + children), the fork's docs hero
@@ -445,16 +444,11 @@ export const Sample: React.FC = () => {
         </section>
       </main>
 
-      <footer className="site-footer" id="creditos">
+      <footer className="site-footer">
         <div className="wrap">
           <GlassPanel className="foot-glass">
             <div className="foot">
               <a href={HOME_URL}>← Voltar para a página inicial</a>
-              <span>
-                Efeito: <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante), pacote{" "}
-                <code>@samasante/liquid-glass</code> 0.1.1. Fotos: Wikimedia Commons, créditos e licenças em{" "}
-                <a href={CREDITS_URL}>CREDITS.md</a>.
-              </span>
             </div>
           </GlassPanel>
         </div>

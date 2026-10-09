@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { GlassCaption, GlassPanel, Picture, CREDITS_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture } from "../components/Surfaces";
 import { page, type PageKey } from "../lib/pages";
 import { useThemeName } from "../lib/theme";
 import { drawMermaid } from "../lib/mermaid";
@@ -112,10 +112,7 @@ export const DocsPage: React.FC<{
   hero: Skyline;
 }> = ({ self, eyebrow, lead, docs, hero }) => {
   const info = page(self);
-  const nav: NavItem[] = [
-    ...docs.map(({ doc, label }) => ({ href: `#${doc.id}`, label })),
-    { href: "#creditos", label: "Créditos" },
-  ];
+  const nav: NavItem[] = docs.map(({ doc, label }) => ({ href: `#${doc.id}`, label }));
   const mainRef = useRef<HTMLElement>(null);
   const theme = useThemeName();
 
@@ -134,7 +131,6 @@ export const DocsPage: React.FC<{
     mainRef.current?.querySelectorAll<HTMLElement>("[data-mermaid][data-drawn]").forEach((f) => void drawMermaid(f));
   }, [theme]);
 
-  const skylines = [hero, ...docs.flatMap((d) => (d.before ? [d.before] : []))];
   return (
     <>
       <a className="skip" href="#conteudo">
@@ -164,24 +160,6 @@ export const DocsPage: React.FC<{
             <DocSection doc={doc} />
           </React.Fragment>
         ))}
-
-        <GlassPanel className="doc-glass">
-          <footer className="doc-foot" id="creditos">
-            <h2>Créditos</h2>
-            <p>
-              O texto desta página é o conteúdo de <code>docs/</code> no repositório, convertido no build
-              (<code>scripts/vite-docs.ts</code>): mudou o arquivo, mudou a página. Fotos de horizontes do Wikimedia
-              Commons, recortadas em 16:9 e redimensionadas; licenças em <a href={CREDITS_URL}>CREDITS.md</a>.
-            </p>
-            <ul>
-              {skylines.map((s) => (
-                <li key={s.name}>
-                  <strong>{s.place}</strong>: {s.credit}
-                </li>
-              ))}
-            </ul>
-          </footer>
-        </GlassPanel>
       </main>
     </>
   );

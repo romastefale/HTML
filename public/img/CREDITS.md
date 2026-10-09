@@ -25,6 +25,6 @@ Os fundos das páginas são gradientes CSS (`src/styles/global.css`), sem imagen
 | `hong-kong-noite-tufao.jpg` | `contrato-arquitetura.html` | Arranha-céus de Hong Kong numa noite de tufão | Wilfredor | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [File:Hong Kong skyscrapers in a night of typhoon.jpg](https://commons.wikimedia.org/wiki/File:Hong_Kong_skyscrapers_in_a_night_of_typhoon.jpg) |
 
 As fotos CC BY e CC BY-SA (Santorini, São Paulo, Nova York, Tóquio, Chicago e Singapura) exigem atribuição: autor e licença
-aparecem na legenda de vidro da própria foto e no rodapé de créditos de cada página que a usa. As versões recortadas e
+aparecem na legenda de vidro da própria foto. A lista completa está neste arquivo, no repositório; as páginas não repetem o crédito no rodapé. As versões recortadas e
 redimensionadas (JPEG, AVIF e WebP) continuam sob a mesma licença da original (CC BY-SA 3.0/4.0 ou CC BY 4.0).
 As demais (CC0 e domínio público) não exigem atribuição, mas também têm crédito nas legendas.

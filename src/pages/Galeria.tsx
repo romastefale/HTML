@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { Glass, type GlassOptics, type GlassSurfaceLens } from "@samasante/liquid-glass";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
-import { GlassCaption, GlassPanel, Picture, CREDITS_URL, WIDTHS, asset } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture, WIDTHS, asset } from "../components/Surfaces";
 import { FROST, NO_SHINE, PANEL } from "../lib/optics";
 import { useReducedMotion } from "../lib/useMedia";
 import { softwareGL, useBox, useFilterResolution, useOnScreen } from "../lib/device";
@@ -27,7 +27,6 @@ const SECTIONS = [
   { href: "#visor", label: "Visor" },
   { href: "#colecao", label: "Coleção" },
   { href: "#como", label: "Como funciona" },
-  { href: "#creditos", label: "Créditos" },
 ];
 const NAV: NavItem[] = SECTIONS;
 
@@ -660,20 +659,6 @@ export const Galeria: React.FC = () => {
             </GlassPanel>
           </div>
         </section>
-
-        <GlassPanel className="gl-foot-glass">
-          <footer className="gl-foot" id="creditos">
-            <strong>Créditos.</strong> Fotos do Wikimedia Commons; licenças em <a href={CREDITS_URL}>CREDITS.md</a>.{" "}
-            {PHOTOS.map((p, i) => (
-              <React.Fragment key={p.name}>
-                {i > 0 && " · "}
-                {p.title}: <Credit p={p} />
-              </React.Fragment>
-            ))}
-            . Óticas do visor: <code>examples/GlassVideoControls</code> do{" "}
-            <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT © Sam Asante).
-          </footer>
-        </GlassPanel>
       </main>
       <Sheet
         photo={open === null ? null : PHOTOS[open]}

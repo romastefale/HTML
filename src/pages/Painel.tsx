@@ -2,7 +2,7 @@ import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } f
 import { Glass, animateGlassValue, cubicBezier, glassValue, type GlassOptics } from "@samasante/liquid-glass";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
 import { Frost } from "../components/Frost";
-import { GlassCaption, GlassPanel, Picture, CREDITS_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture } from "../components/Surfaces";
 import { GlassSwitch } from "../components/examples/GlassSwitch";
 import { GlassSlider } from "../components/examples/GlassSlider";
 import { FROST, NO_SHINE } from "../lib/optics";
@@ -31,10 +31,7 @@ const SECTIONS = [
   { id: "avisos", label: "Avisos" },
   { id: "widgets", label: "Widgets" },
 ] as const;
-const NAV: NavItem[] = [
-  ...SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.label })),
-  { href: "#creditos", label: "Créditos" },
-];
+const NAV: NavItem[] = SECTIONS.map((s) => ({ href: `#${s.id}`, label: s.label }));
 
 type Period = "manha" | "tarde" | "noite";
 const PERIODS: { key: Period; label: string }[] = [
@@ -638,20 +635,6 @@ export const Painel: React.FC = () => {
           <p className="sub">Calendário, baterias, lembretes e previsão: superfícies planas, todas em fosco CSS.</p>
           <Widgets />
         </section>
-
-        <GlassPanel className="pn-foot-glass">
-          <footer className="pn-foot" id="creditos">
-            Fotos do Wikimedia Commons (créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>):{" "}
-            {PERIODS.map((p, i) => (
-              <React.Fragment key={p.key}>
-                {i > 0 && "; "}
-                {WALLS[p.key].place}, {WALLS[p.key].credit}
-              </React.Fragment>
-            ))}
-            . Chave e controle deslizante: receitas do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a>{" "}
-            (MIT © Sam Asante), copiadas sem alteração.
-          </footer>
-        </GlassPanel>
       </main>
       <TabBar />
     </>

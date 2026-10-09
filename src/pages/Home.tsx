@@ -1,6 +1,6 @@
 import React from "react";
 import { SiteHeader, type NavItem } from "../components/SiteHeader";
-import { GlassCaption, GlassPanel, Picture, CREDITS_URL, SAMPLE_URL } from "../components/Surfaces";
+import { GlassCaption, GlassPanel, Picture } from "../components/Surfaces";
 import { PAGES } from "../lib/pages";
 import "./Home.css";
 
@@ -13,7 +13,6 @@ const NAV: NavItem[] = [
   { href: "#fundo", label: "Fundo" },
   { href: "#cartoes", label: "Cartões" },
   { href: "#ceu", label: "Céu noturno" },
-  { href: "#creditos", label: "Créditos" },
 ];
 
 // The portal: one card per page. Each page's accent is a CSS gradient disc
@@ -182,15 +181,6 @@ export const Home: React.FC = () => {
             , domínio público
           </Photo>
         </Card>
-
-        <GlassPanel className="card-glass">
-          <footer className="foot" id="creditos">
-            Fotos do Wikimedia Commons; créditos e licenças em <a href={CREDITS_URL}>CREDITS.md</a>. Vidro: o fosco
-            desta página segue os valores do <a href="https://github.com/romastefale/liquid-glass">liquid-glass</a> (MIT ©
-            Sam Asante), e o <code>&lt;Glass&gt;</code> do pacote <code>@samasante/liquid-glass</code> é usado na{" "}
-            <a href={SAMPLE_URL}>amostra</a>, no painel, na galeria e no menu do topo.
-          </footer>
-        </GlassPanel>
       </main>
     </>
   );
