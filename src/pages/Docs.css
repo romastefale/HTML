@@ -58,7 +58,7 @@ html{scroll-behavior:smooth}
    and one gap for all of them. Section headings (<h3>) sit between them, on the
    page. Anchors land under the pill (scroll-padding). */
 .md-card{position:relative;margin:0 0 12px;padding:18px clamp(16px, 3.4vw, 24px);border-radius:20px;min-width:0;
-  -webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4)}
+  -webkit-backdrop-filter:blur(var(--vidro-frost)) saturate(1.4);backdrop-filter:blur(var(--vidro-frost)) saturate(1.4)}
 .md-card > :last-child,.md-card > :last-child > :last-child{margin-bottom:0}
 .md-card > :first-child{margin-top:0}
 .md-card .md-h3,.md-card .md-h4{margin-top:0}

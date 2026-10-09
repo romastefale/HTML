@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Glass, type GlassOptics } from "@samasante/liquid-glass";
-import vidroIni from "../../vidro.ini?raw";
+import { Glass } from "@samasante/liquid-glass";
+import { vidro, type Vidro } from "../lib/vidro";
 import { useReducedMotion } from "../lib/useMedia";
 import { useTheme } from "../lib/theme";
 import { Magnifier, PageSearch } from "./PageSearch";
@@ -35,20 +35,6 @@ const Moon = () => (
   </svg>
 );
 
-type Vidro = { optics: Partial<GlassOptics>; tintClaro: string; tintEscuro: string };
-const vidro: Record<string, Vidro> = {};
-let secao = "";
-for (const linha of vidroIni.split("\n").map((l) => l.trim())) {
-  const s = linha.match(/^\[(.+)\]$/);
-  if (s) vidro[(secao = s[1])] = { optics: {} } as Vidro;
-  const kv = linha.match(/^(\w+)\s*=\s*(.+)$/);
-  if (!kv) continue;
-  const [, chave, valor] = kv;
-  if (chave === "tintClaro" || chave === "tintEscuro") vidro[secao][chave] = valor;
-  else
-    (vidro[secao].optics as Record<string, number | boolean>)[chave] =
-      valor === "true" ? true : valor === "false" ? false : Number(valor);
-}
 
 const EDGE = 12;
 

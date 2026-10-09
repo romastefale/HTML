@@ -77,7 +77,8 @@ HTML/
     │   ├── pages.ts              # PAGES (o portal, a lista ☰)
     │   ├── device.ts             # useBox, useOnScreen, useSectionSpy, useDeferredMount, useNear, softwareGL…
     │   ├── mermaid.ts            # drawMermaid(): importa o mermaid sob demanda
-    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL
+    │   ├── optics.ts             # NO_SHINE (specular, sheen e glow 0) e as óticas CONTROL, FROST e PANEL (frost do vidro.ini)
+    │   ├── vidro.ts              # lê o vidro.ini; grava --vidro-frost e as tintas de [paginas] no :root
     │   ├── theme.ts              # useTheme, useThemeName, applyTheme, THEME_KEY, PAGE_EDGE
     │   └── useMedia.ts           # useMediaQuery, useReducedMotion
     ├── pages/
@@ -366,10 +367,10 @@ Mesmo padrão de `examples/GlassNotification.tsx` do fork.
 |---|---|---|---|---|
 | Pílula do menu e lista ☰ | `SiteHeader` | `<Glass>` material | `vidro.ini` `[pilula]`, `[lista]` | todas |
 | Botões ☰, tema e lupa | `.sh-glass` | `<Glass>` material | `vidro.ini` `[botoes]` | todas |
-| Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(22px) saturate(1.4)` | Início |
+| Introdução, cartões e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL`: `blur(frost) saturate(1.4)` | Início |
 | Notas e rodapé | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | Amostra |
 | Legendas das fotos | `GlassCaption` | `<Frost>` + `.tint-ink` | `FROST` | todas com fotos |
-| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE` (`frost` 6, `saturate` 1.15) | Amostra |
+| Botões de vidro (5) | `GlassPill` | **Blink:** `<Glass optics={CONTROL}>` (curvatura ao vivo). **Outros:** `<Frost optics={CONTROL}>` | `CONTROL` = material padrão + `NO_SHINE`, com o `frost` do `vidro.ini` (`saturate` 1.15) | Amostra |
 | Lente do título | `Hero` | `<Glass>` no lugar | `HERO_LENS` | Amostra |
 | Cartões da faixa (3) | `BandCard` | `<Glass refract behind>` | `PANEL_LENS` | Amostra |
 | Cartões do portal, documentos, avisos, widgets, notas e rodapés | `GlassPanel` | `<Frost>` + `.tint-frost` | `PANEL` | todas |
@@ -420,9 +421,9 @@ Os 3 cartões `refract` não criam `<filter>` SVG próprio no DOM.
 
 ```ts
 export const NO_SHINE = { specular: 0, sheen: 0, glow: 0 };
-export const CONTROL = { ...NO_SHINE };                                                   // material padrão, sem aro nem brilho
-export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 6,  saturate: 1.15 };
-export const PANEL   = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };
+export const CONTROL = { ...NO_SHINE, frost };                                            // material padrão, sem aro nem brilho
+export const FROST   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 }; // frost = vidro.paginas.optics.frost
+export const PANEL   = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.4 };
 ```
 
 - **A14. Toda ótica DEVE espalhar `NO_SHINE` (`specular: 0`, `sheen: 0`, `glow: 0`).** A hairline DEVE vir do CSS (`.glass::after`).

@@ -1,4 +1,7 @@
 import type { GlassOptics } from "@samasante/liquid-glass";
+import { vidro } from "./vidro";
+
+const frost = vidro.paginas.optics.frost;
 
 /** No library light at all, for every <Glass> on the site.
  *  • `specular: 0` turns the edge layer off: the material <Glass> always draws a
@@ -14,13 +17,13 @@ export const NO_SHINE: Partial<GlassOptics> = { specular: 0, sheen: 0, glow: 0 }
 
 /** Content-sized controls (buttons, the search step pill): the library's
  *  default material look (bends the live page in Chrome/Edge). */
-export const CONTROL: Partial<GlassOptics> = { ...NO_SHINE };
+export const CONTROL: Partial<GlassOptics> = { ...NO_SHINE, frost };
 
 /** Wide bars (the Painel tab bar, the Galeria chips) + caption pills: frost only. BROWSERS.md: "Very
  *  wide panels shouldn't use a single stretched displacement lens … use a
  *  frost-only treatment". Rendered by <Frost> (plain CSS, same look) rather
  *  than a material <Glass>: see src/components/Frost.tsx. */
-export const FROST: Partial<GlassOptics> = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 6, saturate: 1.15 };
+export const FROST: Partial<GlassOptics> = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.15 };
 
-/** Reading panels (cards, notes, footer): frost only, heavier blur (<Frost>). */
-export const PANEL: Partial<GlassOptics> = { ...NO_SHINE, strength: 0, dispersion: 0, frost: 22, saturate: 1.4 };
+/** Reading panels (cards, notes, footer): frost only (<Frost>), stronger saturation. */
+export const PANEL: Partial<GlassOptics> = { ...NO_SHINE, strength: 0, dispersion: 0, frost, saturate: 1.4 };

@@ -13,7 +13,7 @@
 .sh-band{
   position:fixed;z-index:69;left:0;right:0;top:calc(var(--bar-top) - 10px);height:82px;pointer-events:none;
   transform:translateY(var(--vv-top));
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(var(--vidro-frost));backdrop-filter:blur(var(--vidro-frost));
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
   mask-image:linear-gradient(180deg,transparent 0,#000 12px,#000 calc(100% - 22px),transparent 100%);
 }

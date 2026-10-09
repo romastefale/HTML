@@ -260,7 +260,7 @@ As variações de TBT (10–20 ms) estão dentro do ruído entre execuções (no
 - **A lente do título da amostra.** O modo "no lugar" aplica `filter: url(#…)` com 17 primitivas SVG (19 até o PR #14) sobre **todo** o bloco do título (~353×451 CSS px no iPhone 15, com `will-change: filter`), e não só sobre o disco da lente, de 130–200 px. Isso é refeito a cada quadro enquanto a lente orbita.
   - Parada no topo da amostra: ~11–12 fps em render por software no PR #14; 13,7 fps no PR #15 (iPhone emulado no Chromium, §3.4). Com movimento reduzido, 60 fps.
   - Reduzir esse custo exige mudar a biblioteca (restringir a região do filtro) ou o efeito.
-- **Os 5 botões com curvatura ao vivo no Chromium e os desfoques fortes** (22px nos painéis) são o próprio visual. Nos experimentos do PR #9 na amostra, no Chromium, com movimento reduzido:
+- **Os 5 botões com curvatura ao vivo no Chromium e os desfoques** (o `frost` do `vidro.ini` nos painéis) são o próprio visual. Nos experimentos do PR #9 na amostra, no Chromium, com movimento reduzido:
 
   | Configuração | fps de rolagem |
   |---|---|

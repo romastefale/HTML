@@ -2,7 +2,7 @@
 
 Site: https://romastefale.github.io/HTML/
 
-App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. O menu do topo também usa o `<Glass>` dessa biblioteca, com os valores em [`vidro.ini`](vidro.ini). É um portal de seis páginas em pt-BR:
+App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. O menu do topo também usa o `<Glass>` dessa biblioteca. Os valores do vidro ficam em [`vidro.ini`](vidro.ini): as seções do menu e `[paginas]`, cujo `frost` e tinta valem para o vidro de todas as páginas. É um portal de seis páginas em pt-BR:
 
 | Página | Endereço | O que mostra |
 |---|---|---|

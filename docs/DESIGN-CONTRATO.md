@@ -81,23 +81,25 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 
 ## 4. Fosco e tintas
 
+O desfoque de todo vidro das páginas é o `frost` da seção `[paginas]` do `vidro.ini` (ele vira `--vidro-frost` e o `frost` de `FROST`, `PANEL` e `CONTROL`, em `src/lib/vidro.ts` e `src/lib/optics.ts`). As lentes de refração (`<Glass>` com cópia) ficam fora: nelas o `frost` da biblioteca é dividido pelo tamanho da lente, não é um blur em px.
+
 | Uso | Ótica / CSS | `backdrop-filter` resultante |
 |---|---|---|
-| Legendas de foto | `FROST` | `blur(6px) saturate(1.15)` |
-| Cartões, introdução, notas e rodapés | `PANEL` | `blur(22px) saturate(1.4)` |
-| Botões de vidro fora do Blink | `CONTROL` (padrão do material) | `blur(6px) saturate(1.15)` |
+| Legendas de foto | `FROST` | `blur(frost) saturate(1.15)` |
+| Cartões, introdução, notas e rodapés | `PANEL` | `blur(frost) saturate(1.4)` |
+| Botões de vidro fora do Blink | `CONTROL` | `blur(frost) saturate(1.15)` |
 
 - **D8. A tinta DEVE ser o `background` translúcido do próprio elemento** (classe `tint-*`). É PROIBIDO tinta opaca, exceto em `prefers-reduced-transparency`.
   *Por quê:* é a regra da biblioteca ("the background is the tint"). O fosco só aparece se o fundo deixar passar luz.
 
 | Classe | Claro | Escuro | Transparência reduzida |
 |---|---|---|---|
-| `.tint-bar` (barra de abas, chips) | `rgba(238,240,245,.72)` | `rgba(6,6,7,.72)` | `#eef0f5` / `#060607` |
-| `.tint-frost` (painéis) | `rgba(255,255,255,.52)` | `rgba(28,24,60,.5)` | `rgba(255,255,255,.95)` / `rgba(28,24,60,.96)` |
+| `.tint-bar` (barra de abas, chips), `.tint-frost` (painéis), `.tint-control`, `.tint-soft`, `.tint-white` | `tintClaro` de `[paginas]` no `vidro.ini` (`--vidro-tint`) | `tintEscuro` de `[paginas]` | `.tint-bar`: `#eef0f5` / `#060607`; os outros: `rgba(255,255,255,.95)` / `rgba(28,24,60,.96)` |
 | `.tint-ink` (legendas) | `rgba(24,20,56,.46)`, texto `#fff` | igual | `rgba(24,20,56,.94)` |
 | `.tint-blue` | `rgba(10,132,255,.52)`, texto `#fff` | igual | `rgba(10,110,230,.96)` |
-| `.tint-red` / `.tint-green` / `.tint-white` | `rgba(248,113,113,.40)` / `rgba(48,209,88,.36)` / `rgba(255,255,255,.34)` | igual | `rgba(255,255,255,.95)` |
-| `.tint-soft` | `rgba(255,255,255,.42)` | `rgba(255,255,255,.12)` | `.95` / `.96` como acima |
+| `.tint-red` / `.tint-green` | `rgba(248,113,113,.40)` / `rgba(48,209,88,.36)` | igual | `rgba(255,255,255,.95)` |
+
+As tintas de cor (`.tint-ink`, `.tint-blue`, `.tint-red`, `.tint-green`) mantêm a cor própria, porque a cor é o significado delas; o desfoque delas é o `frost` do `vidro.ini`.
 
 **Raios:**
 
@@ -138,7 +140,7 @@ A faixa dos cartões da amostra (`--band-bg`) tem um gradiente próprio: 5 radia
 | Links | `height: 34px`, `padding: 0 13px` (12px em telas ≤ 760px), raio 17px, 13,5px/500, cor `--bar-sub`. O link atual usa 600 e `--bar-text` |
 | Botões ☰, tema e lupa | `.sh-glass`: um `<Glass>` material por botão, 34×34, raio 17px, `position: fixed`, `z-index: 72`, sobre os `.sh-slot` da pílula (`left`/`right` a partir de `--bar-l`/`--bar-r` e `--bar-pad`); o `<button class="sh-btn">` preenche o vidro |
 | Degradê lateral | máscara de 22px só no lado em que há mais links (`data-fade-start` / `data-fade-end`) |
-| Rolagem de borda | `.sh-band`: uma faixa fixa sem cor, só `backdrop-filter: blur(6px)` com máscara em degradê, de 10px acima a 20px abaixo da pílula (nunca encosta na borda de cima, T11) |
+| Rolagem de borda | `.sh-band`: uma faixa fixa sem cor, só `backdrop-filter: blur(var(--vidro-frost))` com máscara em degradê, de 10px acima a 20px abaixo da pílula (nunca encosta na borda de cima, T11) |
 | Seleção | `.sh-indicator`: pílula de cor (a tinta de `[selecao]`), dentro do `<nav>` e atrás dos links (`position: absolute; z-index: 0`), por isso rola junto com eles; do tamanho do link atual (`offsetLeft`, `offsetTop`, `offsetWidth`, `offsetHeight`) e movida por `transform` só quando a seção ativa muda (`transition: transform .45s cubic-bezier(.65,0,.35,1)`). Não é um `<Glass>`: um `backdrop-filter` dentro de outro só enxerga o conteúdo do pai |
 | Lista de páginas | `.sh-picker`: um `<Glass>` material, mostrado com `data-open` (`visibility`); `position: fixed`, `z-index: 73`, `top: calc(var(--bar-top) + 60px)`, `left: var(--bar-l)`, raio 22px, `padding: 6px` (no `<nav>` de dentro), `width: max-content` (mínimo 180px). Itens de 44px de altura, em grade `auto 15px` com `gap: 14px`; a página atual em 600 e com um ✓ |
 | Fonte | `system-ui, -apple-system, sans-serif` (a primeira família sempre existe; veja [DESEMPENHO.md](DESEMPENHO.md) P7) |
@@ -147,7 +149,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
 
 | Token | Claro | Escuro |
 |---|---|---|
-| `--bar-bg` (`.tint-bar`) | `rgba(238,240,245,.72)` | `rgba(6,6,7,.72)` |
+| `--bar-bg` (`.tint-bar`) | `tintClaro` de `[paginas]` | `tintEscuro` de `[paginas]` |
 | `--bar-text` / `--bar-sub` | `#0a0b0d` / `rgba(0,0,0,.6)` | `#fff` / `rgba(255,255,255,.6)` |
 | `--sel-bg` (barra de abas do Painel, chips da Galeria) | `rgba(255,255,255,.9)` | `rgba(255,255,255,.16)` |
 | `--sel-shadow` | `0 1px 2px rgba(20,16,60,.1), 0 3px 10px rgba(20,16,60,.1)` | `0 2px 10px rgba(0,0,0,.3)` |
@@ -228,7 +230,7 @@ Paleta do menu (a mesma do `site/src/theme.ts` do fork):
   - cada PR do histórico é um cartão (`.md-entry`);
   - o resto entre dois desses fica num cartão só.
 
-  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (22px, saturate 1,4) e a hairline de `.glass::after`.
+  Todos os cartões têm o mesmo raio (20px), padding (18px × 16–24px), espaço (12px), tinta (`tint-frost`), fosco (`frost` do `vidro.ini`, saturate 1,4) e a hairline de `.glass::after`.
 - **D30. Nenhum texto DEVE passar da largura da tela ou do seu cartão:** ele quebra a linha.
   - `body` tem `overflow-wrap: break-word`; `code` e `kbd`, `overflow-wrap: anywhere`; `p`, `li`, `dd`, `dt`, títulos e `figcaption` têm `min-width: 0` (dentro de flex e grid eles podem encolher).
   - Blocos de código quebram dentro do cartão (`white-space: break-spaces`, `overflow-wrap: anywhere`), mantendo a indentação. No celular (≤ 700px), o código em linha usa `word-break: break-all`, porque o WebKit deixava o padding de 6px de um trecho no fim da linha passar 2–4px do cartão.
