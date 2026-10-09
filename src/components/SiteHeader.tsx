@@ -175,15 +175,10 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
       ind.style.transform = "translate(-9999px, -9999px)";
       return;
     }
-    const bar = barRef.current?.getBoundingClientRect();
-    if (!bar) return;
-    const n = nav.getBoundingClientRect();
-    const r = a.getBoundingClientRect();
-    const x = Math.max(n.left, Math.min(r.left, n.right - r.width)) - bar.left;
     if (!placed.current) ind.style.transition = "none";
-    ind.style.width = `${r.width}px`;
-    ind.style.height = `${r.height}px`;
-    ind.style.transform = `translate(${x}px, ${r.top - bar.top}px)`;
+    ind.style.width = `${a.offsetWidth}px`;
+    ind.style.height = `${a.offsetHeight}px`;
+    ind.style.transform = `translate(${a.offsetLeft}px, ${a.offsetTop}px)`;
     if (!placed.current) {
       void ind.offsetHeight;
       ind.style.transition = "";
@@ -197,11 +192,9 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
     if (!bar || !nav) return;
     const ro = new ResizeObserver(layout);
     ro.observe(bar);
-    nav.addEventListener("scroll", layout, { passive: true });
     addEventListener("resize", layout);
     return () => {
       ro.disconnect();
-      nav.removeEventListener("scroll", layout);
       removeEventListener("resize", layout);
     };
   }, [layout]);
@@ -331,7 +324,6 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
         data-mode={searchOpen ? "search" : "menu"}
       >
         <header ref={barRef} className="sh-bar">
-          <div ref={indRef} className="sh-indicator" aria-hidden="true" style={tint(vidro.selecao)} />
           <span className="sh-slot" />
           <nav
             ref={navRef}
@@ -342,6 +334,7 @@ export const SiteHeader: React.FC<{ items: NavItem[]; current: PageKey; label?: 
             onScroll={syncFade}
             inert={searchOpen}
           >
+            <div ref={indRef} className="sh-indicator" aria-hidden="true" style={tint(vidro.selecao)} />
             {items.map((it, i) => (
               <a
                 key={it.href + it.label}

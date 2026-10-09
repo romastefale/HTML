@@ -228,7 +228,7 @@ As props são `items: NavItem[]`, `current: PageKey`, `label = "Seções desta p
 
 O ☰ abre a **lista de páginas** (`.sh-picker`): um `<Glass>` material, sempre no DOM e mostrado com `data-open` (`inert` quando fechado), posicionado sob a ponta esquerda da pílula, com um link para cada item de `PAGES` (rótulo `pick`) e `aria-current="page"` na página `current`.
 
-**O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro da `.sh-bar`, atrás dos links.
+**O vidro:** o `<Glass>` de `@samasante/liquid-glass` no modo material (DESIGN-CONTRATO D9.1), em cinco elementos fixos: a pílula (`.site-header`, com o `<header class="sh-bar">` dentro), um por botão (`.sh-glass`, com o `<button class="sh-btn">` dentro) e a lista ☰. A seleção (`.sh-indicator`) é uma pílula de cor dentro do `<nav>`, atrás dos links, e rola junto com eles.
 
 - Valores: `vidro.ini`, na raiz do repositório, lido no build (`?raw`). Cada seção (`[pilula]`, `[botoes]`, `[lista]`) tem as optics da biblioteca, um parâmetro por linha, e `tintClaro` / `tintEscuro` (o `background` translúcido do `<Glass>` em cada modo); `[selecao]` tem só a tinta. O código não tem valor de vidro próprio: tudo vem do arquivo.
 
@@ -248,7 +248,7 @@ Estado interno:
 | `searchOpen` | alterna `data-mode="menu" \| "search"` na pílula |
 | `pickerOpen` | mostra a lista de páginas (`data-open`, `inert` quando fechada). Esc, toque fora, foco saindo, escolha ou ☰ de novo fecham; abrir a pesquisa também |
 | `active` | índice da seção atual (scroll-spy) → `aria-current="location"`; só links de seção entram na conta |
-| `active` → `.sh-indicator` | a pílula de seleção recebe a largura, a altura e o `transform` do link atual; não anima na primeira colocação |
+| `active` → `.sh-indicator` | a pílula de seleção recebe a largura, a altura e a posição do link atual dentro do `<nav>`; anima só quando a seção ativa muda, não na primeira colocação nem na rolagem lateral |
 | `fade {start, end}` | degradê só no lado em que há mais links |
 | `pinned` (ref) | depois de um toque em um link, pausa o scroll-spy por 700 ms. O prazo se renova por 220 ms enquanto a página rola, para a seleção não voltar no meio da rolagem |
 
