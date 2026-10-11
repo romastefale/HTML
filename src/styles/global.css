@@ -33,7 +33,6 @@
     radial-gradient(50% 60% at 50% 50%, #ffe1a8 0%, rgba(255,225,168,0) 75%),
     linear-gradient(135deg, #fbe3f1 0%, #e4dcff 100%);
   --band-edge:#eadcf6;
-  --fade-top:64px; /* top fade continues from the safe area into the page */
   --text:#1c1c1e;
   --text-dim:#3a3a3c;
   --faint:#5d5b6e;
@@ -96,11 +95,11 @@ html::before{
   pointer-events:none;
   background:var(--page-bg) center/100% 100% no-repeat;
 }
-/* The only CSS fade is at the top. It starts in the exact solid edge colour,
-   then eases to fully transparent; the SVG already handles the bottom edge. */
+/* The only CSS fade is limited to the top safe area: exact edge colour at
+   the first pixel, fully transparent at the bottom of that browser bar. */
 body::before{
   content:"";position:fixed;z-index:50;left:0;right:0;top:0;
-  height:calc(env(safe-area-inset-top, 0px) + var(--fade-top));
+  height:env(safe-area-inset-top, 0px);
   pointer-events:none;
   background:linear-gradient(180deg,
     var(--page-edge) 0%,
