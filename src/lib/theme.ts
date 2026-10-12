@@ -10,11 +10,51 @@ import { useCallback, useEffect, useState } from "react";
 type ThemeName = "light" | "dark";
 const THEME_KEY = "lg-theme";
 
-/** Browser-bar colour per mode = the page's top/bottom edge (--page-edge in
- *  src/styles/global.css), also html/body background-color: the menu floats,
- *  nothing solid touches the edge, so the browser bars read as the page.
- *  Keep in sync with the inline <head> script in index.html / liquid-glass-sample.html. */
+/** Browser-bar colour per mode = --page-edge in global.css and PAGE_EDGE here. */
 const PAGE_EDGE: Record<ThemeName, string> = { light: "#8b82e6", dark: "#1b1646" };
+
+let chromeSampleRefreshScheduled = false;
+
+/**
+ * Safari 26 can keep a stale cached edge tint after a CSS variable/theme change.
+ * Insert one real (not pseudo-) fixed element so WebKit has a solid colour to
+ * sample. global.css clips its background to text; because it is empty, it
+ * paints no visible pixels. This uses a reverse-engineered Safari behaviour,
+ * not a public browser API.
+ */
+const ensureSafariChromeSample = (): HTMLDivElement | null => {
+  if (typeof document === "undefined" || !document.body) return null;
+
+  const existing = document.querySelector<HTMLDivElement>("[data-safari-chrome-sample]");
+  if (existing) return existing;
+
+  const sample = document.createElement("div");
+  sample.className = "safari-chrome-sample";
+  sample.dataset.safariChromeSample = "";
+  sample.setAttribute("aria-hidden", "true");
+  document.body.prepend(sample);
+  return sample;
+};
+
+/**
+ * Nudge Safari's cached edge sample after a theme change: 11px → 12px → 11px
+ * across two animation frames. On other browsers the CSS keeps the element at
+ * zero height, so this refresh attribute has no visual effect.
+ */
+const refreshSafariChromeSample = (): void => {
+  if (!ensureSafariChromeSample() || chromeSampleRefreshScheduled) return;
+
+  const root = document.documentElement;
+  chromeSampleRefreshScheduled = true;
+  root.dataset.chromeSampleRefresh = "";
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      delete root.dataset.chromeSampleRefresh;
+      chromeSampleRefreshScheduled = false;
+    });
+  });
+};
 
 const stored = (): ThemeName | null => {
   try {
@@ -31,14 +71,17 @@ const applyTheme = (t: ThemeName) => {
   d.dataset.theme = t;
   d.style.colorScheme = t;
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", PAGE_EDGE[t]));
+  refreshSafariChromeSample();
 };
 
 export const useTheme = () => {
   const [theme, setTheme] = useState<ThemeName>(() =>
     typeof document !== "undefined" && document.documentElement.dataset.theme === "dark" ? "dark" : "light",
   );
-  // Follow the system setting until the user picks a mode.
+  // Create the sampler for the initial theme too; follow the system setting
+  // until the user picks a mode.
   useEffect(() => {
+    refreshSafariChromeSample();
     const mq = matchMedia("(prefers-color-scheme: dark)");
     const sync = () => {
       if (stored()) return;
