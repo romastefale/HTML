@@ -7,20 +7,18 @@
      blurred organic colour fields) STARTS and ENDS on --page-edge, and the
      canvas colour (body background-color, propagated) is --page-edge too (also
      set inline in the HTML head, so it holds before this file loads and in the
-     rubber-band overscroll). Whether the browser shows live page pixels behind
-     its bars or its fallback tint, it's the same colour: the bars read as the page.
-   • One fixed fade at the top (body::before) starts on --page-edge at the
-     topmost pixel and becomes fully transparent at the end of the top fade
-     region. The SVG supplies the bottom transition itself, so no additional
-     fade is drawn at the end of the document. No background-colour or
-     backdrop-filter is added to the fade layer.
-   • No fixed/sticky element with background-color or backdrop-filter touches
-     a viewport edge (Safari 26 samples those into its bars): the floating
-     menu (SiteHeader.css) is inset 12px under the safe area and from the
-     sides (it is also the search bar: the magnifier turns it into the field,
-     no separate panel).
-   • theme-color (Android Chrome, older Safari) = --page-edge for the mode the
-     toggle picked (src/lib/theme.ts › PAGE_EDGE; the inline <head> script). */
+     rubber-band overscroll).
+   • Safari 26 can cache the sampled browser-bar tint across a theme change.
+     A real, empty .safari-chrome-sample element is inserted by src/lib/theme.ts.
+     Its solid background-color follows --page-edge, but background-clip:text
+     prevents it from painting visible pixels. The theme code changes its height
+     from 11px to 12px and back to prompt a fresh sample. This relies on a
+     reverse-engineered Safari 26 behaviour, not a public browser API.
+   • The visual menu band (.sh-band in SiteHeader.css) remains inset below the
+     safe area and keeps its blur; it is not the browser-colour sampler.
+   • theme-color (Android Chrome and browsers that honour it) remains aligned
+     with --page-edge for the selected theme.
+*/
 :root{
   --page-edge:#8b82e6;
   --page-bg:url("../assets/fundo-claro.svg");
@@ -86,6 +84,33 @@ body{
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
   touch-action:manipulation;
+}
+/* Safari 26 browser-chrome colour sampler.
+   The matching empty DOM element is created by theme.ts. WebKit samples its
+   computed background-color; text clipping keeps that colour from being
+   visibly painted because the element contains no text. */
+.safari-chrome-sample{
+  position:fixed;
+  top:0;
+  right:0;
+  left:0;
+  z-index:2147483647;
+  height:0;
+  border:0;
+  outline:0;
+  pointer-events:none;
+  background-color:var(--page-edge);
+  background-clip:text;
+  -webkit-background-clip:text;
+  box-shadow:none;
+  transition:none;
+}
+/* Safari on touch devices needs an edge candidate taller than 10px. */
+@supports (-webkit-touch-callout:none){
+  @media (hover:none) and (pointer:coarse){
+    .safari-chrome-sample{height:11px}
+    :root[data-chrome-sample-refresh] .safari-chrome-sample{height:12px}
+  }
 }
 /* The page background: static, no animation, no JS. Fixed and one large
    viewport tall (100lvh), so it's rasterised once and never resized when the
