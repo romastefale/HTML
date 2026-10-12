@@ -93,12 +93,16 @@ export const Fundo: React.FC = () => (
         <ul className="fundo-grid">
           {TILES.map((t) => (
             <li key={t.name}>
-              <GlassPanel className="card-glass fundo-tile">
-                <figure className="fundo-figure">
-                  <Picture name={t.name} alt={t.alt} w={t.w} h={t.h} lazy sizes="(min-width: 600px) 272px, calc(50vw - 28px)" />
-                  <figcaption>{t.title}</figcaption>
-                </figure>
-              </GlassPanel>
+              <figure className="fundo-place">
+                <Picture name={t.name} alt={t.alt} w={t.w} h={t.h} lazy sizes="(min-width: 600px) 277px, calc(50vw - 23px)" />
+                <figcaption>
+                  <GlassCaption>
+                    <span className="cap">
+                      <strong>{t.title}</strong>
+                    </span>
+                  </GlassCaption>
+                </figcaption>
+              </figure>
             </li>
           ))}
         </ul>
