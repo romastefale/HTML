@@ -17,11 +17,12 @@ const NAV: NavItem[] = [
 
 // The portal: one card per page. Each page's accent is a CSS gradient disc
 // (no photo here: the cards sit near the top, and the home stays light).
-const ACCENT: Record<string, string> = { amostra: "", painel: "alt", galeria: "alt2", contrato: "alt3", arquitetura: "alt4" };
+const ACCENT: Record<string, string> = { amostra: "", painel: "alt", galeria: "alt2", fundo: "alt5", contrato: "alt3", arquitetura: "alt4" };
 const KIND: Record<string, string> = {
   amostra: "Exemplo · lente no lugar",
   painel: "Exemplo · widgets",
   galeria: "Exemplo · mídia",
+  fundo: "Exemplo · animação",
   contrato: "Contrato · docs/",
   arquitetura: "Contrato · docs/",
 };

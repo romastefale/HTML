@@ -40,3 +40,4 @@ kbd{font:600 .85em ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 6px;b
 .portal-text .card-body{font-size:13.5px;line-height:1.4}
 .portal-go{font-size:26px;line-height:1;color:var(--faint);padding:0 2px}
 .portal-link:active{transform:scale(.99)}
+.avatar.alt5{background:linear-gradient(135deg, #7ad151, #2a9d8f)}

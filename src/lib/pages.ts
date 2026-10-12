@@ -1,7 +1,7 @@
 const BASE = import.meta.env.BASE_URL;
 
 /** Every page of the portal (Vite entries in vite.config.ts), in menu order. */
-export type PageKey = "inicio" | "amostra" | "painel" | "galeria" | "contrato" | "arquitetura";
+export type PageKey = "inicio" | "amostra" | "painel" | "galeria" | "fundo" | "contrato" | "arquitetura";
 interface PageInfo {
   key: PageKey;
   href: string;
@@ -26,6 +26,10 @@ export const PAGES: PageInfo[] = [
   {
     key: "galeria", href: `${BASE}galeria.html`, pick: "Galeria", label: "Galeria", title: "Galeria de lugares",
     summary: "Visor em WebGL em que cada controle é uma lente, chips de filtro e uma folha com lupa refratada.",
+  },
+  {
+    key: "fundo", href: `${BASE}fundo-animado.html`, pick: "Fundo animado", label: "Fundo", title: "Fundo animado",
+    summary: "Elipses de cor translúcidas desenhadas ao vivo em WebGL atrás dos cartões, e como esse fundo funciona.",
   },
   {
     key: "contrato", href: `${BASE}contrato-design.html`, pick: "Contrato de design", label: "Contrato", title: "Contrato de design",

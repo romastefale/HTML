@@ -68,7 +68,7 @@ gh api repos/romastefale/HTML/pages --jq .build_type
 
 # 3. O HTML ao vivo aponta para os assets do build novo (compare com dist/ local)
 curl -s https://romastefale.github.io/HTML/ | grep -o 'assets/[^"]*'
-for p in liquid-glass-sample painel galeria contrato-design contrato-arquitetura; do
+for p in liquid-glass-sample painel galeria fundo-animado contrato-design contrato-arquitetura; do
   curl -s "https://romastefale.github.io/HTML/$p.html" | grep -o 'assets/[^"]*'; done
 
 # 4. Cabeçalhos

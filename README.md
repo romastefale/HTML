@@ -2,7 +2,7 @@
 
 Site: https://romastefale.github.io/HTML/
 
-App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. Os números de cada vidro ficam em [`vidro.ini`](vidro.ini), uma seção por elemento. É um portal de seis páginas em pt-BR:
+App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/liquid-glass`](https://www.npmjs.com/package/@samasante/liquid-glass) 0.1.1, que é idêntica ao fork [romastefale/liquid-glass](https://github.com/romastefale/liquid-glass) no commit `4e7b769`. Os números de cada vidro ficam em [`vidro.ini`](vidro.ini), uma seção por elemento. É um portal de sete páginas em pt-BR:
 
 | Página | Endereço | O que mostra |
 |---|---|---|
@@ -10,6 +10,7 @@ App React 19 (Vite + TypeScript) com vidro líquido da biblioteca [`@samasante/l
 | Amostra | [`liquid-glass-sample.html`](https://romastefale.github.io/HTML/liquid-glass-sample.html) | lente no lugar sobre o título, cartões com `refract` e botões materiais |
 | Painel | [`painel.html`](https://romastefale.github.io/HTML/painel.html) | segmentado com lente, widgets com `refract` sobre a foto, chaves e controle deslizante de vidro, avisos e barra de abas |
 | Galeria | [`galeria.html`](https://romastefale.github.io/HTML/galeria.html) | visor em WebGL em que cada controle é uma lente, chips de filtro e uma folha com lupa |
+| Fundo animado | [`fundo-animado.html`](https://romastefale.github.io/HTML/fundo-animado.html) | cartões de imagem sobre um fundo animado em WebGL (a receita da [Aurora Alt](https://romastefale.github.io/aurora/alt-version.html)) e como ele é desenhado |
 | Contrato de design | [`contrato-design.html`](https://romastefale.github.io/HTML/contrato-design.html) | `docs/` README, DESIGN-CONTRATO, TELA-CHEIA-E-BARRAS e ACESSIBILIDADE, com fotos de skylines |
 | Arquitetura e operação | [`contrato-arquitetura.html`](https://romastefale.github.io/HTML/contrato-arquitetura.html) | `docs/` ARQUITETURA, DESEMPENHO, DEPLOY, CHECKLIST e HISTORICO, com fotos de skylines |
 
@@ -34,13 +35,14 @@ O relato técnico e o **contrato para projetos futuros** estão em [`docs/`](doc
 
 ## Estrutura
 
-- `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
+- `index.html`, `liquid-glass-sample.html`, `painel.html`, `galeria.html`, `fundo-animado.html`, `contrato-design.html` e `contrato-arquitetura.html`: entradas do Vite (`base: "/HTML/"`), uma por página.
 - `src/lib/pages.ts`: a lista de páginas do portal (a da lista ☰).
 - `src/components/SiteHeader.tsx`: o menu compartilhado (lista de páginas ☰, seções com rolagem lateral e seleção, tema e lupa). Pílula, lista e botões usam o mesmo fosco. Valores em `vidro.ini`.
 - `src/components/PageSearch.tsx`: a pesquisa dentro da pílula (CSS Custom Highlight API, com fallback).
 - `src/components/Frost.tsx`, `GlassPill.tsx` e `Surfaces.tsx`: as superfícies de vidro e as fotos responsivas.
 - `src/components/examples/`: `GlassSwitch` e `GlassSlider`, copiados do `examples/` do fork (MIT).
-- `src/pages/`: as páginas (`Home`, `Sample`, `Painel`, `Galeria` e `Docs`, que renderiza os documentos).
+- `src/pages/`: as páginas (`Home`, `Sample`, `Painel`, `Galeria`, `Fundo` e `Docs`, que renderiza os documentos).
+- `src/components/AnimatedBackground.tsx`: o fundo animado do Fundo animado (sete elipses translúcidas com desfoque gaussiano calculado, em WebGL), atrás do conteúdo e acima do fundo estático.
 - `src/lib/device.ts`: medidas, pausa fora da tela, montagem adiada e detecção de WebGL em software.
 - `src/styles/global.css`: o fundo orgânico (`src/assets/fundo-*.svg`, gerados por `scripts/make-organic-bg.py`), as camadas de borda, as tintas e o foco.
 - `public/img/`: as fotos, as variantes AVIF/WebP (`r/`) e o `CREDITS.md`. As variantes são geradas por `scripts/make-responsive-images.py`.
